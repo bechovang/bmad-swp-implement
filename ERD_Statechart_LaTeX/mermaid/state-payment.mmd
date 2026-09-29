@@ -1,0 +1,14 @@
+%% StorageHub — State chart: vòng đời Payment (mock gateway, 4 touchpoint)
+%% V3 2026-09-18: thêm touchpoint thứ 4 — extra fee khi Settlement Charge vượt deposit
+stateDiagram-v2
+    [*] --> Pending : mở Payment Modal [deposit / rent / extension fee / extra fee]
+
+    Pending --> Processing : bấm Pay [spinner ~1.5-2s, khoá back]
+    Processing --> Succeeded : gateway xác nhận [đổi trạng thái thực thể + toast + bell]
+    Processing --> Failed : lỗi [không đụng gì tới trạng thái, "No money was taken"]
+
+    Failed --> Pending : retry / đổi method [sau 2 lần fail gợi ý đổi method]
+    Pending --> Expired : QR hết hạn ~5 phút [trả về chọn method]
+
+    Succeeded --> [*]
+    Expired --> Pending : chọn lại method

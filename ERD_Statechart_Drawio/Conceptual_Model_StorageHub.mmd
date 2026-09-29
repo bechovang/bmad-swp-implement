@@ -1,0 +1,38 @@
+%% StorageHub - Conceptual model (17 thuc the, 28 quan he)
+%% Gop tu ERD 22 bang: staff_assignments/policy_rules -> M:N; inspections -> Thanh ly;
+%% notifications/activity_logs -> bo (co che he thong). Khong the hien attribute (muc khai niem).
+%% Thu tu khai bao BFS tu hub RENTALS de dagre dat hub vao giua.
+erDiagram
+    RENTALS ||--|| RESERVATIONS : "kich hoat"
+    RENTALS ||--o{ USERS : "thue"
+    RENTALS ||--o{ UNITS : "cho thue"
+    RENTALS ||--o{ EXTENSIONS : "gia han"
+    RENTALS ||--o{ CHECKOUT_REQUESTS : "xin tra"
+    RENTALS ||--o{ CONTRACTS : "mang (goc + phu luc)"
+    RENTALS ||--o| SETTLEMENTS : "thanh ly"
+    RENTALS ||--o{ PAYMENTS : "tien thue"
+
+    RESERVATIONS ||--o{ USERS : "dat"
+    RESERVATIONS ||--o{ UNITS : "duoc giu"
+    RESERVATIONS ||--o{ PAYMENTS : "coc giu cho"
+
+    CONTRACTS ||--o{ POLICIES : "khoa phien ban"
+    CONTRACTS ||--o{ CONTRACTS : "phu luc cua"
+    CONTRACTS ||--o{ SETTLEMENTS : "doi chieu"
+
+    SETTLEMENTS ||--o{ PAYMENTS : "phi phat sinh"
+    EXTENSIONS ||--o| PAYMENTS : "phi gia han"
+
+    USERS ||--o{ ROLES : "phan vai"
+    USERS }o--o{ ZONES : "truc ca"
+    USERS ||--o{ PAYMENTS : "tra tien"
+    USERS ||--o{ TICKETS : "gui"
+    USERS ||--o{ ESCALATIONS : "escalate / quyet dinh"
+    USERS ||--o{ TASKS : "nhan viec"
+
+    ZONES ||--o{ FACILITIES : "chua"
+    ZONES ||--o{ UNITS : "chua"
+    UNITS ||--o{ UNIT_TYPES : "phan loai"
+    UNITS ||--o{ TICKETS : "lien quan"
+    UNIT_TYPES }o--o{ POLICIES : "ap dung"
+    TICKETS ||--o| ESCALATIONS : "nang cap"

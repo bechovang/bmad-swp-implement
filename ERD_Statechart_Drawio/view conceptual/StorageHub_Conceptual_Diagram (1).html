@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StorageHub Conceptual Diagram</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --line: #475569;
+      --entity-border: #243447;
+      --rel-border: #374151;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef3fb 0%, #f9fbff 100%);
+      overflow: hidden;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      background: rgba(255,255,255,0.94);
+      border-right: 1px solid #dbe3ef;
+      padding: 20px;
+      overflow: auto;
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid #e5eaf2;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .sample-entity,
+    .sample-rel {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 12px;
+      border: 2px solid var(--entity-border);
+      background: #e9f4ff;
+      min-width: 86px;
+      height: 38px;
+    }
+
+    .sample-rel {
+      min-width: 74px;
+      height: 44px;
+      border: 2px solid var(--rel-border);
+      background: #fff7d8;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+
+    .card ul {
+      padding-left: 18px;
+      margin: 8px 0 0;
+    }
+
+    .card li {
+      margin: 8px 0;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #d9e3f2;
+      background: #f8fbff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .viewer-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      border: 1px solid #d6deea;
+      background: rgba(255,255,255,0.96);
+      color: #0f172a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar button:hover {
+      background: #f5f9ff;
+    }
+
+    .viewer {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(100, 116, 139, 0.18) 1px, transparent 0) 0 0/26px 26px,
+        linear-gradient(180deg, #fbfdff, #f3f7fc);
+    }
+
+    .viewer.dragging { cursor: grabbing; }
+
+    #scene {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2800px;
+      height: 1800px;
+      transform-origin: 0 0;
+    }
+
+    #edges {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2800px;
+      height: 1800px;
+      overflow: visible;
+    }
+
+    .node {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px 10px;
+      font-weight: 700;
+      color: #111827;
+      user-select: none;
+      cursor: move;
+      touch-action: none;
+    }
+
+    .node.dragging-node {
+      z-index: 20;
+      filter: drop-shadow(0 10px 14px rgba(15, 23, 42, 0.20));
+    }
+
+    .entity {
+      border: 2px solid var(--entity-border);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .rel {
+      border: 2px solid var(--rel-border);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);
+      font-size: 12px;
+      line-height: 1.15;
+      padding: 4px 8px;
+    }
+
+    .edge-line {
+      stroke: var(--line);
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .cardinality {
+      font-size: 14px;
+      font-weight: 700;
+      fill: #111827;
+      paint-order: stroke;
+      stroke: #ffffff;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+
+    .watermark {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 10;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #dde5f0;
+      font-size: 13px;
+      color: #334155;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+      .sidebar {
+        max-height: 40vh;
+        border-right: 0;
+        border-bottom: 1px solid #dbe3ef;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>StorageHub Conceptual Diagram</h1>
+      <div class="subtitle">
+        Sơ đồ conceptual từ file <b>ERD_StorageHub.dbml</b>.<br>
+        Chỉ hiển thị <b>Entity</b> và <b>Relationship (động từ)</b>, không hiển thị thuộc tính / attribute.
+      </div>
+
+      <div class="card">
+        <h2>Ký hiệu</h2>
+        <div class="legend-item">
+          <span class="sample-entity">ENTITY</span>
+          <span>Thực thể</span>
+        </div>
+        <div class="legend-item">
+          <span class="sample-rel">VERB</span>
+          <span>Quan hệ bằng động từ</span>
+        </div>
+        <div class="legend-item"><strong>1</strong> = một &nbsp;&nbsp; <strong>N</strong> = nhiều &nbsp;&nbsp; <strong>0..1</strong> = không hoặc một</div>
+      </div>
+
+      <div class="card">
+        <h2>Nhóm thực thể</h2>
+        <div class="chips">
+          <span class="chip">Người dùng & Cơ sở</span>
+          <span class="chip">Kho & Unit</span>
+          <span class="chip">Chính sách giá</span>
+          <span class="chip">Đặt chỗ & Thuê</span>
+          <span class="chip">Hợp đồng</span>
+          <span class="chip">Thanh toán & Thanh lý</span>
+          <span class="chip">Hỗ trợ</span>
+          <span class="chip">Vận hành & Hệ thống</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cách dùng</h2>
+        <ul>
+          <li>Giữ chuột trái trên <b>ENTITY</b> hoặc <b>hình thoi Relationship</b> để kéo thả tự do.</li>
+          <li>Đường nối và cardinality <b>1 / N / 0..1</b> tự cập nhật khi kéo.</li>
+          <li>Kéo vùng trống để <b>pan</b>; lăn chuột để <b>zoom</b>.</li>
+          <li>Vị trí kéo thả được <b>tự lưu trên trình duyệt</b>.</li>
+          <li>Dùng <b>Reset layout</b> để quay lại bố cục ban đầu; <b>Fit</b> để căn vừa màn hình.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Tóm tắt</h2>
+        <ul>
+          <li><b>22 entity</b></li>
+          <li><b>34 relationship</b> (bao gồm self-relationship)</li>
+          <li>Thiết kế theo đúng hướng <b>conceptual ERD</b></li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="viewer-wrap">
+      <div class="toolbar">
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">−</button>
+        <button id="fitBtn">Fit</button>
+        <button id="resetLayoutBtn">Reset layout</button>
+        <button id="resetBtn">100%</button>
+      </div>
+      <div class="viewer" id="viewer">
+        <div id="scene">
+          <svg id="edges" viewBox="0 0 2800 1800" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="watermark">StorageHub • Conceptual ERD View</div>
+    </section>
+  </div>
+
+  <script>
+    const entityFill = {
+      group1: '#f6ead4',
+      group2: '#ddefff',
+      group3: '#e7f6e7',
+      group4: '#f9e7ef',
+      group5: '#efe6ff',
+      group6: '#ffeecf',
+      group7: '#fce3e3',
+      group8: '#e7ebff'
+    };
+
+    const relFill = {
+      group1: '#fff8cf',
+      group2: '#fcefc7',
+      group3: '#eef6bf',
+      group4: '#ffe7ba',
+      group5: '#f8dfb8',
+      group6: '#ffe9c8',
+      group7: '#ffd9c9',
+      group8: '#e9e7ff'
+    };
+
+    const nodes = [
+      { id: 'roles', label: 'ROLE', x: 110, y: 70, w: 120, h: 54, type: 'entity', fill: entityFill.group1 },
+      { id: 'users', label: 'USER', x: 340, y: 70, w: 140, h: 54, type: 'entity', fill: entityFill.group1 },
+      { id: 'facilities', label: 'FACILITY', x: 620, y: 70, w: 150, h: 54, type: 'entity', fill: entityFill.group1 },
+      { id: 'zones', label: 'ZONE', x: 900, y: 70, w: 120, h: 54, type: 'entity', fill: entityFill.group1 },
+      { id: 'staff_assignments', label: 'STAFF_ASSIGNMENT', x: 700, y: 250, w: 220, h: 54, type: 'entity', fill: entityFill.group1 },
+
+      { id: 'unit_types', label: 'UNIT_TYPE', x: 1180, y: 70, w: 150, h: 54, type: 'entity', fill: entityFill.group2 },
+      { id: 'units', label: 'UNIT', x: 1470, y: 70, w: 130, h: 54, type: 'entity', fill: entityFill.group2 },
+
+      { id: 'rental_policies', label: 'RENTAL_POLICY', x: 1790, y: 70, w: 190, h: 54, type: 'entity', fill: entityFill.group3 },
+      { id: 'policy_rules', label: 'POLICY_RULE', x: 2130, y: 70, w: 160, h: 54, type: 'entity', fill: entityFill.group3 },
+
+      { id: 'reservations', label: 'RESERVATION', x: 360, y: 560, w: 170, h: 56, type: 'entity', fill: entityFill.group4 },
+      { id: 'rentals', label: 'RENTAL', x: 690, y: 560, w: 140, h: 56, type: 'entity', fill: entityFill.group4 },
+      { id: 'extensions', label: 'EXTENSION', x: 980, y: 560, w: 160, h: 56, type: 'entity', fill: entityFill.group4 },
+      { id: 'checkout_requests', label: 'CHECKOUT_REQUEST', x: 950, y: 760, w: 220, h: 56, type: 'entity', fill: entityFill.group4 },
+
+      { id: 'contracts', label: 'CONTRACT', x: 1300, y: 560, w: 150, h: 56, type: 'entity', fill: entityFill.group5 },
+
+      { id: 'payments', label: 'PAYMENT', x: 1700, y: 560, w: 150, h: 56, type: 'entity', fill: entityFill.group6 },
+      { id: 'settlements', label: 'SETTLEMENT', x: 1970, y: 760, w: 170, h: 56, type: 'entity', fill: entityFill.group6 },
+      { id: 'inspections', label: 'INSPECTION', x: 2260, y: 760, w: 170, h: 56, type: 'entity', fill: entityFill.group6 },
+
+      { id: 'support_tickets', label: 'SUPPORT_TICKET', x: 620, y: 1080, w: 220, h: 56, type: 'entity', fill: entityFill.group7 },
+      { id: 'escalations', label: 'ESCALATION', x: 1000, y: 1080, w: 170, h: 56, type: 'entity', fill: entityFill.group7 },
+
+      { id: 'tasks', label: 'TASK', x: 220, y: 250, w: 120, h: 54, type: 'entity', fill: entityFill.group8 },
+      { id: 'notifications', label: 'NOTIFICATION', x: 120, y: 420, w: 180, h: 54, type: 'entity', fill: entityFill.group8 },
+      { id: 'activity_logs', label: 'ACTIVITY_LOG', x: 330, y: 420, w: 170, h: 54, type: 'entity', fill: entityFill.group8 },
+
+      // relationship nodes
+      { id: 'r1', label: 'Assigned\nTo', x: 238, y: 70, w: 84, h: 58, type: 'rel', fill: relFill.group1 },
+      { id: 'r2', label: 'Contains', x: 780, y: 70, w: 90, h: 58, type: 'rel', fill: relFill.group1 },
+      { id: 'r3', label: 'Contains', x: 1045, y: 70, w: 90, h: 58, type: 'rel', fill: relFill.group2 },
+      { id: 'r4', label: 'Classifies', x: 1350, y: 70, w: 96, h: 58, type: 'rel', fill: relFill.group2 },
+      { id: 'r5', label: 'Receives', x: 505, y: 210, w: 96, h: 58, type: 'rel', fill: relFill.group1 },
+      { id: 'r6', label: 'Covers', x: 935, y: 210, w: 86, h: 58, type: 'rel', fill: relFill.group1 },
+
+      { id: 'r7', label: 'Defines', x: 1995, y: 70, w: 86, h: 58, type: 'rel', fill: relFill.group3 },
+      { id: 'r8', label: 'Applies\nTo', x: 1700, y: 230, w: 86, h: 58, type: 'rel', fill: relFill.group3 },
+
+      { id: 'r9', label: 'Makes', x: 300, y: 370, w: 82, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r10', label: 'Holds', x: 1060, y: 330, w: 82, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r11', label: 'Creates', x: 560, y: 560, w: 86, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r12', label: 'Rents', x: 500, y: 560, w: 82, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r13', label: 'Used In', x: 1030, y: 430, w: 86, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r14', label: 'Has', x: 890, y: 560, w: 70, h: 58, type: 'rel', fill: relFill.group4 },
+      { id: 'r15', label: 'Has', x: 1020, y: 665, w: 70, h: 58, type: 'rel', fill: relFill.group4 },
+
+      { id: 'r16', label: 'Has', x: 1170, y: 560, w: 70, h: 58, type: 'rel', fill: relFill.group5 },
+      { id: 'r17', label: 'Amends', x: 1360, y: 440, w: 86, h: 58, type: 'rel', fill: relFill.group5 },
+      { id: 'r18', label: 'Uses', x: 1760, y: 330, w: 78, h: 58, type: 'rel', fill: relFill.group5 },
+
+      { id: 'r19', label: 'Makes', x: 1560, y: 700, w: 82, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r20', label: 'Covers', x: 1470, y: 440, w: 82, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r21', label: 'Covers', x: 1560, y: 610, w: 82, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r22', label: 'Paid By', x: 1460, y: 700, w: 86, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r23', label: 'Paid By', x: 1880, y: 700, w: 86, h: 58, type: 'rel', fill: relFill.group6 },
+
+      { id: 'r24', label: 'Closes\nWith', x: 1640, y: 760, w: 88, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r25', label: 'References', x: 1800, y: 880, w: 96, h: 58, type: 'rel', fill: relFill.group6 },
+      { id: 'r26', label: 'Has', x: 2170, y: 760, w: 70, h: 58, type: 'rel', fill: relFill.group6 },
+
+      { id: 'r27', label: 'Creates', x: 470, y: 1010, w: 86, h: 58, type: 'rel', fill: relFill.group7 },
+      { id: 'r28', label: 'Related\nTo', x: 1010, y: 980, w: 86, h: 58, type: 'rel', fill: relFill.group7 },
+      { id: 'r29', label: 'Related\nTo', x: 720, y: 900, w: 86, h: 58, type: 'rel', fill: relFill.group7 },
+      { id: 'r30', label: 'Escalates', x: 890, y: 1080, w: 92, h: 58, type: 'rel', fill: relFill.group7 },
+
+      { id: 'r31', label: 'Assigned', x: 390, y: 180, w: 92, h: 58, type: 'rel', fill: relFill.group8 },
+      { id: 'r32', label: 'Receives', x: 205, y: 340, w: 92, h: 58, type: 'rel', fill: relFill.group8 },
+      { id: 'r33', label: 'Records', x: 380, y: 340, w: 90, h: 58, type: 'rel', fill: relFill.group8 },
+
+      { id: 'r34', label: 'Merged\nInto', x: 1500, y: 220, w: 92, h: 58, type: 'rel', fill: relFill.group2 }
+    ];
+
+    const connections = [
+      { from: 'roles', rel: 'r1', to: 'users', left: '1', right: 'N' },
+      { from: 'facilities', rel: 'r2', to: 'zones', left: '1', right: 'N' },
+      { from: 'zones', rel: 'r3', to: 'units', left: '1', right: 'N' },
+      { from: 'unit_types', rel: 'r4', to: 'units', left: '1', right: 'N' },
+      { from: 'users', rel: 'r5', to: 'staff_assignments', left: '1', right: 'N' },
+      { from: 'zones', rel: 'r6', to: 'staff_assignments', left: '1', right: 'N' },
+
+      { from: 'rental_policies', rel: 'r7', to: 'policy_rules', left: '1', right: 'N' },
+      { from: 'unit_types', rel: 'r8', to: 'policy_rules', left: '1', right: 'N' },
+
+      { from: 'users', rel: 'r9', to: 'reservations', left: '1', right: 'N' },
+      { from: 'units', rel: 'r10', to: 'reservations', left: '1', right: 'N' },
+      { from: 'reservations', rel: 'r11', to: 'rentals', left: '1', right: '1' },
+      { from: 'users', rel: 'r12', to: 'rentals', left: '1', right: 'N' },
+      { from: 'units', rel: 'r13', to: 'rentals', left: '1', right: 'N' },
+      { from: 'rentals', rel: 'r14', to: 'extensions', left: '1', right: 'N' },
+      { from: 'rentals', rel: 'r15', to: 'checkout_requests', left: '1', right: 'N' },
+
+      { from: 'rentals', rel: 'r16', to: 'contracts', left: '1', right: 'N' },
+      { from: 'contracts', rel: 'r17', to: 'contracts', left: '1', right: 'N', self: true, fromAnchor: {fx: 1, fy: 0.5}, toAnchor: {fx: 0.5, fy: 0} },
+      { from: 'rental_policies', rel: 'r18', to: 'contracts', left: '1', right: 'N' },
+
+      { from: 'users', rel: 'r19', to: 'payments', left: '1', right: 'N' },
+      { from: 'reservations', rel: 'r20', to: 'payments', left: '1', right: 'N' },
+      { from: 'rentals', rel: 'r21', to: 'payments', left: '1', right: 'N' },
+      { from: 'extensions', rel: 'r22', to: 'payments', left: '1', right: '0..1' },
+      { from: 'settlements', rel: 'r23', to: 'payments', left: '1', right: 'N' },
+
+      { from: 'rentals', rel: 'r24', to: 'settlements', left: '1', right: '0..1' },
+      { from: 'contracts', rel: 'r25', to: 'settlements', left: '1', right: 'N' },
+      { from: 'settlements', rel: 'r26', to: 'inspections', left: '1', right: 'N' },
+
+      { from: 'users', rel: 'r27', to: 'support_tickets', left: '1', right: 'N' },
+      { from: 'units', rel: 'r28', to: 'support_tickets', left: '1', right: 'N' },
+      { from: 'rentals', rel: 'r29', to: 'support_tickets', left: '1', right: 'N' },
+      { from: 'support_tickets', rel: 'r30', to: 'escalations', left: '1', right: '0..1' },
+
+      { from: 'users', rel: 'r31', to: 'tasks', left: '1', right: 'N' },
+      { from: 'users', rel: 'r32', to: 'notifications', left: '1', right: 'N' },
+      { from: 'users', rel: 'r33', to: 'activity_logs', left: '1', right: 'N' },
+
+      { from: 'units', rel: 'r34', to: 'units', left: '1', right: 'N', self: true, fromAnchor: {fx: 1, fy: 0.5}, toAnchor: {fx: 0.5, fy: 1} }
+    ];
+
+    const scene = document.getElementById('scene');
+    const edgesSvg = document.getElementById('edges');
+    const viewer = document.getElementById('viewer');
+
+    const nodeMap = new Map();
+    const elementMap = new Map();
+    const layoutStorageKey = 'storagehub-conceptual-layout-v2';
+    const initialPositions = new Map(nodes.map(node => [node.id, { x: node.x, y: node.y }]));
+
+    function loadSavedLayout() {
+      try {
+        const raw = localStorage.getItem(layoutStorageKey);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        nodes.forEach(node => {
+          if (saved[node.id] && Number.isFinite(saved[node.id].x) && Number.isFinite(saved[node.id].y)) {
+            node.x = saved[node.id].x;
+            node.y = saved[node.id].y;
+          }
+        });
+      } catch (error) {
+        console.warn('Không thể đọc layout đã lưu:', error);
+      }
+    }
+
+    function saveLayout() {
+      try {
+        const positions = {};
+        nodes.forEach(node => {
+          positions[node.id] = { x: Math.round(node.x), y: Math.round(node.y) };
+        });
+        localStorage.setItem(layoutStorageKey, JSON.stringify(positions));
+      } catch (error) {
+        console.warn('Không thể lưu layout:', error);
+      }
+    }
+
+    function resetLayout() {
+      nodes.forEach(node => {
+        const initial = initialPositions.get(node.id);
+        node.x = initial.x;
+        node.y = initial.y;
+        const el = elementMap.get(node.id);
+        if (el) {
+          el.style.left = node.x + 'px';
+          el.style.top = node.y + 'px';
+        }
+      });
+      localStorage.removeItem(layoutStorageKey);
+      drawEdges();
+      fitToView();
+    }
+
+    function center(node) {
+      return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+    }
+
+    function createNodes() {
+      nodes.forEach(n => {
+        const el = document.createElement('div');
+        el.className = `node ${n.type === 'entity' ? 'entity' : 'rel'}`;
+        el.style.left = n.x + 'px';
+        el.style.top = n.y + 'px';
+        el.style.width = n.w + 'px';
+        el.style.height = n.h + 'px';
+        el.style.background = n.fill;
+        el.innerHTML = n.label.replace(/\n/g, '<br>');
+        el.dataset.id = n.id;
+        scene.appendChild(el);
+        nodeMap.set(n.id, n);
+        elementMap.set(n.id, el);
+        enableNodeDrag(el, n);
+      });
+    }
+
+    function boundaryPoint(node, towardPoint) {
+      const cx = node.x + node.w / 2;
+      const cy = node.y + node.h / 2;
+      const dx = towardPoint.x - cx;
+      const dy = towardPoint.y - cy;
+      if (dx === 0 && dy === 0) return { x: cx, y: cy };
+
+      const hw = node.w / 2;
+      const hh = node.h / 2;
+      const scale = 1 / Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh);
+      return {
+        x: cx + dx * scale,
+        y: cy + dy * scale
+      };
+    }
+
+    function addLine(x1, y1, x2, y2) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      line.setAttribute('class', 'edge-line');
+      edgesSvg.appendChild(line);
+    }
+
+    function addCardinality(text, x, y) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      el.setAttribute('x', x);
+      el.setAttribute('y', y);
+      el.setAttribute('class', 'cardinality');
+      el.textContent = text;
+      edgesSvg.appendChild(el);
+    }
+
+    function drawConnection(conn) {
+      const from = nodeMap.get(conn.from);
+      const rel = nodeMap.get(conn.rel);
+      const to = nodeMap.get(conn.to);
+      const relCenter = center(rel);
+
+      let p1, p2, p3, p4;
+
+      if (conn.self && conn.fromAnchor && conn.toAnchor) {
+        // anchor tuong doi theo hop -> keo node van dinh line
+        p1 = { x: from.x + conn.fromAnchor.fx * from.w, y: from.y + conn.fromAnchor.fy * from.h };
+        p4 = { x: to.x + conn.toAnchor.fx * to.w, y: to.y + conn.toAnchor.fy * to.h };
+        p2 = boundaryPoint(rel, p1);
+        p3 = boundaryPoint(rel, p4);
+      } else {
+        p1 = boundaryPoint(from, relCenter);
+        p2 = boundaryPoint(rel, center(from));
+        p3 = boundaryPoint(rel, center(to));
+        p4 = boundaryPoint(to, relCenter);
+      }
+
+      addLine(p1.x, p1.y, p2.x, p2.y);
+      addLine(p3.x, p3.y, p4.x, p4.y);
+
+      addCardinality(conn.left, p1.x + (p2.x - p1.x) * 0.28 - 8, p1.y + (p2.y - p1.y) * 0.28 - 8);
+      addCardinality(conn.right, p4.x + (p3.x - p4.x) * 0.28 - 8, p4.y + (p3.y - p4.y) * 0.28 - 8);
+    }
+
+    function drawEdges() {
+      edgesSvg.innerHTML = '';
+      connections.forEach(drawConnection);
+    }
+
+    let draggingNode = null;
+
+    function enableNodeDrag(el, node) {
+      el.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        e.preventDefault();
+        e.stopPropagation();
+        draggingNode = {
+          node,
+          el,
+          pointerId: e.pointerId,
+          startClientX: e.clientX,
+          startClientY: e.clientY,
+          startX: node.x,
+          startY: node.y
+        };
+        el.classList.add('dragging-node');
+        el.setPointerCapture?.(e.pointerId);
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!draggingNode || draggingNode.node !== node || draggingNode.pointerId !== e.pointerId) return;
+        e.preventDefault();
+        const dx = (e.clientX - draggingNode.startClientX) / scale;
+        const dy = (e.clientY - draggingNode.startClientY) / scale;
+        node.x = Math.max(0, Math.min(2800 - node.w, draggingNode.startX + dx));
+        node.y = Math.max(0, Math.min(1800 - node.h, draggingNode.startY + dy));
+        el.style.left = node.x + 'px';
+        el.style.top = node.y + 'px';
+        drawEdges();
+      });
+
+      const finishNodeDrag = (e) => {
+        if (!draggingNode || draggingNode.node !== node) return;
+        if (e && draggingNode.pointerId !== e.pointerId) return;
+        el.classList.remove('dragging-node');
+        try { el.releasePointerCapture?.(draggingNode.pointerId); } catch (_) {}
+        draggingNode = null;
+        saveLayout();
+      };
+
+      el.addEventListener('pointerup', finishNodeDrag);
+      el.addEventListener('pointercancel', finishNodeDrag);
+    }
+
+    loadSavedLayout();
+    createNodes();
+    drawEdges();
+
+    let scale = 0.55;
+    let translateX = 30;
+    let translateY = 20;
+
+    function applyTransform() {
+      scene.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    function fitToView() {
+      const viewportW = viewer.clientWidth;
+      const viewportH = viewer.clientHeight;
+      const contentW = 2800;
+      const contentH = 1800;
+      scale = Math.min((viewportW - 40) / contentW, (viewportH - 40) / contentH);
+      translateX = (viewportW - contentW * scale) / 2;
+      translateY = (viewportH - contentH * scale) / 2;
+      applyTransform();
+    }
+
+    function resetView() {
+      scale = 1;
+      translateX = 20;
+      translateY = 20;
+      applyTransform();
+    }
+
+    document.getElementById('zoomIn').addEventListener('click', () => {
+      scale = Math.min(2.2, scale + 0.1);
+      applyTransform();
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', () => {
+      scale = Math.max(0.25, scale - 0.1);
+      applyTransform();
+    });
+
+    document.getElementById('fitBtn').addEventListener('click', fitToView);
+    document.getElementById('resetLayoutBtn').addEventListener('click', resetLayout);
+    document.getElementById('resetBtn').addEventListener('click', resetView);
+
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+    let panX = 0;
+    let panY = 0;
+
+    viewer.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.toolbar') || e.target.closest('.node')) return;
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      isPanning = true;
+      viewer.classList.add('dragging');
+      startX = e.clientX;
+      startY = e.clientY;
+      panX = translateX;
+      panY = translateY;
+      viewer.setPointerCapture?.(e.pointerId);
+    });
+
+    viewer.addEventListener('pointermove', (e) => {
+      if (!isPanning) return;
+      translateX = panX + (e.clientX - startX);
+      translateY = panY + (e.clientY - startY);
+      applyTransform();
+    });
+
+    const stopPanning = (e) => {
+      if (!isPanning) return;
+      isPanning = false;
+      viewer.classList.remove('dragging');
+      try { viewer.releasePointerCapture?.(e.pointerId); } catch (_) {}
+    };
+
+    viewer.addEventListener('pointerup', stopPanning);
+    viewer.addEventListener('pointercancel', stopPanning);
+
+    viewer.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = viewer.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const prevScale = scale;
+      const delta = e.deltaY < 0 ? 1.08 : 0.92;
+      scale = Math.min(2.2, Math.max(0.25, scale * delta));
+
+      translateX = mouseX - ((mouseX - translateX) / prevScale) * scale;
+      translateY = mouseY - ((mouseY - translateY) / prevScale) * scale;
+      applyTransform();
+    }, { passive: false });
+
+    window.addEventListener('resize', fitToView);
+    fitToView();
+  </script>
+</body>
+</html>

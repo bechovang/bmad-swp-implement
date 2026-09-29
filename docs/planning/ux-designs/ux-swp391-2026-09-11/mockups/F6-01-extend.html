@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StorageHub - Extend Rental Unit S-3</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#ffdbcc",
+            "on-tertiary-fixed": "#351000",
+            "on-primary-fixed": "#0f0069",
+            "secondary-container": "#d5e3fd",
+            "surface-variant": "#e4e1ee",
+            "status-reserved-tint": "#EEF2FF",
+            "status-maintenance-border": "#FFEDD5",
+            "primary-fixed": "#e2dfff",
+            "surface-bright": "#fcf8ff",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#dad7ff",
+            "status-maintenance": "#C2410C",
+            "tertiary-fixed-dim": "#ffb695",
+            "inverse-primary": "#c3c0ff",
+            "status-retired-tint": "#F8FAFC",
+            "surface-container-low": "#f5f2ff",
+            "status-buffer": "#B45309",
+            "error": "#DC2626",
+            "on-background": "#1b1b24",
+            "success-tint": "#ECFDF5",
+            "status-retired-border": "#E2E8F0",
+            "surface": "#FFFFFF",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "status-reserved-border": "#E0E7FF",
+            "on-primary-fixed-variant": "#3323cc",
+            "status-available": "#059669",
+            "surface-dim": "#dcd8e5",
+            "status-reserved": "#4F46E5",
+            "status-preparing-border": "#E0F2FE",
+            "primary-outline-border": "#C7D2FE",
+            "on-tertiary": "#ffffff",
+            "surface-subtle": "#F8FAFC",
+            "secondary-fixed-dim": "#b9c7e0",
+            "primary-border": "#E0E7FF",
+            "on-secondary-container": "#57657b",
+            "on-error": "#ffffff",
+            "error-border": "#FECACA",
+            "ink": "#0F172A",
+            "divider": "#F1F5F9",
+            "tertiary": "#7e3000",
+            "outline": "#777587",
+            "on-secondary-fixed-variant": "#3a485c",
+            "on-surface-variant": "#464555",
+            "on-primary": "#ffffff",
+            "surface-muted": "#F1F5F9",
+            "primary": "#4F46E5",
+            "status-buffer-bar": "#F59E0B",
+            "status-available-tint": "#ECFDF5",
+            "muted": "#64748B",
+            "ink-secondary": "#334155",
+            "border-strong": "#CBD5E1",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#f3effc",
+            "surface-container-highest": "#e4e1ee",
+            "status-rented-tint": "#F1F5F9",
+            "error-container": "#ffdad6",
+            "warning": "#B45309",
+            "status-buffer-tint": "#FFFBEB",
+            "background": "#fcf8ff",
+            "app-bg": "#F4F6F9",
+            "inverse-surface": "#302f39",
+            "success": "#059669",
+            "primary-tint": "#EEF2FF",
+            "secondary": "#515f74",
+            "border": "#E2E8F0",
+            "error-tint": "#FEF2F2",
+            "on-secondary-fixed": "#0d1c2f",
+            "status-rented-border": "#E2E8F0",
+            "on-error-container": "#93000a",
+            "faint": "#94A3B8",
+            "surface-container-high": "#eae6f4",
+            "status-maintenance-tint": "#FFF7ED",
+            "primary-container": "#4f46e5",
+            "tertiary-container": "#a44100",
+            "status-buffer-border": "#FDE68A",
+            "on-surface": "#1b1b24",
+            "status-preparing": "#0284C7",
+            "surface-container": "#f0ecf9",
+            "status-preparing-tint": "#F0F9FF",
+            "surface-tint": "#4d44e3",
+            "warning-bar": "#F59E0B",
+            "status-retired": "#94A3B8",
+            "warning-tint": "#FFFBEB",
+            "on-tertiary-container": "#ffd2be",
+            "status-rented": "#334155",
+            "outline-variant": "#c7c4d8",
+            "primary-fixed-dim": "#c3c0ff",
+            "status-available-border": "#D1FAE5",
+            "secondary-fixed": "#d5e3fd"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "margin": "24px",
+            "gutter": "14px",
+            "space-xl": "24px",
+            "space-2xl": "32px",
+            "space-md": "12px",
+            "space-3xl": "48px",
+            "space-xs": "4px"
+          },
+          "fontFamily": {
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .hatch-pattern {
+      background-color: #FEF2F2;
+      background-image: repeating-linear-gradient(45deg, #FEE2E2, #FEE2E2 4px, #FEF2F2 4px, #FEF2F2 9px);
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col font-body antialiased">
+<!-- Top Navigation Header (Shared Component: TopNavBar) -->
+<header class="flex justify-between items-center h-[54px] px-margin w-full bg-surface dark:bg-surface border-b border-border dark:border-border sticky top-0 z-30 shadow-sm dark:shadow-none">
+<!-- Left: Brand Logo & Main Nav Links -->
+<div class="flex items-center space-x-space-2xl h-full">
+<div class="flex items-center space-x-space-sm cursor-pointer">
+<div class="w-6 h-6 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="deployed_code" style="font-size: 16px;">deployed_code</span>
+</div>
+<span class="text-headline font-headline font-bold text-ink dark:text-ink tracking-tight">StorageHub</span>
+</div>
+<!-- Navigation Links from JSON: ["Browse Units", "My Rentals", "Support"] -->
+<nav class="hidden md:flex items-center space-x-space-xl h-full">
+<a class="text-ink-secondary dark:text-ink-secondary font-nav hover:text-ink dark:hover:text-ink transition-colors duration-150" href="#">Browse Units</a>
+<!-- Active Nav: "My Rentals" with semantic styling from JSON -->
+<a class="text-primary dark:text-primary font-nav font-semibold border-b-2 border-primary pb-[16px] flex items-center gap-1.5 pt-[16px]" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+          My Rentals
+        </a>
+<a class="text-ink-secondary dark:text-ink-secondary font-nav hover:text-ink dark:hover:text-ink transition-colors duration-150" href="#">Support</a>
+</nav>
+</div>
+<!-- Right: Contextual Telemetry, Role Chip, Notifications & Avatar -->
+<div class="flex items-center space-x-space-md">
+<!-- Role Badge -->
+<span class="px-2 py-0.5 rounded-full bg-primary-tint border border-primary-border text-primary font-label text-label">
+        Customer · SGN-8842
+      </span>
+<!-- Notification Action (trailing_icon_actions from JSON) -->
+<button aria-label="Notifications" class="relative p-1.5 rounded-xl text-ink-secondary hover:text-ink hover:bg-surface-subtle transition-colors duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error border-2 border-surface"></span>
+</button>
+<!-- Profile Image & Indicator -->
+<div class="flex items-center space-x-space-sm pl-space-xs border-l border-border">
+<div class="w-7 h-7 rounded-full bg-surface-muted text-ink font-body-strong flex items-center justify-center border border-border text-meta shadow-xs" title="Lan user profile avatar">
+          L
+        </div>
+<div class="hidden lg:flex flex-col text-left">
+<span class="font-body-strong text-meta text-ink leading-none">Lan Nguyen</span>
+<span class="font-meta text-label text-muted leading-tight">PIN #8842</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-Header / Breadcrumbs Bar -->
+<section class="bg-surface border-b border-border px-margin py-space-md">
+<div class="max-w-[1280px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2">
+<!-- Breadcrumb Hierarchy -->
+<nav class="flex items-center space-x-space-sm font-meta text-meta text-muted">
+<a class="flex items-center gap-1 text-ink-secondary hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="arrow_back" style="font-size: 14px;">arrow_back</span>
+<span>Back to Unit S-3</span>
+</a>
+<span>/</span>
+<a class="hover:text-primary transition-colors" href="#">My Rentals</a>
+<span>/</span>
+<span class="font-code text-code-sm text-ink-secondary bg-surface-muted px-1.5 py-0.5 rounded border border-border">Unit S-3</span>
+<span>/</span>
+<span class="text-ink font-semibold">Extend rental</span>
+</nav>
+<!-- Unit quick indicator -->
+<div class="flex items-center space-x-2">
+<span class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-subtle border border-border font-label text-label text-muted">
+<span class="w-1.5 h-1.5 rounded-full bg-status-rented"></span>
+          Depot SGN-01 (Tân Bình) · Floor 2
+        </span>
+</div>
+</div>
+</section>
+<!-- Page Header Anchor -->
+<div class="max-w-[1280px] mx-auto w-full px-margin pt-space-xl pb-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-md">
+<h1 class="text-display font-display text-ink tracking-tight">Extend rental · Unit S-3</h1>
+<span class="font-code text-code-sm px-2 py-0.5 bg-surface-muted border border-border-strong text-ink rounded-lg">S-3</span>
+<!-- Status Badge -->
+<span class="px-2 py-0.5 rounded-full bg-status-rented-tint border border-status-rented-border text-status-rented font-label text-label flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-rented"></span>
+            Rented
+          </span>
+</div>
+<p class="font-meta text-meta text-muted mt-1">
+          Current checkout: <span class="text-ink font-semibold tabular-nums">Oct 17, 2026 · 14:00 ICT</span> · Standard storage locker (3.5 m² / 10.5 m³)
+        </p>
+</div>
+<!-- Quick Telemetry Badge -->
+<div class="flex items-center gap-2 self-start sm:self-auto bg-surface border border-border rounded-xl px-3 py-1.5 shadow-xs">
+<span class="material-symbols-outlined text-warning" data-icon="lock_clock">lock_clock</span>
+<div class="text-left font-meta text-meta">
+<span class="block text-muted text-label leading-none">Access Status</span>
+<span class="font-semibold text-ink leading-tight tabular-nums">Gate PIN #8842 Active</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Canvas (Two-Column Layout) -->
+<main class="max-w-[1280px] mx-auto w-full px-margin pb-space-3xl flex-1">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN: Calendar & Turnover Constraint Engine (Card 1) -->
+<div class="lg:col-span-7 bg-surface rounded-xl border border-border shadow-xs overflow-hidden relative border-l-[3px] border-l-status-buffer-bar">
+<!-- Card Header -->
+<div class="p-space-lg border-b border-divider flex items-center justify-between">
+<div>
+<h2 class="text-headline font-headline text-ink">Select new checkout date</h2>
+<p class="font-meta text-meta text-muted mt-0.5">Pick your extension boundary. Turnover cleaning starts promptly at scheduled release.</p>
+</div>
+<span class="px-2 py-0.5 rounded-lg bg-warning-tint border border-status-buffer-border text-warning font-label text-label flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="info" style="font-size: 13px;">info</span>
+            Turnover Constraint Active
+          </span>
+</div>
+<div class="p-space-lg">
+<!-- Calendar Shell for October 2026 -->
+<div class="border border-border rounded-xl p-space-lg bg-surface">
+<!-- Calendar Navigation Header -->
+<div class="flex items-center justify-between mb-space-lg">
+<div class="flex items-center gap-2">
+<span class="text-headline font-headline text-ink">October 2026</span>
+<span class="font-code text-code-sm text-muted bg-surface-subtle border border-border px-1.5 py-0.5 rounded">UTC+7 (ICT)</span>
+</div>
+<div class="flex items-center gap-1">
+<button aria-label="Previous Month" class="p-1.5 rounded-lg border border-border text-muted hover:text-ink hover:bg-surface-subtle disabled:opacity-30 disabled:cursor-not-allowed" disabled="" type="button">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button aria-label="Next Month" class="p-1.5 rounded-lg border border-border text-ink hover:bg-surface-subtle" type="button">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 gap-1 text-center font-meta text-meta mb-2">
+<span class="text-muted font-label py-1">Su</span>
+<span class="text-muted font-label py-1">Mo</span>
+<span class="text-muted font-label py-1">Tu</span>
+<span class="text-muted font-label py-1">We</span>
+<span class="text-muted font-label py-1">Th</span>
+<span class="text-muted font-label py-1">Fr</span>
+<span class="text-muted font-label py-1">Sa</span>
+</div>
+<!-- Calendar Days (October 2026 starts on Thursday Oct 1) -->
+<div class="grid grid-cols-7 gap-1 font-body text-body tabular-nums">
+<!-- Empty buffer cells for Sep 27 - Sep 30 -->
+<div class="h-11 rounded-lg text-faint flex items-center justify-center opacity-30">27</div>
+<div class="h-11 rounded-lg text-faint flex items-center justify-center opacity-30">28</div>
+<div class="h-11 rounded-lg text-faint flex items-center justify-center opacity-30">29</div>
+<div class="h-11 rounded-lg text-faint flex items-center justify-center opacity-30">30</div>
+<!-- Oct 1 to Oct 15 (Past/Active Lease Days) -->
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">1</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">2</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">3</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">4</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">5</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">6</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">7</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">8</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">9</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">10</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">11</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">12</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">13</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">14</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">15</div>
+<div class="h-11 rounded-lg text-muted flex items-center justify-center bg-surface-subtle/50 cursor-not-allowed">16</div>
+<!-- Day 17: Current Checkout Date -->
+<div class="h-11 rounded-lg bg-surface-muted border border-border text-ink font-body-strong flex flex-col items-center justify-center relative shadow-xs">
+<span>17</span>
+<span class="text-[9px] font-label leading-none text-muted">Current</span>
+</div>
+<!-- Day 18: Selected Date (+1 Day Boundary) -->
+<div class="h-11 rounded-lg bg-primary text-on-primary font-body-strong flex flex-col items-center justify-center relative shadow-sm ring-2 ring-primary ring-offset-1 cursor-pointer">
+<span>18</span>
+<span class="text-[9px] font-label font-bold leading-none text-on-primary-container bg-primary-fixed/20 px-1 rounded-sm">+1 day</span>
+</div>
+<!-- Blocked range: Oct 19 onwards with diagonal hatching -->
+<div class="h-11 rounded-lg hatch-pattern border border-error-border text-error font-body-strong flex flex-col items-center justify-center relative cursor-not-allowed opacity-85" title="Unit reserved by customer M-2 starting Oct 19">
+<span class="line-through decoration-error">19</span>
+<span class="text-[8.5px] font-label text-error leading-none">Hold</span>
+</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">20</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">21</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">22</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">23</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">24</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">25</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">26</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">27</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">28</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">29</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">30</div>
+<div class="h-11 rounded-lg hatch-pattern border border-error-border/60 text-error/70 flex items-center justify-center cursor-not-allowed line-through">31</div>
+</div>
+<!-- Calendar Legend -->
+<div class="mt-space-lg pt-space-md border-t border-divider grid grid-cols-1 sm:grid-cols-3 gap-space-sm font-meta text-meta">
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-sm bg-primary border border-primary"></span>
+<span class="text-ink">Selected (Oct 18 — Latest available)</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-sm bg-surface-muted border border-border"></span>
+<span class="text-muted">Current lease (Ends Oct 17)</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-sm hatch-pattern border border-error-border"></span>
+<span class="text-error">Reserved next customer (Oct 19+)</span>
+</div>
+</div>
+</div>
+<!-- Prominent Warning Banner (Density over decoration) -->
+<div class="mt-space-lg p-space-md rounded-xl bg-status-buffer-tint border border-status-buffer-border flex items-start gap-space-md">
+<span class="material-symbols-outlined text-status-buffer mt-0.5 flex-shrink-0" data-icon="warning">warning</span>
+<div class="space-y-0.5">
+<h4 class="font-body-strong text-body-strong text-status-buffer">Can't extend past Oct 18</h4>
+<p class="font-meta text-meta text-status-buffer leading-relaxed">
+                Customer M-2 has an active booking starting <strong class="font-semibold tabular-nums">Oct 19 · 08:00 ICT</strong>. Automated sanitization buffer is scheduled for the turnover window. Oct 18 is the hard perimeter for this unit.
+              </p>
+</div>
+</div>
+</div>
+<!-- Operational Status Footer within Card 1 -->
+<div class="bg-surface-subtle px-space-lg py-space-sm border-t border-divider flex items-center justify-between text-muted font-meta text-meta">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-success" data-icon="check_circle" style="font-size: 15px;">check_circle</span>
+            Lockout Protection active: SGN-01 Gate controller synced
+          </span>
+<span class="tabular-nums">Buffer window: 18h</span>
+</div>
+</div>
+<!-- RIGHT COLUMN: Extension Summary & Ledger Breakdown (Card 2) -->
+<div class="lg:col-span-5 space-y-gutter">
+<div class="bg-surface rounded-xl border border-border shadow-xs overflow-hidden border-l-[3px] border-l-primary">
+<!-- Card Header -->
+<div class="p-space-lg border-b border-divider">
+<div class="flex items-center justify-between">
+<h2 class="text-headline font-headline text-ink">Extension summary</h2>
+<span class="font-code text-code-sm px-2 py-0.5 bg-primary-tint border border-primary-border text-primary rounded">
+                +1 Day Delta
+              </span>
+</div>
+<p class="font-meta text-meta text-muted mt-0.5">New checkout: <strong class="text-ink font-semibold tabular-nums">Oct 18, 2026 · 14:00 ICT</strong></p>
+</div>
+<!-- Total & Rate Breakdown -->
+<div class="p-space-lg">
+<!-- Large Price Display -->
+<div class="bg-surface-subtle border border-border rounded-xl p-space-lg mb-space-lg">
+<span class="text-label font-label text-muted uppercase tracking-wider block">Total Due Now</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-kpi-value font-kpi-value text-ink tabular-nums tracking-tight">690.000 ₫</span>
+<span class="text-meta font-meta text-muted">VND · Inclusive of VAT</span>
+</div>
+<div class="mt-2 pt-2 border-t border-border/80 flex items-center gap-1.5 text-success font-meta text-meta">
+<span class="material-symbols-outlined" data-icon="verified_user" style="font-size: 15px;">verified_user</span>
+<span>Your deposit stays held until final turnover checkout.</span>
+</div>
+</div>
+<!-- Ledger Breakdown Items -->
+<div class="space-y-space-md text-body font-body">
+<div class="flex justify-between items-center py-1 border-b border-divider">
+<span class="text-muted font-meta text-meta">Additional lease window</span>
+<span class="font-body-strong text-ink tabular-nums">1 day (Oct 17 → Oct 18)</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-divider">
+<div class="flex flex-col">
+<span class="text-ink font-body-strong">Prorated unit rate</span>
+<span class="font-meta text-meta text-muted">Locker standard tariff (S-3)</span>
+</div>
+<span class="font-body-strong text-ink tabular-nums">690.000 ₫</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-divider">
+<div class="flex flex-col">
+<span class="text-ink font-body-strong">Security deposit status</span>
+<span class="font-meta text-meta text-muted">103.500 ₫ safely vaulted in escrow</span>
+</div>
+<span class="text-success font-body-strong flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="sync" style="font-size: 14px;">sync</span>
+                  Rolls over
+                </span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-divider">
+<div class="flex flex-col">
+<span class="text-ink font-body-strong">Electronic gate access</span>
+<span class="font-meta text-meta text-muted">Depot Turnstile + Locker Pad</span>
+</div>
+<span class="font-code text-code-sm bg-surface-muted px-1.5 py-0.5 rounded border border-border text-ink">
+                  PIN #8842
+                </span>
+</div>
+</div>
+<!-- Payment Method Preview Selector -->
+<div class="mt-space-lg pt-space-md border-t border-divider">
+<label class="block text-label font-label text-muted mb-space-xs">Payment Method</label>
+<div class="grid grid-cols-2 gap-2">
+<!-- Card Option (Selected) -->
+<div class="border-2 border-primary bg-primary-tint/30 rounded-xl p-space-sm flex items-center gap-2 cursor-pointer transition-colors">
+<div class="w-8 h-6 bg-surface rounded border border-border flex items-center justify-center font-bold text-[10px] text-ink">
+                    VISA
+                  </div>
+<div class="text-left font-meta">
+<span class="block text-ink font-semibold leading-tight tabular-nums">Visa •••• 8842</span>
+<span class="block text-[10px] text-muted leading-tight">Exp 09/28</span>
+</div>
+</div>
+<!-- VNPay QR Alternative -->
+<div class="border border-border bg-surface hover:bg-surface-subtle rounded-xl p-space-sm flex items-center gap-2 cursor-pointer transition-colors">
+<div class="w-8 h-6 bg-surface rounded border border-border flex items-center justify-center font-bold text-[9px] text-primary">
+                    VNPAY
+                  </div>
+<div class="text-left font-meta">
+<span class="block text-ink font-semibold leading-tight">VietQR Instant</span>
+<span class="block text-[10px] text-muted leading-tight">Fast bank transfer</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Accountability Context Card -->
+
+<div class="bg-surface rounded-xl border border-border shadow-xs overflow-hidden p-space-lg space-y-space-md">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-warning" data-icon="history_edu" style="font-size: 18px;">history_edu</span>
+      <h3 class="text-body-strong font-body-strong text-ink">After payment</h3>
+    </div>
+    <span class="px-2 py-0.5 rounded-full bg-status-buffer-tint border border-status-buffer-border text-status-buffer font-label text-label flex items-center gap-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-warning-bar"></span>
+      Signature required at desk
+    </span>
+  </div>
+  <p class="font-meta text-meta text-muted leading-relaxed">
+    Addendum <span class="font-code text-code-sm text-ink bg-surface-muted px-1 py-0.5 rounded border border-border">CT-1042-A1</span> is drafted automatically once the extension is paid. Sign the paper addendum at the desk by Oct 25 — the new checkout date applies immediately after payment.
+  </p>
+  <div class="space-y-1.5 pt-2 border-t border-divider text-meta font-meta">
+    <div class="flex items-center justify-between py-1 bg-surface-subtle px-2.5 rounded border border-border/80">
+      <div class="flex items-center gap-2">
+        <span class="font-code text-code-sm text-ink-secondary bg-surface px-1 py-0.5 rounded border border-border">CT-1042-A1</span>
+        <span class="text-ink font-semibold">Extension addendum</span>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-warning-tint text-status-buffer border border-status-buffer-border font-label text-label flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-warning-bar"></span>
+        Awaiting signature
+      </span>
+    </div>
+    <div class="flex items-center justify-between py-1 bg-surface-subtle px-2.5 rounded border border-border/80">
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-success" data-icon="check_circle" style="font-size: 14px;">check_circle</span>
+        <span class="text-ink">New checkout Oct 18 · unit held for you</span>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-success-tint text-success border border-status-available-border font-label text-label">
+        Effective on payment
+      </span>
+    </div>
+  </div>
+</div>
+<div class="bg-surface rounded-xl border border-border p-space-md shadow-xs flex items-center justify-between text-meta font-meta">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-muted" data-icon="verified">verified</span>
+<span class="text-muted">Direct invoice generation upon settlement</span>
+</div>
+<span class="font-code text-code-sm text-ink bg-surface-muted px-1.5 py-0.5 rounded border border-border">INV-2026-8842</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Bottom Action Bar (Transactional Controls) -->
+<footer class="sticky bottom-0 z-20 bg-surface border-t border-border shadow-[0_-4px_12px_rgba(15,23,42,0.05)]">
+<div class="max-w-[1280px] mx-auto px-margin py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Left Info: Ledger Status -->
+<div class="flex items-center space-x-space-md">
+<div class="w-2 h-2 rounded-full bg-warning-bar animate-pulse"></div>
+<div class="text-left">
+<p class="font-body-strong text-body-strong text-ink leading-tight">
+            Checkout lock: <span class="text-primary tabular-nums">Oct 18, 2026 · 14:00 ICT</span>
+</p>
+<p class="font-meta text-meta text-muted leading-tight">
+            Unit S-3 will transition to sanitization immediately after this deadline.
+          </p>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center space-x-space-md">
+<!-- Ghost / Secondary Button -->
+<button class="px-space-lg py-2 rounded-lg border border-border-strong text-ink-secondary hover:text-ink hover:bg-surface-subtle font-button text-button transition-colors duration-150" type="button">
+          Cancel and return to rental
+        </button>
+<!-- Primary Action Button with Indigo shadow -->
+<button class="px-space-xl py-2 rounded-lg bg-primary hover:bg-primary/95 text-on-primary font-button text-button shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center gap-space-sm transition-all" type="button">
+<span class="tabular-nums">Pay extension 690.000 ₫</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward" style="font-size: 16px;">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Technical System Telemetry Line -->
+<div class="bg-surface-muted border-t border-divider px-margin py-1.5 text-center font-meta text-label text-muted">
+<span>StorageHub Control Room v2.4</span>
+<span class="mx-1.5">·</span>
+<span>Operational Depot SGN-01 (Tân Bình)</span>
+<span class="mx-1.5">·</span>
+<span class="text-success inline-flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+        Systems Nominal
+      </span>
+<span class="mx-1.5">·</span>
+<span>Prices in VND (₫)</span>
+</div>
+</footer>
+</body></html>

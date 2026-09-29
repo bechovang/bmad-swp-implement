@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-app-bg" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Task Board — Morning Shift — StorageHub</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#4d44e3",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "on-surface-variant": "#464555",
+            "status-rented-tint": "#F1F5F9",
+            "status-available": "#059669",
+            "ink": "#0F172A",
+            "status-retired-border": "#E2E8F0",
+            "secondary-container": "#d5e3fd",
+            "primary-container": "#4f46e5",
+            "status-rented-border": "#E2E8F0",
+            "faint": "#94A3B8",
+            "primary-fixed": "#e2dfff",
+            "warning-tint": "#FFFBEB",
+            "status-available-border": "#D1FAE5",
+            "success-tint": "#ECFDF5",
+            "on-secondary-fixed": "#0d1c2f",
+            "status-buffer-bar": "#F59E0B",
+            "on-tertiary": "#ffffff",
+            "app-bg": "#F4F6F9",
+            "on-error": "#ffffff",
+            "inverse-on-surface": "#f3effc",
+            "error": "#DC2626",
+            "on-primary": "#ffffff",
+            "surface-container": "#f0ecf9",
+            "on-primary-container": "#dad7ff",
+            "status-maintenance-tint": "#FFF7ED",
+            "status-maintenance-border": "#FFEDD5",
+            "success": "#059669",
+            "tertiary-fixed": "#ffdbcc",
+            "status-reserved-tint": "#EEF2FF",
+            "status-reserved-border": "#E0E7FF",
+            "tertiary-container": "#a44100",
+            "on-background": "#1b1b24",
+            "status-maintenance": "#C2410C",
+            "surface-container-highest": "#e4e1ee",
+            "secondary-fixed-dim": "#b9c7e0",
+            "on-error-container": "#93000a",
+            "tertiary": "#7e3000",
+            "status-buffer-tint": "#FFFBEB",
+            "divider": "#F1F5F9",
+            "on-tertiary-fixed": "#351000",
+            "surface-variant": "#e4e1ee",
+            "status-retired-tint": "#F8FAFC",
+            "background": "#fcf8ff",
+            "status-retired": "#94A3B8",
+            "primary-border": "#E0E7FF",
+            "border-strong": "#CBD5E1",
+            "primary-fixed-dim": "#c3c0ff",
+            "on-secondary": "#ffffff",
+            "warning-bar": "#F59E0B",
+            "surface-bright": "#fcf8ff",
+            "surface-container-low": "#f5f2ff",
+            "surface-container-high": "#eae6f4",
+            "on-tertiary-container": "#ffd2be",
+            "status-preparing-tint": "#F0F9FF",
+            "inverse-surface": "#302f39",
+            "status-available-tint": "#ECFDF5",
+            "outline-variant": "#c7c4d8",
+            "surface-subtle": "#F8FAFC",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-rented": "#334155",
+            "status-buffer-border": "#FDE68A",
+            "ink-secondary": "#334155",
+            "error-container": "#ffdad6",
+            "primary-tint": "#EEF2FF",
+            "border": "#E2E8F0",
+            "primary": "#4F46E5",
+            "on-secondary-container": "#57657b",
+            "on-primary-fixed-variant": "#3323cc",
+            "status-preparing": "#0284C7",
+            "on-primary-fixed": "#0f0069",
+            "status-reserved": "#4F46E5",
+            "error-border": "#FECACA",
+            "primary-outline-border": "#C7D2FE",
+            "surface-muted": "#F1F5F9",
+            "status-buffer": "#B45309",
+            "surface": "#FFFFFF",
+            "on-secondary-fixed-variant": "#3a485c",
+            "surface-dim": "#dcd8e5",
+            "warning": "#B45309",
+            "secondary": "#515f74",
+            "outline": "#777587",
+            "error-tint": "#FEF2F2",
+            "status-preparing-border": "#E0F2FE",
+            "on-surface": "#1b1b24",
+            "muted": "#64748B",
+            "secondary-fixed": "#d5e3fd",
+            "inverse-primary": "#c3c0ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-sm": "8px",
+            "space-xl": "24px",
+            "space-md": "12px",
+            "space-xs": "4px",
+            "gutter": "14px",
+            "space-lg": "16px",
+            "space-3xl": "48px",
+            "space-2xl": "32px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full bg-app-bg text-ink font-body text-body antialiased flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="w-full h-[54px] px-margin flex items-center justify-between border-b border-border bg-surface sticky top-0 z-50 shadow-sm">
+<div class="flex items-center gap-6 h-full">
+<!-- Brand Logo -->
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-headline text-headline text-ink font-semibold tracking-tight">StorageHub</span>
+<!-- Role Chip -->
+<span class="bg-primary-tint border border-primary-border text-primary font-medium text-xs px-2 py-0.5 rounded-md">Staff</span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex items-center gap-1 h-full">
+<!-- Active link: Tasks -->
+<a class="text-primary font-body-strong border-b-2 border-primary py-3.5 px-3 flex items-center gap-1.5 h-full transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]" data-icon="checklist">checklist</span>
+<span>Tasks</span>
+</a>
+<!-- Inactive links -->
+<a class="text-muted hover:text-ink font-nav py-3.5 px-3 flex items-center gap-1.5 h-full transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]" data-icon="support_agent">support_agent</span>
+<span>Support</span>
+</a>
+<a class="text-muted hover:text-ink font-nav py-3.5 px-3 flex items-center gap-1.5 h-full transition-colors" href="#">
+<span>Inventory</span>
+</a>
+<a class="text-muted hover:text-ink font-nav py-3.5 px-3 flex items-center gap-1.5 h-full transition-colors" href="#">
+<span>Depots</span>
+</a>
+<a class="text-muted hover:text-ink font-nav py-3.5 px-3 flex items-center gap-1.5 h-full transition-colors" href="#">
+<span>Audit Log</span>
+</a>
+</nav>
+</div>
+<!-- Trailing Accessories -->
+<div class="flex items-center gap-4">
+<!-- Live Depot Status Pill -->
+<div class="flex items-center gap-2 bg-surface-subtle border border-border px-2.5 py-1 rounded-full text-ink-secondary text-meta">
+<span class="inline-block w-2 h-2 rounded-full bg-status-available animate-pulse"></span>
+<span class="font-meta text-meta">VN-SGN-01 Gateway · Online</span>
+</div>
+<!-- Icon Actions -->
+<div class="flex items-center gap-1">
+<!-- Notification Bell with Red Badge -->
+<button aria-label="Notifications" class="relative p-1.5 text-muted hover:text-ink hover:bg-surface-subtle rounded-md transition-colors focus:outline-none">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
+</button>
+<button aria-label="Help" class="p-1.5 text-muted hover:text-ink hover:bg-surface-subtle rounded-md transition-colors focus:outline-none">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+</button>
+</div>
+<div class="h-4 w-px bg-border"></div>
+<!-- User Avatar / Info -->
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-primary font-code-sm text-code-sm">
+          MN
+        </div>
+<div class="flex flex-col text-left">
+<span class="font-body-strong text-body leading-none text-ink">Minh</span>
+<span class="font-label text-label text-muted leading-tight mt-0.5">Facility Staff</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-header / Context Bar -->
+<div class="bg-surface border-b border-border px-margin py-2 flex flex-wrap items-center justify-between text-meta text-muted">
+<div class="flex items-center gap-2 font-meta">
+<span class="material-symbols-outlined text-[15px] text-muted" data-icon="location_on">location_on</span>
+<span class="font-body-strong text-ink">Depot:</span>
+<span class="text-ink-secondary">Tân Bình Gateway (VN-SGN-01)</span>
+<span class="text-faint">/</span>
+<span class="flex items-center gap-1 text-status-available font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span>
+        Gate Automation Online
+      </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[15px] text-muted" data-icon="schedule">schedule</span>
+<span>Current Shift Time: <strong class="font-code text-ink font-normal">08:42 ICT (UTC+7)</strong></span>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin py-space-lg flex flex-col gap-space-lg max-w-[1600px] w-full mx-auto">
+<!-- Page Header & Controls -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2.5">
+<h1 class="font-display text-display text-ink tracking-tight">Today · Morning shift</h1>
+<span class="bg-status-available-tint border border-status-available-border text-status-available font-label text-label uppercase px-2 py-0.5 rounded">Active Window</span>
+</div>
+<p class="text-muted font-body text-body mt-1">
+          Shift window: <span class="text-ink-secondary font-medium">07:00 – 15:00</span> · <span class="text-ink-secondary font-medium">7 tasks scheduled</span> · <span class="text-error font-medium">2 pending check-ins</span>
+</p>
+</div>
+<!-- Action Controls -->
+<div class="flex items-center gap-2.5">
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle hover:border-border-strong px-3 py-1.5 rounded-md font-button text-button flex items-center gap-1.5 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span>Filter</span>
+</button>
+<!-- The EXACTLY ONE solid primary button on entire page -->
+<button class="bg-primary hover:bg-surface-tint text-white px-3.5 py-1.5 rounded-md font-button text-button flex items-center gap-1.5 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+<span>+ Quick task</span>
+</button>
+</div>
+</div>
+<!-- Filter Tabs Bar -->
+<div class="border-b border-border flex items-center gap-6">
+<button class="font-button text-button text-primary border-b-2 border-primary pb-2.5 -mb-px flex items-center gap-1.5">
+<span>All</span>
+<span class="bg-primary-tint text-primary text-xs px-1.5 py-0.2 rounded-full font-code-sm">7</span>
+</button>
+<button class="font-button text-button text-muted hover:text-ink pb-2.5 flex items-center gap-1.5 transition-colors">
+<span>Check-in</span>
+<span class="bg-surface-muted text-muted text-xs px-1.5 py-0.2 rounded-full font-code-sm">2</span>
+</button>
+<button class="font-button text-button text-muted hover:text-ink pb-2.5 flex items-center gap-1.5 transition-colors">
+<span>Checkout</span>
+<span class="bg-surface-muted text-muted text-xs px-1.5 py-0.2 rounded-full font-code-sm">2</span>
+</button>
+<button class="font-button text-button text-muted hover:text-ink pb-2.5 flex items-center gap-1.5 transition-colors">
+<span>Cleaning</span>
+<span class="bg-surface-muted text-muted text-xs px-1.5 py-0.2 rounded-full font-code-sm">2</span>
+</button>
+<button class="font-button text-button text-muted hover:text-ink pb-2.5 flex items-center gap-1.5 transition-colors">
+<span>Support</span>
+<span class="bg-surface-muted text-muted text-xs px-1.5 py-0.2 rounded-full font-code-sm">1</span>
+</button>
+</div>
+<!-- 3-Column Kanban Board -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter items-start flex-1">
+<!-- COLUMN 1: To do (3) -->
+<section class="flex flex-col gap-3">
+<!-- Column Header -->
+<div class="flex items-center justify-between px-1 py-1">
+<div class="flex items-center gap-2">
+<h2 class="font-headline text-headline text-ink text-[15px] font-semibold">To do</h2>
+<span class="bg-surface-muted border border-border text-ink-secondary text-code-sm font-code-sm px-2 py-0.5 rounded-full">3</span>
+</div>
+<div class="flex items-center gap-1 text-muted">
+<button aria-label="Add card" class="p-1 hover:text-ink hover:bg-surface-subtle rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+<button aria-label="Column settings" class="p-1 hover:text-ink hover:bg-surface-subtle rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Cards Container -->
+<div class="flex flex-col gap-3">
+<!-- Card 1.1: Check-in -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:border-border-strong transition-colors">
+<!-- 3px Left Status Bar: Indigo -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div class="pl-1.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-primary-tint border border-primary-border text-primary font-label text-label px-2 py-0.5 rounded">Check-in</span>
+<span class="font-code text-code-sm text-muted">BK-1042 · Unit S-3</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Check-in</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Lan Nguyen · 09:00</p>
+</div>
+<div class="pt-2 border-t border-divider flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-meta text-muted">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span>Due 09:00</span>
+</div>
+<span class="bg-success-tint border border-status-available-border text-status-available font-label text-label px-1.5 py-0.5 rounded font-mono">PIN: 8842-Active</span>
+</div>
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle hover:border-border-strong px-2.5 py-1 rounded text-button font-button text-[12px] flex items-center gap-1 transition-colors">
+<span>Start check-in</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 1.2: Cleaning -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:border-border-strong transition-colors">
+<!-- 3px Left Status Bar: Amber -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-buffer-bar"></div>
+<div class="pl-1.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-warning-tint border border-status-buffer-border text-status-buffer font-label text-label px-2 py-0.5 rounded">Cleaning</span>
+<span class="font-code text-code-sm text-muted">Unit S-1</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Cleaning</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Unit S-1 · 16:00</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between gap-2">
+<div class="flex items-center gap-1 text-meta text-muted">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span>Due 16:00</span>
+</div>
+<span class="bg-warning-tint border border-status-buffer-border text-status-buffer font-label text-label px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="warning">warning</span>
+<span>Next tenant 16:30</span>
+</span>
+</div>
+</div>
+</article>
+<!-- Card 1.3: Support -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:border-border-strong transition-colors">
+<!-- 3px Left Status Bar: Red -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-error"></div>
+<div class="pl-1.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-error-tint border border-error-border text-error font-label text-label px-2 py-0.5 rounded">Support</span>
+<span class="font-code text-code-sm text-muted">SR-0032 · Unit S-4</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Support</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">sticky door · Unit S-4</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between gap-2">
+<span class="font-meta text-meta text-muted">Priority: <strong class="text-ink-secondary">Medium</strong></span>
+<div class="flex items-center gap-1.5">
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle px-2 py-1 rounded text-button font-button text-[12px] transition-colors">Assign</button>
+<button class="bg-surface border border-border text-error hover:bg-error-tint px-2 py-1 rounded text-button font-button text-[12px] transition-colors">Escalate</button>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- COLUMN 2: In progress (2) -->
+<section class="flex flex-col gap-3">
+<!-- Column Header -->
+<div class="flex items-center justify-between px-1 py-1">
+<div class="flex items-center gap-2">
+<h2 class="font-headline text-headline text-ink text-[15px] font-semibold">In progress</h2>
+<span class="bg-surface-muted border border-border text-ink-secondary text-code-sm font-code-sm px-2 py-0.5 rounded-full">2</span>
+</div>
+<div class="flex items-center gap-1 text-muted">
+<button aria-label="Add card" class="p-1 hover:text-ink hover:bg-surface-subtle rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+<button aria-label="Column settings" class="p-1 hover:text-ink hover:bg-surface-subtle rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Cards Container -->
+<div class="flex flex-col gap-3">
+<!-- Card 2.1: Checkout with left/right move arrows -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:border-border-strong transition-colors">
+<!-- 3px Left Status Bar: Sky-blue -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-preparing"></div>
+<div class="pl-1.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-status-preparing-tint border border-status-preparing-border text-status-preparing font-label text-label px-2 py-0.5 rounded">Checkout</span>
+<span class="font-code text-code-sm text-muted">RT-0871 · Unit M-2</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Checkout</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Unit M-2 · 14:00</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between gap-2">
+<div class="flex items-center gap-1 text-meta text-muted">
+<span class="material-symbols-outlined text-[14px]" data-icon="hourglass_empty">hourglass_empty</span>
+<span>Due 14:00</span>
+</div>
+<!-- Move Buttons -->
+<div class="flex items-center gap-1.5">
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle px-2 py-1 rounded text-button font-button text-[12px] flex items-center gap-0.5 transition-colors" title="Move to To do">
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_back">arrow_back</span>
+<span>To do</span>
+</button>
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle px-2 py-1 rounded text-button font-button text-[12px] flex items-center gap-0.5 transition-colors" title="Move to Done">
+<span>Done</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2.2: Cleaning -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:border-border-strong transition-colors">
+<!-- 3px Left Status Bar: Amber -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-buffer-bar"></div>
+<div class="pl-1.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-warning-tint border border-status-buffer-border text-status-buffer font-label text-label px-2 py-0.5 rounded">Cleaning</span>
+<span class="font-code text-code-sm text-muted">Unit L-3 · 12 m²</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Cleaning</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Post-moveout deep clean · Air vent sanitized & drying</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between gap-2">
+<div class="flex items-center gap-1 text-meta text-muted">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span>Due 12:45</span>
+</div>
+<button class="bg-surface border border-border text-ink-secondary hover:bg-surface-subtle hover:border-border-strong px-2.5 py-1 rounded text-button font-button text-[12px] flex items-center gap-1 transition-colors">
+<span>Complete turnover</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- COLUMN 3: Done (2) -->
+<section class="flex flex-col gap-3">
+<!-- Column Header -->
+<div class="flex items-center justify-between px-1 py-1">
+<div class="flex items-center gap-2">
+<h2 class="font-headline text-headline text-ink text-[15px] font-semibold">Done</h2>
+<span class="bg-surface-muted border border-border text-ink-secondary text-code-sm font-code-sm px-2 py-0.5 rounded-full">2</span>
+</div>
+<div class="flex items-center gap-1 text-muted">
+<button aria-label="Column settings" class="p-1 hover:text-ink hover:bg-surface-subtle rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Cards Container: 60% Opacity Muted Styling -->
+<div class="flex flex-col gap-3 opacity-60">
+<!-- Card 3.1: Completed Check-in -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:opacity-100 transition-opacity">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-success-tint border border-status-available-border text-status-available font-label text-label px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle">check_circle</span>
+<span>Completed</span>
+</span>
+<span class="font-code text-code-sm text-muted">BK-1039 · Unit M-5</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Check-in</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Tran Hoang · Fast pass onboarding</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between text-meta text-muted">
+<span>Finished at 08:15</span>
+<span>by Staff Minh</span>
+</div>
+</div>
+</article>
+<!-- Card 3.2: Completed Cleaning -->
+<article class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden flex flex-col p-3 hover:opacity-100 transition-opacity">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-success-tint border border-status-available-border text-status-available font-label text-label px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="check_circle">check_circle</span>
+<span>Completed</span>
+</span>
+<span class="font-code text-code-sm text-muted">Unit S-2</span>
+</div>
+<div>
+<h3 class="font-body-strong text-body text-ink font-semibold">Cleaning</h3>
+<p class="text-muted font-body text-body text-[12.5px] mt-0.5">Routine sanitization & latch audit</p>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between text-meta text-muted">
+<span>Finished at 07:45</span>
+<span class="text-status-available font-medium">Ready for allocation</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Shift Progress Bar Card -->
+<div class="bg-surface border border-border rounded-xl p-3.5 shadow-sm mt-1">
+<div class="flex items-center justify-between text-body">
+<span class="font-body-strong text-ink text-body">Shift Clearance</span>
+<span class="font-code-sm text-code-sm font-semibold text-primary">28.5% (2 / 7)</span>
+</div>
+<!-- Progress Bar Track -->
+<div class="w-full h-2 bg-surface-muted rounded-full overflow-hidden mt-2 border border-border">
+<div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 28.5%"></div>
+</div>
+<div class="flex items-center gap-1.5 mt-2.5 text-meta text-muted">
+<span class="material-symbols-outlined text-[14px]" data-icon="timer">timer</span>
+<span>Estimated shift completion: <strong class="font-mono text-ink-secondary">14:30 ICT</strong></span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom System Telemetry Footer -->
+<footer class="w-full bg-surface border-t border-border px-margin py-2.5 mt-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-meta text-muted">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-available"></span>
+<span>StorageHub Control Room v2.4 · Facility ID: <strong class="text-ink-secondary font-mono">VN-SGN-01</strong></span>
+</div>
+<div class="flex items-center gap-3">
+<span>Systems Nominal</span>
+<span class="text-faint">·</span>
+<span>Gate Automation Online</span>
+<span class="text-faint">·</span>
+<span>Shift: <strong class="text-ink-secondary">Morning (Minh)</strong></span>
+</div>
+</footer>
+</body></html>

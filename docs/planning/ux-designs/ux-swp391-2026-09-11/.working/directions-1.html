@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StorageHub — Design Directions 01–04 (Browse Units)</title>
+<!-- ============================================================
+     STORAGEHUB — DESIGN DIRECTIONS v1 (2026-09-11)
+     4 distinct visual personalities for the SAME hero screen:
+     Browse Units (customer view, role-based adaptive shell).
+     Light mode only. System fonts. No JS, no network, no images.
+     Per direction: hex values + font sizes documented in the
+     CSS comment token block at the top of each direction.
+     ============================================================ -->
+<style>
+/* ============ SHARED PAGE CHROME (not part of any direction) ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#E8EAEE;color:#1F2937;padding:36px 24px 72px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.page{max-width:1240px;margin:0 auto}
+.doc-head{margin-bottom:30px}
+.doc-head h1{font-size:24px;letter-spacing:-.01em}
+.doc-head p{font-size:13.5px;color:#4B5563;margin-top:6px;line-height:1.55;max-width:880px}
+.sec{margin-bottom:60px}
+.sec-head{background:#fff;border:1px solid #CFD4DC;border-radius:12px;padding:22px 26px;margin-bottom:18px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:#6B7280;text-transform:uppercase}
+.sec-head h2{font-size:21px;margin:7px 0 8px;letter-spacing:-.01em}
+.sec-head p{font-size:13.5px;line-height:1.6;color:#4B5563;max-width:900px}
+.meta{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+.mchip{font-size:11px;font-weight:600;color:#374151;background:#F3F4F6;border:1px solid #E5E7EB;padding:3px 10px;border-radius:999px}
+.frame{background:#fff;border:1px solid #C9CED6;border-radius:10px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.10)}
+.chrome{display:flex;align-items:center;gap:10px;background:#E9ECF1;border-bottom:1px solid #D6DAE1;padding:9px 14px}
+.cdots{display:flex;gap:6px}
+.cdots i{width:10px;height:10px;border-radius:50%;display:block}
+.cdots i:nth-child(1){background:#FF5F57}.cdots i:nth-child(2){background:#FEBC2E}.cdots i:nth-child(3){background:#28C840}
+.curl{flex:1;text-align:center;font:500 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5B6472;background:#fff;border:1px solid #DDE1E7;border-radius:6px;padding:6px 12px;max-width:430px;margin:0 auto}
+.cspace{width:46px;flex:0 0 auto}
+.duo{display:flex;gap:22px;margin-top:20px;align-items:stretch}
+.duo>.frame{width:500px;flex:0 0 auto}
+.notes{flex:1;background:#fff;border:1px solid #CFD4DC;border-radius:12px;padding:18px 22px}
+.notes h3{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6B7280;margin-bottom:10px}
+.notes ul{list-style:none}
+.notes li{font-size:12.5px;line-height:1.55;color:#374151;padding-left:16px;position:relative;margin-bottom:8px}
+.notes li:before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;background:#9CA3AF}
+.notes b{color:#111827}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="doc-head">
+<h1>StorageHub — Design Directions 01–04</h1>
+<p>Same hero screen (<b>Browse Units</b>, customer role, adaptive shell) rendered in four complete visual personalities: density, type weight, corner language, elevation and brand register all change — not just color. Each direction is paired with a small secondary screen (Unit Detail S-3 or the Browse empty state) and shows at least one component state variant (turn-over buffer card, scarcity card, or empty state). Currency is VND, formatted <code>1.150.000 ₫</code>. Light mode only.</p>
+</div>
+
+<!-- ================================================================
+     DIRECTION 01 — MANIFEST (Utilitarian Industrial)
+     ================================================================ -->
+<div class="sec">
+<div class="sec-head">
+<div class="eyebrow">Direction 01</div>
+<h2>Manifest — Utilitarian Industrial</h2>
+<p>An operations-first register borrowed from warehouse signage and shipping manifests. Squared corners, hard 1.5px borders, a safety-orange accent and dense 13px type put throughput and legibility above charm — the whole screen reads like a packing slip a depot manager already trusts. Elevation is expressed as weight of line, never shadow.</p>
+<div class="meta"><span class="mchip">Hero: Browse Units</span><span class="mchip">Secondary: Unit Detail S-3</span><span class="mchip">State: turn-over buffer card (L-3)</span></div>
+</div>
+
+<style>
+/* ===== D1 MANIFEST tokens =====
+   Palette: app-bg #F5F5F4 · surface #FFFFFF · ink #1C1917 · muted #78716C
+            accent #EA580C (safety orange) · line #D6D3D1 · strong-line #1C1917
+            ok #15803D · tape bg #FEF3C7 / tape ink #92400E · photo greys #E8EAED→#9AA3AD
+   Type:    base 13px · status strip 10px mono +0.08em · nav 12px/700 uppercase
+            field label 9.5px/700 uppercase · card code 15px mono/700 · price 15px mono/700
+            availability 11px/600 · buttons 11.5px/800 uppercase
+   Geometry: radius 2px · border 1px #D6D3D1 (2px on primary surfaces) · no soft shadows
+             segmented controls + square badges · tape strip = 100% width note
+=================================================================== */
+.d1{background:#F5F5F4;color:#1C1917;font-size:13px}
+.d1-strip{background:#1C1917;color:#F5F5F4;font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;padding:7px 20px;display:flex;justify-content:space-between}
+.d1-strip b{color:#FB923C;font-weight:700}
+.d1-nav{background:#fff;border-bottom:2px solid #1C1917;display:flex;align-items:center;gap:26px;padding:0 20px;height:56px}
+.d1-logo{display:flex;align-items:center;gap:9px}
+.d1-mark{width:27px;height:27px;background:#EA580C;border-radius:2px;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+.d1-logo span{font-size:14px;font-weight:800;letter-spacing:.10em}
+.d1-links{display:flex;gap:4px;flex:1}
+.d1-links a{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#57534E;text-decoration:none;padding:19px 11px;border-bottom:3px solid transparent;margin-bottom:-2px}
+.d1-links a.on{color:#1C1917;border-bottom-color:#EA580C}
+.d1-bell{position:relative;width:34px;height:34px;border:1px solid #D6D3D1;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#44403C}
+.d1-badge{position:absolute;top:-6px;right:-6px;background:#EA580C;color:#fff;font-size:9px;font-weight:800;border-radius:2px;padding:2px 4px}
+.d1-user{display:flex;align-items:center;gap:8px;border-left:1px solid #D6D3D1;padding-left:16px;margin-left:6px}
+.d1-av{width:30px;height:30px;background:#1C1917;color:#fff;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.d1-user small{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:#78716C;display:block;text-transform:uppercase}
+.d1-user b{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}
+.d1-body{padding:18px 20px 26px}
+.d1-filters{background:#fff;border:1.5px solid #1C1917;display:flex;align-items:stretch}
+.d1-f{padding:11px 14px;border-right:1px solid #D6D3D1;display:flex;flex-direction:column;gap:6px}
+.d1-f:last-child{border-right:0}
+.d1-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#78716C}
+.d1-seg{display:flex;border:1px solid #1C1917}
+.d1-seg span{font-size:11px;font-weight:700;padding:5px 10px;text-transform:uppercase;letter-spacing:.03em;border-right:1px solid #1C1917;color:#57534E}
+.d1-seg span:last-child{border-right:0}
+.d1-seg span.on{background:#1C1917;color:#fff}
+.d1-sizes{display:flex;gap:5px}
+.d1-sizes span{min-width:38px;text-align:center;border:1px solid #D6D3D1;font:600 11px/1 ui-monospace,Menlo,Consolas,monospace;padding:6px 4px;color:#44403C}
+.d1-sizes span.on{border-color:#EA580C;background:#EA580C;color:#fff;font-weight:700}
+.d1-val{font:600 12.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #D6D3D1;padding:7px 10px;color:#1C1917;background:#FAFAF9;min-width:118px;display:flex;justify-content:space-between}
+.d1-val i{font-style:normal;color:#A8A29E}
+.d1-go{margin-left:auto;background:#EA580C;color:#fff;border:0;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:0 26px;cursor:pointer}
+.d1-count{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 12px}
+.d1-count b{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.d1-sort{font:600 11px/1 ui-monospace,Menlo,Consolas,monospace;border:1px solid #D6D3D1;background:#fff;padding:7px 12px;color:#44403C}
+.d1-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.d1-card{background:#fff;border:1px solid #D6D3D1;border-radius:2px}
+.d1-card.note{border:1.5px solid #EA580C}
+.d1-photo{height:104px;position:relative;background:linear-gradient(135deg,#E8EAED 0%,#C3C9D1 55%,#9AA3AD 100%)}
+.d1-photo.out{background:linear-gradient(180deg,#D9C9B2,#C2AB8C),repeating-linear-gradient(180deg,rgba(60,50,35,.14) 0 9px,transparent 9px 21px)}
+.d1-photo.cli{background:linear-gradient(150deg,#DCE9F5,#B3CBE1 60%,#8FB4D6)}
+.d1-codechip{position:absolute;top:8px;left:8px;background:#1C1917;color:#fff;font:700 10px/1 ui-monospace,Menlo,Consolas,monospace;padding:4px 7px;letter-spacing:.06em}
+.d1-tape{background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;border-bottom:1px solid #F3D9A4}
+.d1-cb{padding:11px 12px 12px}
+.d1-crow{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.d1-ucode{font:700 15px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.d1-size{font:700 11px/1 ui-monospace,Menlo,Consolas,monospace;border:1px solid #1C1917;padding:4px 6px}
+.d1-type{font-size:11.5px;color:#78716C;margin-bottom:9px}
+.d1-priceline{display:flex;align-items:baseline;gap:5px;border-top:1px solid #E7E5E4;padding-top:9px}
+.d1-price{font:700 15px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.d1-per{font-size:9.5px;font-weight:700;color:#A8A29E;text-transform:uppercase}
+.d1-avail{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#15803D;margin:7px 0 10px}
+.d1-avail i{width:7px;height:7px;background:#15803D;display:block}
+.d1-avail.warn{color:#92400E}.d1-avail.warn i{background:#D97706}
+.d1-book{display:block;width:100%;background:#1C1917;color:#fff;border:0;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:9px 0;cursor:pointer}
+.d1-card.note .d1-book{background:#fff;color:#1C1917;border:1.5px solid #1C1917}
+/* D1 secondary: spec sheet */
+.d1d{background:#F5F5F4;color:#1C1917;font-size:13px;padding:18px}
+.d1d-head{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1.5px solid #1C1917;padding:12px 14px}
+.d1d-head h4{font:800 16px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em}
+.d1d-stat{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:#1C1917;color:#fff;padding:5px 8px}
+.d1d-photo{height:110px;margin-top:-1.5px;border:1.5px solid #1C1917;border-top:0;background:linear-gradient(180deg,#D9C9B2,#C2AB8C),repeating-linear-gradient(180deg,rgba(60,50,35,.14) 0 10px,transparent 10px 23px);position:relative}
+.d1d-photo span{position:absolute;bottom:8px;right:10px;background:rgba(28,25,23,.85);color:#E7E5E4;font:600 9px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;padding:4px 7px}
+.d1d-spec{background:#fff;border:1.5px solid #1C1917;border-top:0}
+.d1d-spec div{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #E7E5E4;font-size:12px}
+.d1d-spec div:last-child{border-bottom:0}
+.d1d-spec span{color:#78716C;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding-top:2px}
+.d1d-spec b{font:600 12px/1 ui-monospace,Menlo,Consolas,monospace}
+.d1d-price{margin-top:12px;background:#fff;border:1.5px solid #1C1917}
+.d1d-price .row{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #E7E5E4;font:600 12.5px/1 ui-monospace,Menlo,Consolas,monospace}
+.d1d-price .row span{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#78716C;padding-top:1px}
+.d1d-price .tot{background:#1C1917;color:#fff}
+.d1d-price .tot span{color:#A8A29E}
+.d1d-price .tot b{font-size:14px;font-weight:700}
+.d1d-cta{display:block;width:100%;margin-top:12px;background:#EA580C;color:#fff;border:0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:12px 0;cursor:pointer}
+.d1d-fine{font-size:9.5px;color:#A8A29E;margin-top:8px;text-transform:uppercase;letter-spacing:.05em;text-align:center}
+</style>
+
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units</div><div class="cspace"></div></div>
+<div class="d1">
+<div class="d1-strip"><span>SITE: TÂN BÌNH DEPOT · HCMC</span><span>OPEN 24/7 · <b>GATE 2 ACTIVE</b></span><span>LANG: EN / VND</span></div>
+<div class="d1-nav">
+<div class="d1-logo"><div class="d1-mark">SH</div><span>STORAGEHUB</span></div>
+<div class="d1-links"><a class="on" href="#">Browse Units</a><a href="#">My Rentals</a><a href="#">Support</a></div>
+<div class="d1-bell">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+<span class="d1-badge">3</span>
+</div>
+<div class="d1-user"><div class="d1-av">LN</div><div><small>Customer</small><b>Lan</b></div></div>
+</div>
+<div class="d1-body">
+<div class="d1-filters">
+<div class="d1-f"><span class="d1-lbl">Type</span>
+<div class="d1-seg"><span class="on">Indoor</span><span>Outdoor</span><span>Climate</span></div></div>
+<div class="d1-f"><span class="d1-lbl">Size</span>
+<div class="d1-sizes"><span>3m²</span><span class="on">5m²</span><span>8m²</span><span>12m²</span></div></div>
+<div class="d1-f"><span class="d1-lbl">Start date</span><div class="d1-val">OCT 3, 2026 <i>▾</i></div></div>
+<div class="d1-f"><span class="d1-lbl">Duration</span><div class="d1-val">3 MONTHS <i>▾</i></div></div>
+<button class="d1-go" type="button">Search</button>
+</div>
+<div class="d1-count"><b>6 units available</b><span class="d1-sort">SORT: PRICE LOW→HIGH ▾</span></div>
+<div class="d1-grid">
+<div class="d1-card"><div class="d1-photo"><span class="d1-codechip">S-1</span></div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">S-1</span><span class="d1-size">3 m²</span></div>
+<div class="d1-type">Indoor · Ground floor</div>
+<div class="d1-priceline"><span class="d1-price">450.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail"><i></i>AVAILABLE OCT 3</div>
+<button class="d1-book" type="button">Book</button></div></div>
+<div class="d1-card"><div class="d1-photo cli"><span class="d1-codechip">S-3</span></div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">S-3</span><span class="d1-size">5 m²</span></div>
+<div class="d1-type">Indoor · Ground floor</div>
+<div class="d1-priceline"><span class="d1-price">345.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail"><i></i>AVAILABLE OCT 3</div>
+<button class="d1-book" type="button">Book</button></div></div>
+<div class="d1-card"><div class="d1-photo out"><span class="d1-codechip">M-2</span></div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">M-2</span><span class="d1-size">8 m²</span></div>
+<div class="d1-type">Outdoor · Drive-up</div>
+<div class="d1-priceline"><span class="d1-price">720.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail"><i></i>AVAILABLE OCT 3</div>
+<button class="d1-book" type="button">Book</button></div></div>
+<div class="d1-card"><div class="d1-photo out"><span class="d1-codechip">M-5</span></div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">M-5</span><span class="d1-size">8 m²</span></div>
+<div class="d1-type">Climate · Drive-up</div>
+<div class="d1-priceline"><span class="d1-price">890.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail"><i></i>AVAILABLE OCT 3</div>
+<button class="d1-book" type="button">Book</button></div></div>
+<div class="d1-card"><div class="d1-photo out"><span class="d1-codechip">L-1</span></div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">L-1</span><span class="d1-size">12 m²</span></div>
+<div class="d1-type">Outdoor · Drive-up</div>
+<div class="d1-priceline"><span class="d1-price">1.150.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail"><i></i>AVAILABLE OCT 3</div>
+<button class="d1-book" type="button">Book</button></div></div>
+<div class="d1-card note"><div class="d1-photo out"><span class="d1-codechip">L-3</span></div>
+<div class="d1-tape">Available from Oct 5 — cleaning buffer</div><div class="d1-cb">
+<div class="d1-crow"><span class="d1-ucode">L-3</span><span class="d1-size">12 m²</span></div>
+<div class="d1-type">Climate · Drive-up</div>
+<div class="d1-priceline"><span class="d1-price">1.280.000 ₫</span><span class="d1-per">/mo</span></div>
+<div class="d1-avail warn"><i></i>FROM OCT 5 · TURNOVER BUFFER</div>
+<button class="d1-book" type="button">Book</button></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="duo">
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units/S-3</div><div class="cspace"></div></div>
+<div class="d1d">
+<div class="d1d-head"><h4>UNIT S-3</h4><span class="d1d-stat">AVAILABLE OCT 3</span></div>
+<div class="d1d-photo"><span>ROLL-UP DOOR · 2.0 × 2.5 M</span></div>
+<div class="d1d-spec">
+<div><span>Size</span><b>5 m² (2.0 × 2.5 m)</b></div>
+<div><span>Type</span><b>INDOOR</b></div>
+<div><span>Floor</span><b>GROUND</b></div>
+<div><span>Access</span><b>24/7 PIN</b></div>
+<div><span>Security</span><b>CCTV + GOODS LIFT</b></div>
+</div>
+<div class="d1d-price">
+<div class="row"><span>Rent 345.000 ₫/mo × 3</span><b>1.035.000 ₫</b></div>
+<div class="row"><span>Deposit (10%)</span><b>103.500 ₫</b></div>
+<div class="row tot"><span>Total</span><b>1.035.000 ₫</b></div>
+</div>
+<button class="d1d-cta" type="button">Reserve Unit</button>
+<div class="d1d-fine">Deposit 103.500 ₫ due at reservation · refundable</div>
+</div>
+</div>
+<div class="notes">
+<h3>Direction 01 — at a glance</h3>
+<ul>
+<li><b>Register:</b> utilitarian-industrial / depot software. Trust through density and precision, not delight.</li>
+<li><b>Corner language:</b> 2px radius everywhere; square badges and avatar; borders over shadows (2px ink on primary panels).</li>
+<li><b>Type:</b> mono for every number, code and code-like token (S-1, prices, dates); 9.5–10px uppercase letterspaced labels.</li>
+<li><b>States shown:</b> turn-over buffer card L-3 (tape strip + amber availability); Unit Detail spec-sheet secondary.</li>
+<li><b>Signature:</b> ink status ticker above the nav; safety-orange reserved strictly for action + alert.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- ================================================================
+     DIRECTION 02 — STOREFRONT (Friendly Consumer)
+     ================================================================ -->
+<div class="sec">
+<div class="sec-head">
+<div class="eyebrow">Direction 02</div>
+<h2>Storefront — Friendly Consumer</h2>
+<p>A warm, consumer-marketplace register that makes renting a lockable unit feel like booking a homestay. Generous 16–18px radii, soft layered shadows, a coral primary and sage secondary lower the stakes for first-time self-storage users. Type is larger and rounder in feel, with friendly microcopy throughout.</p>
+<div class="meta"><span class="mchip">Hero: Browse Units</span><span class="mchip">Secondary: Empty state variant</span><span class="mchip">State: scarcity card (M-5, Only 1 left)</span></div>
+</div>
+
+<style>
+/* ===== D2 STOREFRONT tokens =====
+   Palette: app-bg #FAF6F0 · surface #FFFFFF · ink #2D2A26 · muted #8A8378
+            primary #E85D3D (coral) · primary-ink #C94425 · sage #2F9B84 / tint #E4F3EE
+            line #F0E9E0 · badge coral pill · photo gradients warm
+   Type:    base 14px · nav 14px/600 · headline 22px/800 · field label 10.5px/700 uppercase
+            card title 16px/700 · price 17px/800 · availability 12.5px · button 13.5px/700
+   Geometry: radius 18px cards · 12px inputs · 999px pills/buttons
+            soft shadows 0 6px 18px rgba(232,93,61,.10) / 0 2px 8px rgba(45,42,38,.06)
+=================================================================== */
+.d2{background:#FAF6F0;color:#2D2A26;font-size:14px}
+.d2-nav{background:#fff;border-bottom:1px solid #F0E9E0;display:flex;align-items:center;gap:22px;padding:12px 26px}
+.d2-logo{display:flex;align-items:center;gap:9px}
+.d2-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#F0785A,#E85D3D);display:flex;align-items:center;justify-content:center;color:#fff}
+.d2-logo b{font-size:17.5px;font-weight:800;letter-spacing:-.01em}
+.d2-links{display:flex;gap:4px;flex:1}
+.d2-links a{font-size:14px;font-weight:600;color:#8A8378;text-decoration:none;padding:8px 14px;border-radius:999px}
+.d2-links a.on{color:#C94425;background:#FDEDE8}
+.d2-bell{position:relative;width:38px;height:38px;border-radius:999px;background:#F7F2EA;display:flex;align-items:center;justify-content:center;color:#6B645B}
+.d2-badge{position:absolute;top:-2px;right:-2px;background:#E85D3D;color:#fff;border:2px solid #fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 5px;line-height:1}
+.d2-av{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,#F2C14E,#E85D3D);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-left:8px}
+.d2-body{padding:26px 26px 32px}
+.d2-hero{margin-bottom:18px}
+.d2-hero h3{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.d2-hero p{font-size:13.5px;color:#8A8378;margin-top:4px}
+.d2-hero p b{color:#2F9B84;font-weight:700}
+.d2-filters{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(45,42,38,.06),0 12px 28px rgba(232,93,61,.07);padding:14px 16px;display:flex;gap:12px;align-items:flex-end}
+.d2-f{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.d2-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#B0A89C;padding-left:4px}
+.d2-in{background:#FAF6F0;border:1px solid #F0E9E0;border-radius:12px;padding:10px 12px;font-size:13.5px;font-weight:600;color:#2D2A26;display:flex;justify-content:space-between;align-items:center}
+.d2-in i{font-style:normal;color:#B0A89C;font-size:11px}
+.d2-chips{display:flex;gap:6px;flex-wrap:wrap}
+.d2-chips span{border:1px solid #F0E9E0;background:#fff;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:#8A8378}
+.d2-chips span.on{background:#2D2A26;color:#fff;border-color:#2D2A26}
+.d2-go{background:#E85D3D;color:#fff;border:0;border-radius:999px;font-size:13.5px;font-weight:700;padding:12px 26px;cursor:pointer;box-shadow:0 6px 18px rgba(232,93,61,.35)}
+.d2-count{display:flex;justify-content:space-between;align-items:center;margin:22px 4px 14px}
+.d2-count b{font-size:15.5px;font-weight:800}
+.d2-sort{background:#fff;border:1px solid #F0E9E0;border-radius:999px;padding:9px 16px;font-size:12.5px;font-weight:600;color:#6B645B}
+.d2-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.d2-card{background:#fff;border-radius:18px;box-shadow:0 2px 8px rgba(45,42,38,.05),0 10px 24px rgba(232,93,61,.08);overflow:hidden}
+.d2-photo{height:126px;position:relative;background:linear-gradient(135deg,#F3E9DC,#DDC9AE)}
+.d2-photo.cli{background:linear-gradient(150deg,#E3F0F7,#BAD7E6)}
+.d2-photo.ind{background:linear-gradient(140deg,#EFF0EC,#D8DBD2)}
+.d2-tag{position:absolute;top:10px;left:10px;background:#E85D3D;color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:5px 11px;box-shadow:0 4px 10px rgba(232,93,61,.4)}
+.d2-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:999px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;color:#C94425}
+.d2-cb{padding:14px 16px 16px}
+.d2-crow{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.d2-ucode{font-size:16px;font-weight:800}
+.d2-size{background:#E4F3EE;color:#1F7A66;font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 10px}
+.d2-meta{font-size:12.5px;color:#8A8378;margin-bottom:12px}
+.d2-priceline{display:flex;align-items:baseline;gap:5px}
+.d2-price{font-size:17px;font-weight:800;letter-spacing:-.01em}
+.d2-per{font-size:12px;color:#B0A89C;font-weight:600}
+.d2-avail{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#2F9B84;margin:8px 0 13px}
+.d2-avail i{width:8px;height:8px;border-radius:999px;background:#2F9B84;display:block}
+.d2-avail.hot{color:#C94425}.d2-avail.hot i{background:#E85D3D}
+.d2-book{display:block;width:100%;background:#E85D3D;color:#fff;border:0;border-radius:999px;font-size:13.5px;font-weight:700;padding:11px 0;cursor:pointer}
+/* D2 secondary: empty state */
+.d2e{background:#FAF6F0;color:#2D2A26;font-size:14px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:330px}
+.d2e-box{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(45,42,38,.05),0 14px 30px rgba(232,93,61,.08);padding:34px 36px;text-align:center;max-width:360px}
+.d2e-ic{width:64px;height:64px;border-radius:999px;background:#FDEDE8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#E85D3D}
+.d2e-box h4{font-size:17px;font-weight:800;margin-bottom:6px}
+.d2e-box p{font-size:13px;color:#8A8378;line-height:1.55;margin-bottom:16px}
+.d2e-chips{display:flex;gap:6px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.d2e-chips span{background:#FAF6F0;border:1px solid #F0E9E0;color:#8A8378;font-size:11.5px;font-weight:600;border-radius:999px;padding:5px 11px}
+.d2e-clear{display:inline-block;background:#fff;color:#2D2A26;border:1.5px solid #2D2A26;border-radius:999px;font-size:13px;font-weight:700;padding:10px 24px;cursor:pointer}
+</style>
+
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units</div><div class="cspace"></div></div>
+<div class="d2">
+<div class="d2-nav">
+<div class="d2-logo">
+<div class="d2-mark"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></div>
+<b>StorageHub</b></div>
+<div class="d2-links"><a class="on" href="#">Browse Units</a><a href="#">My Rentals</a><a href="#">Support</a></div>
+<div class="d2-bell">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+<span class="d2-badge">3</span></div>
+<div class="d2-av">Lan</div>
+</div>
+<div class="d2-body">
+<div class="d2-hero">
+<h3>Find a space that fits</h3>
+<p>Tân Bình Depot, HCMC · <b>6 units ready</b> for an Oct 3 start</p>
+</div>
+<div class="d2-filters">
+<div class="d2-f"><span class="d2-lbl">Type</span><div class="d2-in">Indoor <i>▾</i></div></div>
+<div class="d2-f"><span class="d2-lbl">Size</span><div class="d2-in">5 m² <i>▾</i></div></div>
+<div class="d2-f"><span class="d2-lbl">Start date</span><div class="d2-in">Oct 3, 2026 <i>▾</i></div></div>
+<div class="d2-f"><span class="d2-lbl">Duration</span><div class="d2-in">3 months <i>▾</i></div></div>
+<button class="d2-go" type="button">Search</button>
+</div>
+<div class="d2-count"><b>6 units available</b><span class="d2-sort">Sort: Price low to high ▾</span></div>
+<div class="d2-grid">
+<div class="d2-card"><div class="d2-photo ind"></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit S-1</span><span class="d2-size">3 m²</span></div>
+<div class="d2-meta">Indoor · Ground floor</div>
+<div class="d2-priceline"><span class="d2-price">450.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail"><i></i>Available Oct 3</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+<div class="d2-card"><div class="d2-photo cli"></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit S-3</span><span class="d2-size">5 m²</span></div>
+<div class="d2-meta">Indoor · Ground floor</div>
+<div class="d2-priceline"><span class="d2-price">345.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail"><i></i>Available Oct 3</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+<div class="d2-card"><div class="d2-photo"></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit M-2</span><span class="d2-size">8 m²</span></div>
+<div class="d2-meta">Outdoor · Drive-up</div>
+<div class="d2-priceline"><span class="d2-price">720.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail"><i></i>Available Oct 3</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+<div class="d2-card"><div class="d2-photo cli"><span class="d2-tag">Only 1 left</span><div class="d2-fav"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit M-5</span><span class="d2-size">8 m²</span></div>
+<div class="d2-meta">Climate · Drive-up</div>
+<div class="d2-priceline"><span class="d2-price">890.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail hot"><i></i>Available Oct 3 · 1 left at this price</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+<div class="d2-card"><div class="d2-photo"></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit L-1</span><span class="d2-size">12 m²</span></div>
+<div class="d2-meta">Outdoor · Drive-up</div>
+<div class="d2-priceline"><span class="d2-price">1.150.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail"><i></i>Available Oct 3</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+<div class="d2-card"><div class="d2-photo cli"></div><div class="d2-cb">
+<div class="d2-crow"><span class="d2-ucode">Unit L-3</span><span class="d2-size">12 m²</span></div>
+<div class="d2-meta">Climate · Drive-up</div>
+<div class="d2-priceline"><span class="d2-price">1.280.000 ₫</span><span class="d2-per">/mo</span></div>
+<div class="d2-avail"><i></i>Available Oct 3</div>
+<button class="d2-book" type="button">Book now</button></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="duo">
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units (no results)</div><div class="cspace"></div></div>
+<div class="d2e">
+<div class="d2e-box">
+<div class="d2e-ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></div>
+<h4>No units match your filters</h4>
+<p>That combo is fully booked for Oct 3. Try a later start date or the next size up — new units open weekly.</p>
+<div class="d2e-chips"><span>Climate</span><span>3 m²</span><span>Oct 3, 2026</span><span>3 months</span></div>
+<button class="d2e-clear" type="button">Clear filters</button>
+</div>
+</div>
+</div>
+<div class="notes">
+<h3>Direction 02 — at a glance</h3>
+<ul>
+<li><b>Register:</b> friendly consumer marketplace (homestay-booking energy) for first-time renters.</li>
+<li><b>Corner language:</b> 18px card radii, 999px pills for buttons/chips; soft double-layer coral-tinted shadows.</li>
+<li><b>Type:</b> larger and warmer — 22px/800 headline, 16px card titles, 17px/800 prices; conversational microcopy ("That combo is fully booked").</li>
+<li><b>States shown:</b> scarcity card M-5 (coral "Only 1 left" tag + hot availability line); empty-state secondary with ghost pill CTA.</li>
+<li><b>Signature:</b> warm cream canvas, sage for positive/availability, coral strictly for action + urgency.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- ================================================================
+     DIRECTION 03 — LEDGER (Premium Editorial)
+     ================================================================ -->
+<div class="sec">
+<div class="sec-head">
+<div class="eyebrow">Direction 03</div>
+<h2>Ledger — Premium Editorial</h2>
+<p>A quiet, contract-like register: serif display type, hairline rules, a single brass accent and a lot of air position StorageHub as the premium, trustworthy option in the market. Prices are set like fine print on an invoice — large serif numerals, everything else steps back. Zero border-radius, zero shadow; hierarchy is carried entirely by rule, weight and whitespace.</p>
+<div class="meta"><span class="mchip">Hero: Browse Units</span><span class="mchip">Secondary: Unit Detail S-3</span><span class="mchip">State: turn-over buffer note (L-3)</span></div>
+</div>
+
+<style>
+/* ===== D3 LEDGER tokens =====
+   Palette: app-bg #FBFAF7 · surface #FFFFFF · ink #14120F · muted #8C857A
+            brass #8C6D3F / brass-tint #F2EBDD · hairline #E7E2D9 · ok #4A7C59
+            photo tones desaturated (paper-warm greys)
+   Type:    sans labels 10px/700 uppercase +0.14em · body 13.5px sans
+            serif display 28px (Georgia) · card code serif 18px · price serif 19px
+            note italic serif 12.5px · button 11px/700 uppercase +0.12em
+   Geometry: radius 0 everywhere · hairline 1px borders · no shadows
+            rules above/below result rows · brass 2px top rule marks the variant card
+=================================================================== */
+.d3{background:#FBFAF7;color:#14120F;font-size:13.5px}
+.d3-nav{background:#FBFAF7;border-bottom:1px solid #E7E2D9;display:flex;align-items:center;gap:34px;padding:18px 34px}
+.d3-logo{display:flex;align-items:center;gap:10px}
+.d3-mark{width:9px;height:26px;background:#8C6D3F}
+.d3-logo b{font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:400;letter-spacing:.01em}
+.d3-links{display:flex;gap:24px;flex:1}
+.d3-links a{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#8C857A;text-decoration:none;padding-bottom:3px;border-bottom:1px solid transparent}
+.d3-links a.on{color:#14120F;border-bottom-color:#8C6D3F}
+.d3-bell{color:#14120F;position:relative}
+.d3-badge{position:absolute;top:-7px;right:-9px;background:#8C6D3F;color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:1px 5px}
+.d3-av{width:30px;height:30px;border:1px solid #14120F;border-radius:999px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:13px;margin-left:10px}
+.d3-body{padding:34px 34px 40px}
+.d3-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8C6D3F;margin-bottom:8px}
+.d3-body h3{font-family:Georgia,"Times New Roman",serif;font-size:28px;font-weight:400;letter-spacing:.005em}
+.d3-filters{display:flex;align-items:flex-end;gap:0;border-top:1px solid #E7E2D9;border-bottom:1px solid #E7E2D9;margin:24px 0 0}
+.d3-f{padding:12px 26px 14px 0;margin-right:26px;border-right:1px solid #E7E2D9;display:flex;flex-direction:column;gap:7px}
+.d3-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#8C857A}
+.d3-val{font-family:Georgia,"Times New Roman",serif;font-size:15px;color:#14120F;display:flex;align-items:center;gap:8px}
+.d3-val i{font-style:normal;font-size:10px;color:#B3AB9D}
+.d3-go{margin-left:auto;background:0;color:#14120F;border:0;border-bottom:1px solid #8C6D3F;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:10px 2px 4px;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.d3-count{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 20px;padding:12px 2px;border-top:1px solid #14120F;border-bottom:1px solid #E7E2D9}
+.d3-count b{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.16em}
+.d3-count b em{font-style:normal;color:#8C6D3F}
+.d3-sort{font-family:Georgia,serif;font-size:13.5px;color:#8C857A}
+.d3-sort u{text-decoration-color:#8C6D3F;text-underline-offset:4px;color:#14120F}
+.d3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.d3-card{background:#fff;border:1px solid #E7E2D9}
+.d3-card.note{border-top:2px solid #8C6D3F}
+.d3-photo{height:118px;position:relative;background:linear-gradient(160deg,#EFEBE2,#D9D2C4)}
+.d3-photo.cli{background:linear-gradient(155deg,#E9EAE4,#CDCFC6)}
+.d3-photo.out{background:linear-gradient(170deg,#E7DDCB,#CDBFA6)}
+.d3-ucodechip{position:absolute;left:0;bottom:14px;background:#FBFAF7;padding:5px 12px;font-family:Georgia,serif;font-size:13px;letter-spacing:.03em}
+.d3-cb{padding:16px 18px 18px}
+.d3-crow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.d3-ucode{font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:400}
+.d3-size{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#8C6D3F}
+.d3-meta{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#8C857A;padding-bottom:12px;border-bottom:1px solid #E7E2D9;margin-bottom:12px}
+.d3-priceline{display:flex;align-items:baseline;gap:7px}
+.d3-price{font-family:Georgia,"Times New Roman",serif;font-size:19px}
+.d3-per{font-size:10.5px;color:#B3AB9D}
+.d3-avail{font-size:12px;color:#4A7C59;margin:7px 0 14px}
+.d3-avail:before{content:"— ";color:#8C6D3F}
+.d3-avail.buf{color:#8C6D3F;font-style:italic;font-family:Georgia,serif;font-size:12.5px}
+.d3-book{display:block;width:100%;background:#fff;color:#14120F;border:1px solid #14120F;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;padding:11px 0;cursor:pointer}
+.d3-book:hover{background:#14120F;color:#fff}
+/* D3 secondary: contract-style detail */
+.d3d{background:#FBFAF7;color:#14120F;font-size:13.5px;padding:26px}
+.d3d h4{font-family:Georgia,"Times New Roman",serif;font-size:24px;font-weight:400}
+.d3d .sub{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:#8C857A;margin:6px 0 16px}
+.d3d-photo{height:104px;background:linear-gradient(155deg,#E9EAE4,#CDCFC6);margin-bottom:16px}
+.d3d-spec div{display:flex;align-items:baseline;font-size:13px;padding:7px 0}
+.d3d-spec span{color:#8C857A}
+.d3d-spec i{flex:1;border-bottom:1px dotted #C9C2B4;margin:0 9px;transform:translateY(-3px)}
+.d3d-spec b{font-family:Georgia,serif;font-weight:400}
+.d3d-price{border-top:1px solid #14120F;margin-top:14px;padding-top:6px}
+.d3d-price div{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid #E7E2D9}
+.d3d-price span{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8C857A}
+.d3d-price b{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:15px}
+.d3d-price .tot b{font-size:19px}
+.d3d-price .dep b{color:#8C6D3F}
+.d3d-cta{display:block;width:100%;background:#14120F;color:#FBFAF7;border:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;padding:13px 0;margin-top:18px;cursor:pointer}
+.d3d-fine{font-family:Georgia,serif;font-style:italic;font-size:11.5px;color:#8C857A;text-align:center;margin-top:10px}
+</style>
+
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units</div><div class="cspace"></div></div>
+<div class="d3">
+<div class="d3-nav">
+<div class="d3-logo"><div class="d3-mark"></div><b>StorageHub</b></div>
+<div class="d3-links"><a class="on" href="#">Browse Units</a><a href="#">My Rentals</a><a href="#">Support</a></div>
+<div class="d3-bell">
+<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+<span class="d3-badge">3</span></div>
+<div class="d3-av">L</div>
+</div>
+<div class="d3-body">
+<div class="d3-eyebrow">Tân Bình Depot · Ho Chi Minh City</div>
+<h3>Browse units</h3>
+<div class="d3-filters">
+<div class="d3-f"><span class="d3-lbl">Type</span><div class="d3-val">Indoor <i>▾</i></div></div>
+<div class="d3-f"><span class="d3-lbl">Size</span><div class="d3-val">5 m² <i>▾</i></div></div>
+<div class="d3-f"><span class="d3-lbl">Start date</span><div class="d3-val">Oct 3, 2026 <i>▾</i></div></div>
+<div class="d3-f"><span class="d3-lbl">Duration</span><div class="d3-val">3 months <i>▾</i></div></div>
+<button class="d3-go" type="button">Search →</button>
+</div>
+<div class="d3-count"><b><em>6</em> units available</b><span class="d3-sort">Sort — <u>Price, low to high</u></span></div>
+<div class="d3-grid">
+<div class="d3-card"><div class="d3-photo"><span class="d3-ucodechip">S-1</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">S-1</span><span class="d3-size">3 m² · Indoor</span></div>
+<div class="d3-meta">Ground floor · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">450.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail">Available Oct 3</div>
+<button class="d3-book" type="button">Book</button></div></div>
+<div class="d3-card"><div class="d3-photo cli"><span class="d3-ucodechip">S-3</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">S-3</span><span class="d3-size">5 m² · Indoor</span></div>
+<div class="d3-meta">Ground floor · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">345.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail">Available Oct 3</div>
+<button class="d3-book" type="button">Book</button></div></div>
+<div class="d3-card"><div class="d3-photo out"><span class="d3-ucodechip">M-2</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">M-2</span><span class="d3-size">8 m² · Outdoor</span></div>
+<div class="d3-meta">Drive-up · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">720.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail">Available Oct 3</div>
+<button class="d3-book" type="button">Book</button></div></div>
+<div class="d3-card"><div class="d3-photo cli"><span class="d3-ucodechip">M-5</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">M-5</span><span class="d3-size">8 m² · Climate</span></div>
+<div class="d3-meta">Drive-up · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">890.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail">Available Oct 3</div>
+<button class="d3-book" type="button">Book</button></div></div>
+<div class="d3-card"><div class="d3-photo out"><span class="d3-ucodechip">L-1</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">L-1</span><span class="d3-size">12 m² · Outdoor</span></div>
+<div class="d3-meta">Drive-up · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">1.150.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail">Available Oct 3</div>
+<button class="d3-book" type="button">Book</button></div></div>
+<div class="d3-card note"><div class="d3-photo out"><span class="d3-ucodechip">L-3</span></div><div class="d3-cb">
+<div class="d3-crow"><span class="d3-ucode">L-3</span><span class="d3-size">12 m² · Climate</span></div>
+<div class="d3-meta">Drive-up · 24/7 access</div>
+<div class="d3-priceline"><span class="d3-price">1.280.000 ₫</span><span class="d3-per">/ month</span></div>
+<div class="d3-avail buf">Available from Oct 5 — cleaning buffer between tenancies.</div>
+<button class="d3-book" type="button">Book</button></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="duo">
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units/S-3</div><div class="cspace"></div></div>
+<div class="d3d">
+<h4>Unit S-3</h4>
+<div class="sub">5 m² · Indoor · Ground floor</div>
+<div class="d3d-photo"></div>
+<div class="d3d-spec">
+<div><span>Dimensions</span><i></i><b>2.0 × 2.5 m</b></div>
+<div><span>Access</span><i></i><b>24/7, PIN code</b></div>
+<div><span>Security</span><i></i><b>CCTV, goods lift</b></div>
+<div><span>Term</span><i></i><b>3 months from Oct 3</b></div>
+</div>
+<div class="d3d-price">
+<div><span>Rent total</span><b>1.035.000 ₫</b></div>
+<div class="dep"><span>Deposit (10%)</span><b>103.500 ₫</b></div>
+<div class="tot"><span>Total</span><b>1.035.000 ₫</b></div>
+</div>
+<button class="d3d-cta" type="button">Reserve Unit</button>
+<div class="d3d-fine">Deposit of 103.500 ₫ is refunded at move-out, less damages.</div>
+</div>
+</div>
+<div class="notes">
+<h3>Direction 03 — at a glance</h3>
+<ul>
+<li><b>Register:</b> premium editorial / fine-print contract. Positions storage as a considered purchase, not a commodity.</li>
+<li><b>Corner language:</b> radius 0 on every surface; hairline #E7E2D9 rules replace shadows; brass 2px rule marks the variant card.</li>
+<li><b>Type:</b> Georgia serif for display, codes and all prices (19px numerals); 10px uppercase letterspaced sans labels at +0.14em.</li>
+<li><b>States shown:</b> L-3 turn-over buffer as an italic serif note with brass top rule; Unit Detail rendered as a dotted-leader contract sheet.</li>
+<li><b>Signature:</b> "Search →" as an underlined text action instead of a filled button; count row ruled top-and-bottom like a ledger header.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- ================================================================
+     DIRECTION 04 — CONTROL ROOM (Technical SaaS / Fintech precision)
+     ================================================================ -->
+<div class="sec">
+<div class="sec-head">
+<div class="eyebrow">Direction 04</div>
+<h2>Control Room — Technical SaaS</h2>
+<p>A cool, data-forward register in the Stripe/Linear lineage: slate surfaces, one indigo accent, an unbending 8px grid, tabular numerals and status semantics (green/amber dots, left-edge state bars) on every card. It treats browsing units as a comparison task and gives the user instrument-panel confidence in availability and pricing.</p>
+<div class="meta"><span class="mchip">Hero: Browse Units</span><span class="mchip">Secondary: Empty state variant</span><span class="mchip">State: buffer card (L-3, amber status)</span></div>
+</div>
+
+<style>
+/* ===== D4 CONTROL ROOM tokens =====
+   Palette: app-bg #F4F6F9 · surface #FFFFFF · ink #0F172A · muted #64748B
+            primary #4F46E5 · primary-tint #EEF2FF · border #E2E8F0
+            ok #059669 / tint #ECFDF5 · warn #B45309 / tint #FFFBEB / bar #F59E0B
+            photo gradients cool slate-blue
+   Type:    base 13px · nav 13px/500 · field label 10.5px/600 slate-500
+            card code 13px mono/600 · price 15px/600 tabular-nums · meta 11.5px
+            button 13px/600
+   Geometry: radius 8px on every surface · border #E2E8F0 + shadow 0 1px 2px rgba(15,23,42,.05)
+            3px left status bar inset on cards · chips instead of badges where possible
+=================================================================== */
+.d4{background:#F4F6F9;color:#0F172A;font-size:13px}
+.d4-nav{background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:24px;padding:0 24px;height:54px}
+.d4-logo{display:flex;align-items:center;gap:9px}
+.d4-mark{width:28px;height:28px;border-radius:8px;background:#4F46E5;display:flex;align-items:center;justify-content:center;color:#fff}
+.d4-logo b{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.d4-links{display:flex;gap:2px;flex:1}
+.d4-links a{font-size:13px;font-weight:500;color:#64748B;text-decoration:none;padding:17px 12px;border-bottom:2px solid transparent}
+.d4-links a.on{color:#4F46E5;border-bottom-color:#4F46E5}
+.d4-role{font-size:10.5px;font-weight:600;color:#4F46E5;background:#EEF2FF;border:1px solid #E0E7FF;border-radius:6px;padding:3px 8px;margin-right:4px}
+.d4-bell{position:relative;width:34px;height:34px;border-radius:8px;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;color:#334155;background:#fff}
+.d4-badge{position:absolute;top:-5px;right:-5px;background:#DC2626;color:#fff;font-size:9.5px;font-weight:700;border-radius:999px;border:2px solid #fff;padding:1px 5px;line-height:1}
+.d4-av{width:30px;height:30px;border-radius:8px;background:#EEF2FF;color:#4F46E5;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:6px}
+.d4-body{padding:18px 24px 28px}
+.d4-filters{background:#fff;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 1px 2px rgba(15,23,42,.05);padding:12px 14px;display:flex;gap:12px;align-items:flex-end}
+.d4-f{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.d4-lbl{font-size:10.5px;font-weight:600;color:#64748B}
+.d4-in{border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:500;color:#0F172A;background:#fff;display:flex;justify-content:space-between;align-items:center}
+.d4-in i{font-style:normal;color:#94A3B8;font-size:10px}
+.d4-go{background:#4F46E5;color:#fff;border:0;border-radius:8px;font-size:13px;font-weight:600;padding:10px 24px;cursor:pointer;box-shadow:0 1px 2px rgba(79,70,229,.35)}
+.d4-count{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 12px}
+.d4-count b{font-size:13px;font-weight:600;color:#334155}
+.d4-count b em{font-style:normal;color:#059669;background:#ECFDF5;border:1px solid #D1FAE5;border-radius:6px;padding:2px 8px;margin-left:8px;font-size:11.5px;font-weight:600}
+.d4-sort{border:1px solid #E2E8F0;border-radius:8px;background:#fff;padding:8px 12px;font-size:12px;font-weight:500;color:#334155}
+.d4-sort b{font-weight:600;color:#0F172A}
+.d4-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.d4-card{background:#fff;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 1px 2px rgba(15,23,42,.05);overflow:hidden;position:relative}
+.d4-bar{position:absolute;left:0;top:0;bottom:0;width:3px;background:#059669;z-index:2}
+.d4-card.buf .d4-bar{background:#F59E0B}
+.d4-photo{height:116px;position:relative;background:linear-gradient(150deg,#E9EEF5,#C6D2E2 70%,#AFBFD6)}
+.d4-photo.out{background:linear-gradient(160deg,#E4E2DC,#C8C4BA 70%,#B2ADA0)}
+.d4-codechip{position:absolute;bottom:8px;left:11px;background:rgba(15,23,42,.72);color:#fff;font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:4px 8px;border-radius:6px;letter-spacing:.04em}
+.d4-cb{padding:12px 14px 14px}
+.d4-crow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.d4-ucode{font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.02em}
+.d4-chips{display:flex;gap:5px}
+.d4-chip{font-size:10.5px;font-weight:600;border-radius:6px;padding:3px 7px;background:#F1F5F9;color:#475569}
+.d4-chip.sz{background:#F1F5F9;color:#334155}
+.d4-chip.tp{background:#EEF2FF;color:#4F46E5}
+.d4-feats{font-size:11.5px;color:#94A3B8;margin-bottom:10px}
+.d4-priceline{display:flex;align-items:baseline;gap:4px;border-top:1px solid #F1F5F9;padding-top:10px;font-variant-numeric:tabular-nums}
+.d4-price{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.d4-per{font-size:11px;color:#94A3B8;font-weight:500}
+.d4-avail{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#059669;margin:7px 0 12px;font-variant-numeric:tabular-nums}
+.d4-avail i{width:7px;height:7px;border-radius:999px;background:#059669;display:block}
+.d4-avail.warn{color:#B45309}.d4-avail.warn i{background:#F59E0B}
+.d4-book{display:block;width:100%;background:#4F46E5;color:#fff;border:0;border-radius:8px;font-size:13px;font-weight:600;padding:9px 0;cursor:pointer}
+.d4-card.buf .d4-book{background:#fff;color:#4F46E5;border:1px solid #C7D2FE}
+/* D4 secondary: empty state */
+.d4e{background:#F4F6F9;color:#0F172A;font-size:13px;padding:26px;display:flex;align-items:center;justify-content:center;min-height:330px}
+.d4e-box{background:#fff;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 1px 2px rgba(15,23,42,.05);padding:30px 32px;text-align:center;max-width:370px}
+.d4e-ic{width:56px;height:56px;border-radius:8px;background:#F1F5F9;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:#64748B}
+.d4e-box h4{font-size:14.5px;font-weight:600;margin-bottom:5px}
+.d4e-box p{font-size:12.5px;color:#64748B;line-height:1.55;margin-bottom:14px}
+.d4e-chips{display:flex;gap:6px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.d4e-chips span{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:4px 9px;font:500 11px/1.2 ui-monospace,Menlo,Consolas,monospace;color:#475569}
+.d4e-clear{display:inline-block;background:#fff;color:#334155;border:1px solid #CBD5E1;border-radius:8px;font-size:12.5px;font-weight:600;padding:9px 20px;cursor:pointer}
+</style>
+
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units?type=indoor&size=5</div><div class="cspace"></div></div>
+<div class="d4">
+<div class="d4-nav">
+<div class="d4-logo">
+<div class="d4-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg></div>
+<b>StorageHub</b></div>
+<div class="d4-links"><a class="on" href="#">Browse Units</a><a href="#">My Rentals</a><a href="#">Support</a></div>
+<span class="d4-role">Customer</span>
+<div class="d4-bell">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+<span class="d4-badge">3</span></div>
+<div class="d4-av">L</div>
+</div>
+<div class="d4-body">
+<div class="d4-filters">
+<div class="d4-f"><span class="d4-lbl">Type</span><div class="d4-in">Indoor <i>▾</i></div></div>
+<div class="d4-f"><span class="d4-lbl">Size</span><div class="d4-in">5 m² <i>▾</i></div></div>
+<div class="d4-f"><span class="d4-lbl">Start date</span><div class="d4-in">Oct 3, 2026 <i>▾</i></div></div>
+<div class="d4-f"><span class="d4-lbl">Duration</span><div class="d4-in">3 months <i>▾</i></div></div>
+<button class="d4-go" type="button">Search</button>
+</div>
+<div class="d4-count"><b>6 units available<em>live</em></b><span class="d4-sort">Sort: <b>Price · low to high</b> ▾</span></div>
+<div class="d4-grid">
+<div class="d4-card"><span class="d4-bar"></span><div class="d4-photo"><span class="d4-codechip">S-1</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">S-1</span><span class="d4-chips"><span class="d4-chip sz">3 m²</span><span class="d4-chip tp">Indoor</span></span></div>
+<div class="d4-feats">Ground floor · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">450.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail"><i></i>Available Oct 3</div>
+<button class="d4-book" type="button">Book</button></div></div>
+<div class="d4-card"><span class="d4-bar"></span><div class="d4-photo"><span class="d4-codechip">S-3</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">S-3</span><span class="d4-chips"><span class="d4-chip sz">5 m²</span><span class="d4-chip tp">Indoor</span></span></div>
+<div class="d4-feats">Ground floor · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">345.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail"><i></i>Available Oct 3</div>
+<button class="d4-book" type="button">Book</button></div></div>
+<div class="d4-card"><span class="d4-bar"></span><div class="d4-photo out"><span class="d4-codechip">M-2</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">M-2</span><span class="d4-chips"><span class="d4-chip sz">8 m²</span><span class="d4-chip tp">Outdoor</span></span></div>
+<div class="d4-feats">Drive-up · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">720.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail"><i></i>Available Oct 3</div>
+<button class="d4-book" type="button">Book</button></div></div>
+<div class="d4-card"><span class="d4-bar"></span><div class="d4-photo out"><span class="d4-codechip">M-5</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">M-5</span><span class="d4-chips"><span class="d4-chip sz">8 m²</span><span class="d4-chip tp">Climate</span></span></div>
+<div class="d4-feats">Drive-up · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">890.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail"><i></i>Available Oct 3</div>
+<button class="d4-book" type="button">Book</button></div></div>
+<div class="d4-card"><span class="d4-bar"></span><div class="d4-photo out"><span class="d4-codechip">L-1</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">L-1</span><span class="d4-chips"><span class="d4-chip sz">12 m²</span><span class="d4-chip tp">Outdoor</span></span></div>
+<div class="d4-feats">Drive-up · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">1.150.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail"><i></i>Available Oct 3</div>
+<button class="d4-book" type="button">Book</button></div></div>
+<div class="d4-card buf"><span class="d4-bar"></span><div class="d4-photo out"><span class="d4-codechip">L-3</span></div><div class="d4-cb">
+<div class="d4-crow"><span class="d4-ucode">L-3</span><span class="d4-chips"><span class="d4-chip sz">12 m²</span><span class="d4-chip tp">Climate</span></span></div>
+<div class="d4-feats">Drive-up · 24/7 · CCTV</div>
+<div class="d4-priceline"><span class="d4-price">1.280.000 ₫</span><span class="d4-per">/mo</span></div>
+<div class="d4-avail warn"><i></i>Available Oct 5 · cleaning buffer</div>
+<button class="d4-book" type="button">Book</button></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="duo">
+<div class="frame">
+<div class="chrome"><div class="cdots"><i></i><i></i><i></i></div><div class="curl">app.storagehub.vn/units (0 results)</div><div class="cspace"></div></div>
+<div class="d4e">
+<div class="d4e-box">
+<div class="d4e-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg></div>
+<h4>No units match your filters</h4>
+<p>0 of 42 units at Tân Bình Depot meet all four criteria. Widen one filter to see results.</p>
+<div class="d4e-chips"><span>type=climate</span><span>size=3m²</span><span>start=2026-10-03</span><span>term=3mo</span></div>
+<button class="d4e-clear" type="button">Clear filters</button>
+</div>
+</div>
+</div>
+<div class="notes">
+<h3>Direction 04 — at a glance</h3>
+<ul>
+<li><b>Register:</b> technical SaaS / fintech precision — browsing as an instrumented comparison task.</li>
+<li><b>Corner language:</b> unbending 8px radius on every surface; 1px #E2E8F0 borders + 1px shadows; 3px left status bar encodes card state (green ready / amber buffer).</li>
+<li><b>Type:</b> 13px base, tabular numerals for all prices/dates, mono for unit codes and filter chips; "6 units available · live" reads like a system readout.</li>
+<li><b>States shown:</b> L-3 buffer card (amber bar + warn availability + secondary Book button); empty state with query-string chips and ghost Clear-filters button.</li>
+<li><b>Signature:</b> role chip ("Customer") surfaces the adaptive shell; red 3-badge bell vs indigo action keeps alert/action channels separate.</li>
+</ul>
+</div>
+</div>
+</div>
+
+</div>
+</body>
+</html>

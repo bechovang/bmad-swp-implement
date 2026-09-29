@@ -1,0 +1,9 @@
+%% StorageHub — State chart: vòng đời Task (kanban)
+stateDiagram-v2
+    [*] --> ToDo : hệ thống sinh task [check-in / checkout / cleaning / support / contract]
+
+    ToDo --> InProgress : staff kéo thả hoặc mở task
+    InProgress --> Done : hoàn tất bước chốt [guard: payment / settlement / ảnh bản ký]
+    Done --> InProgress : snap-back [thiếu bước chốt] + toast chỉ tên bước thiếu
+
+    Done --> [*]

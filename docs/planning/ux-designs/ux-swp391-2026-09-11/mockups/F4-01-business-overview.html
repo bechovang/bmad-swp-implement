@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Business Overview — StorageHub</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#ffb695",
+            "status-reserved-border": "#E0E7FF",
+            "inverse-primary": "#c3c0ff",
+            "status-retired-border": "#E2E8F0",
+            "status-maintenance": "#C2410C",
+            "inverse-on-surface": "#f3effc",
+            "error": "#DC2626",
+            "on-secondary": "#ffffff",
+            "status-retired": "#94A3B8",
+            "surface-subtle": "#F8FAFC",
+            "ink": "#0F172A",
+            "status-buffer-border": "#FDE68A",
+            "error-container": "#ffdad6",
+            "surface-muted": "#F1F5F9",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "primary-fixed-dim": "#c3c0ff",
+            "background": "#fcf8ff",
+            "warning-bar": "#F59E0B",
+            "warning-tint": "#FFFBEB",
+            "status-buffer-bar": "#F59E0B",
+            "primary-fixed": "#e2dfff",
+            "error-border": "#FECACA",
+            "secondary-fixed": "#d5e3fd",
+            "success-tint": "#ECFDF5",
+            "surface-container": "#f0ecf9",
+            "status-retired-tint": "#F8FAFC",
+            "on-primary-container": "#dad7ff",
+            "border": "#E2E8F0",
+            "surface-container-low": "#f5f2ff",
+            "status-available": "#059669",
+            "divider": "#F1F5F9",
+            "surface-variant": "#e4e1ee",
+            "on-surface-variant": "#464555",
+            "status-preparing-tint": "#F0F9FF",
+            "on-primary-fixed": "#0f0069",
+            "surface-container-highest": "#e4e1ee",
+            "status-rented-border": "#E2E8F0",
+            "status-preparing-border": "#E0F2FE",
+            "surface-container-lowest": "#ffffff",
+            "status-available-border": "#D1FAE5",
+            "on-surface": "#1b1b24",
+            "on-error": "#ffffff",
+            "ink-secondary": "#334155",
+            "error-tint": "#FEF2F2",
+            "primary": "#4F46E5",
+            "primary-outline-border": "#C7D2FE",
+            "tertiary-fixed": "#ffdbcc",
+            "status-maintenance-tint": "#FFF7ED",
+            "muted": "#64748B",
+            "surface-container-high": "#eae6f4",
+            "success": "#059669",
+            "status-maintenance-border": "#FFEDD5",
+            "tertiary-container": "#a44100",
+            "on-error-container": "#93000a",
+            "status-available-tint": "#ECFDF5",
+            "warning": "#B45309",
+            "primary-border": "#E0E7FF",
+            "faint": "#94A3B8",
+            "on-secondary-fixed-variant": "#3a485c",
+            "primary-container": "#4f46e5",
+            "on-tertiary-fixed": "#351000",
+            "on-background": "#1b1b24",
+            "border-strong": "#CBD5E1",
+            "on-primary": "#ffffff",
+            "primary-tint": "#EEF2FF",
+            "secondary-fixed-dim": "#b9c7e0",
+            "status-buffer-tint": "#FFFBEB",
+            "status-buffer": "#B45309",
+            "app-bg": "#F4F6F9",
+            "tertiary": "#7e3000",
+            "outline": "#777587",
+            "outline-variant": "#c7c4d8",
+            "status-reserved": "#4F46E5",
+            "inverse-surface": "#302f39",
+            "surface-bright": "#fcf8ff",
+            "surface-tint": "#4d44e3",
+            "secondary-container": "#d5e3fd",
+            "on-primary-fixed-variant": "#3323cc",
+            "surface": "#FFFFFF",
+            "status-reserved-tint": "#EEF2FF",
+            "on-tertiary-container": "#ffd2be",
+            "status-rented": "#334155",
+            "surface-dim": "#dcd8e5",
+            "status-rented-tint": "#F1F5F9",
+            "secondary": "#515f74",
+            "on-secondary-container": "#57657b",
+            "status-preparing": "#0284C7",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed": "#0d1c2f"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "24px",
+            "space-lg": "16px",
+            "space-3xl": "48px",
+            "margin": "24px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "space-2xl": "32px",
+            "space-sm": "8px",
+            "gutter": "14px"
+          },
+          "fontFamily": {
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "code": ["13px", { "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .num-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col font-body text-body antialiased selection:bg-primary-tint selection:text-primary">
+<!-- TopNavBar (Shared Component JSON Blueprint) -->
+<header class="w-full h-[54px] px-margin flex items-center justify-between border-b border-border bg-surface sticky top-0 z-30 shadow-sm">
+<div class="flex items-center space-x-6 h-full">
+<!-- Logo Anchor -->
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-xl bg-primary text-on-primary flex items-center justify-center font-code text-code-sm font-bold shadow-sm">
+          S
+        </div>
+<span class="text-headline font-headline text-ink font-semibold tracking-tight">StorageHub</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center h-full space-x-1 pl-4">
+<a class="text-primary border-b-2 border-primary font-nav text-nav font-medium h-[54px] flex items-center px-3" href="#overview">
+          Overview
+        </a>
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors" href="#policy">
+          Policy
+        </a>
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors" href="#reports">
+          Reports
+        </a>
+</nav>
+</div>
+<!-- Trailing Actions Cluster -->
+<div class="flex items-center space-x-3">
+<!-- Role Badge -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-primary-tint text-primary border border-primary-border font-medium">
+        Business Ops
+      </span>
+<!-- Notification Action with Dot -->
+<button class="relative w-8 h-8 rounded-xl flex items-center justify-center text-muted hover:text-ink hover:bg-surface-subtle transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full ring-2 ring-surface"></span>
+</button>
+<div class="h-4 w-[1px] bg-border mx-1"></div>
+<!-- User Avatar / Profile Image -->
+<div class="flex items-center space-x-2 pl-1 cursor-pointer group">
+<div class="w-7 h-7 rounded-full bg-surface-muted border border-border flex items-center justify-center overflow-hidden text-ink font-body-strong text-label">
+<img alt="Hằng avatar" class="w-full h-full object-cover" data-alt="A clean professional studio portrait photograph of Hằng, an Asian woman working in business operations leadership, softly lit in a minimalist corporate environment with subtle cool gray and navy tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCDyrFWX-hRMse2j-OeuAcEaJ5GnI8HRlkS0rw_b866tPekdflIHQCDBT_ca-bYlBvsYMdxoJnzDSkKtOHvu234Yvh20MPsVYF74VauWWK4nVotoyy5ITiqNvMlaMGjxdht_JmWC7VtqBNE64dLzi9u5-5tpeWxR0puZSpo1poHzL0W4VF-oJCyNAq1K9cKElDyDBVkOVWpf-TW1o1XpQ2wtqz3MK9MVTyWGCNwdWEHyC8LV_ucEawSg7xwrSZKf4-ufjnqdBHyZk"/>
+</div>
+<div class="hidden lg:flex flex-col text-left">
+<span class="text-body-strong font-body-strong text-ink leading-tight text-[12px]">Hằng</span>
+<span class="text-meta font-meta text-muted text-[10px] leading-tight">Business Ops</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-nav Meta / Facility Telemetry Status Bar -->
+<aside class="w-full bg-surface border-b border-border px-margin py-1.5 flex items-center justify-between text-meta font-meta text-muted">
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[15px] text-muted" data-icon="warehouse">warehouse</span>
+<span class="font-body-strong text-ink">Facility VN-SGN-01</span>
+<span class="text-faint">(Tân Bình Gateway)</span>
+</div>
+<span class="inline-block w-1 h-1 rounded-full bg-border-strong"></span>
+<div class="flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available animate-pulse"></span>
+<span class="text-status-available font-medium">Gate Automation Online</span>
+</div>
+<span class="inline-block w-1 h-1 rounded-full bg-border-strong"></span>
+<span class="text-muted">Systems Nominal</span>
+</div>
+<div class="hidden sm:flex items-center space-x-2 font-code-sm text-code-sm text-muted">
+<span>LATENCY: 18ms</span>
+<span>•</span>
+<span class="num-tabular">TIMEZONE: UTC+07:00</span>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-space-xl space-y-space-xl">
+<!-- 1. Page Header Block -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center space-x-2 text-meta font-meta text-muted mb-1">
+<span>StorageHub VN</span>
+<span>/</span>
+<span class="text-ink font-medium">Financial Operations</span>
+<span>/</span>
+<span class="text-faint">Executive Telemetry</span>
+</div>
+<h1 class="text-display font-display text-ink tracking-tight">Business Overview</h1>
+</div>
+<!-- Action Controls -->
+<div class="flex items-center space-x-2">
+<!-- Period Dropdown Selector -->
+<div class="relative">
+<select class="appearance-none bg-surface border border-border hover:border-border-strong rounded-xl px-3 py-1.5 pr-8 text-body font-body text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors cursor-pointer text-xs">
+<option selected="">Q3 2026 (Jul 1 – Sep 30)</option>
+<option>Q2 2026 (Apr 1 – Jun 30)</option>
+<option>Q1 2026 (Jan 1 – Mar 31)</option>
+<option>YTD 2026</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted text-[16px]" data-icon="expand_more">expand_more</span>
+</div>
+<!-- Export Action Button -->
+<button class="inline-flex items-center space-x-1.5 bg-surface hover:bg-surface-subtle border border-border-strong text-ink-secondary hover:text-ink px-3 py-1.5 rounded-xl font-button text-button transition-colors text-xs shadow-sm">
+<span class="material-symbols-outlined text-[15px]" data-icon="download">download</span>
+<span>Export Financial Audit CSV</span>
+</button>
+</div>
+</section>
+<!-- 2. KPI Cards Row (4 cards with 3px left status indicator bar) -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: Revenue (Q3) -->
+<div class="bg-surface rounded-xl border border-border p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-label font-label text-muted uppercase tracking-wider">Revenue (Q3)</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-label font-label bg-status-available-tint text-status-available border border-status-available-border font-medium">
+              +4.2% vs Q2
+            </span>
+</div>
+<div class="text-kpi-value font-kpi-value text-ink num-tabular mt-1 mb-1">
+            37.450.000 ₫
+          </div>
+</div>
+<p class="text-meta font-meta text-muted pt-2 border-t border-divider mt-2">
+          Across 42 active lease contracts
+        </p>
+</div>
+<!-- Card 2: Deposits held -->
+<div class="bg-surface rounded-xl border border-border p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-label font-label text-muted uppercase tracking-wider">Deposits held</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-label font-label bg-status-reserved-tint text-primary border border-status-reserved-border font-medium">
+              100% Escrow vaulted
+            </span>
+</div>
+<div class="text-kpi-value font-kpi-value text-ink num-tabular mt-1 mb-1">
+            4.890.000 ₫
+          </div>
+</div>
+<p class="text-meta font-meta text-muted pt-2 border-t border-divider mt-2">
+          Held in VNPay escrow settlement
+        </p>
+</div>
+<!-- Card 3: Surcharges -->
+<div class="bg-surface rounded-xl border border-border p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-preparing"></div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-label font-label text-muted uppercase tracking-wider">Surcharges</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-label font-label bg-status-available-tint text-status-available border border-status-available-border font-medium">
+              +11.8% vs last month
+            </span>
+</div>
+<div class="text-kpi-value font-kpi-value text-ink num-tabular mt-1 mb-1">
+            1.240.000 ₫
+          </div>
+</div>
+<p class="text-meta font-meta text-muted pt-2 border-t border-divider mt-2">
+          Late extensions & turnover cleaning fees
+        </p>
+</div>
+<!-- Card 4: Utilization -->
+<div class="bg-surface rounded-xl border border-border p-space-lg shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-warning-bar"></div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-label font-label text-muted uppercase tracking-wider">Utilization</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-label font-label bg-error-tint text-error border border-error-border font-medium">
+              −1.1% target 90%
+            </span>
+</div>
+<div class="text-kpi-value font-kpi-value text-ink num-tabular mt-1 mb-1">
+            87%
+          </div>
+</div>
+<p class="text-meta font-meta text-muted pt-2 border-t border-divider mt-2">
+          37 occupied of 42 total units
+        </p>
+</div>
+</section>
+<!-- 3. Wide Chart Card ('Revenue by month') -->
+<section class="bg-surface rounded-xl border border-border shadow-sm p-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-lg border-b border-divider">
+<div>
+<h2 class="text-headline font-headline text-ink">Revenue by month</h2>
+<p class="text-meta font-meta text-muted mt-0.5">Monthly collected rent & surcharge ledger (Last 6 months)</p>
+</div>
+<div class="flex items-center space-x-4 text-meta font-meta">
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-3 rounded-sm bg-primary inline-block"></span>
+<span class="text-ink font-medium">Gross Rent</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-0.5 bg-border-strong inline-block border-t border-dashed border-muted"></span>
+<span class="text-muted">Target: 12.000.000 ₫/mo</span>
+</div>
+</div>
+</div>
+<!-- Chart Display Area -->
+<div class="pt-6 pb-2">
+<div class="relative h-64 w-full flex">
+<!-- Y-Axis Ticks -->
+<div class="w-12 h-full flex flex-col justify-between text-right pr-2 text-code-sm font-code-sm text-faint num-tabular select-none -translate-y-2">
+<span>15M ₫</span>
+<span>12M ₫</span>
+<span>9M ₫</span>
+<span>6M ₫</span>
+<span>3M ₫</span>
+<span>0 ₫</span>
+</div>
+<!-- Chart Bars Container & Guideline grid -->
+<div class="flex-1 relative h-full flex items-end justify-between px-4 sm:px-8 border-b border-border">
+<!-- Horizontal Guidelines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="w-full border-b border-divider"></div>
+<!-- 12M Target Reference Line -->
+<div class="w-full border-b border-dashed border-primary-outline-border relative">
+<span class="absolute right-2 -top-3 text-[10px] font-code bg-surface px-1 text-primary">TARGET 12.0M</span>
+</div>
+<div class="w-full border-b border-divider"></div>
+<div class="w-full border-b border-divider"></div>
+<div class="w-full border-b border-divider"></div>
+<div class="w-full"></div>
+</div>
+<!-- Bar 1: May (10.2M -> 68%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                10.200.000 ₫
+              </span>
+<div class="w-full bg-primary-tint group-hover:bg-primary/90 transition-all rounded-t-sm" style="height: 68%;">
+<div class="w-full h-full bg-primary rounded-t-sm opacity-90 group-hover:opacity-100"></div>
+</div>
+<span class="text-meta font-meta text-muted mt-2 group-hover:text-ink font-medium">May</span>
+</div>
+<!-- Bar 2: Jun (11.45M -> 76.3%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                11.450.000 ₫
+              </span>
+<div class="w-full bg-primary rounded-t-sm opacity-90 group-hover:opacity-100 transition-all" style="height: 76.3%;"></div>
+<span class="text-meta font-meta text-muted mt-2 group-hover:text-ink font-medium">Jun</span>
+</div>
+<!-- Bar 3: Jul (12.1M -> 80.6%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                12.100.000 ₫
+              </span>
+<div class="w-full bg-primary rounded-t-sm opacity-90 group-hover:opacity-100 transition-all" style="height: 80.6%;"></div>
+<span class="text-meta font-meta text-muted mt-2 group-hover:text-ink font-medium">Jul</span>
+</div>
+<!-- Bar 4: Aug (12.5M -> 83.3%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                12.500.000 ₫
+              </span>
+<div class="w-full bg-primary rounded-t-sm opacity-90 group-hover:opacity-100 transition-all" style="height: 83.3%;"></div>
+<span class="text-meta font-meta text-muted mt-2 group-hover:text-ink font-medium">Aug</span>
+</div>
+<!-- Bar 5: Sep (12.85M -> 85.6%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                12.850.000 ₫
+              </span>
+<div class="w-full bg-primary rounded-t-sm opacity-90 group-hover:opacity-100 transition-all" style="height: 85.6%;"></div>
+<span class="text-meta font-meta text-muted mt-2 group-hover:text-ink font-medium">Sep</span>
+</div>
+<!-- Bar 6: Oct projected (13.2M -> 88%) -->
+<div class="relative z-10 flex flex-col items-center group w-1/6 max-w-[64px] h-full justify-end">
+<span class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-7 bg-ink text-surface text-code-sm font-code px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-20 num-tabular">
+                13.200.000 ₫ (Proj)
+              </span>
+<div class="w-full border-2 border-dashed border-primary bg-primary-tint/50 rounded-t-sm group-hover:bg-primary-tint transition-all" style="height: 88%;"></div>
+<span class="text-meta font-meta text-primary mt-2 font-medium flex items-center gap-0.5">
+                Oct <span class="text-[9px] font-code">*</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center text-meta font-meta text-faint pt-3">
+<span>* October represents active running bookings and month-to-date extensions.</span>
+<span class="font-code-sm text-code-sm">Values pegged in VND (₫)</span>
+</div>
+</section>
+<!-- 4. Compact Table Card ('Recent policy versions') -->
+<section class="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+<!-- Card Header -->
+<div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-divider">
+<div>
+<h2 class="text-headline font-headline text-ink">Recent policy versions</h2>
+<p class="text-meta font-meta text-muted mt-0.5">Operating governance, deposit release criteria, and late fee schedules</p>
+</div>
+<button class="text-primary hover:text-ink font-button text-button transition-colors inline-flex items-center text-xs">
+          Manage Policy Rules →
+        </button>
+</div>
+<!-- Responsive Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-subtle border-b border-divider text-label font-label text-muted uppercase tracking-wider">
+<th class="py-2.5 px-space-lg w-24">Version</th>
+<th class="py-2.5 px-space-lg w-32">Effective</th>
+<th class="py-2.5 px-space-lg w-36">Changed by</th>
+<th class="py-2.5 px-space-lg w-28">Status</th>
+<th class="py-2.5 px-space-lg">Scope & Changelog</th>
+<th class="py-2.5 px-space-lg w-24 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider font-body text-body">
+<!-- Row 1: v3 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-space-lg">
+<span class="px-1.5 py-0.5 rounded font-code text-code-sm bg-surface-muted text-ink border border-border">v3</span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary text-meta font-meta whitespace-nowrap">Oct 1, 2026</td>
+<td class="py-3 px-space-lg">
+<div class="flex items-center space-x-1.5">
+<div class="w-5 h-5 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[10px] font-bold text-primary">
+                    H
+                  </div>
+<span class="text-ink font-medium">Hằng</span>
+</div>
+</td>
+<td class="py-3 px-space-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint text-status-available border border-status-available-border font-medium">
+                  Active
+                </span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary">
+                Updated 15% damage deduction threshold on epoxy flooring
+              </td>
+<td class="py-3 px-space-lg text-right">
+<button class="text-muted hover:text-primary font-button text-xs transition-colors">
+                  View diff
+                </button>
+</td>
+</tr>
+<!-- Row 2: v2 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-space-lg">
+<span class="px-1.5 py-0.5 rounded font-code text-code-sm bg-surface-muted text-ink border border-border">v2</span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary text-meta font-meta whitespace-nowrap">Jul 1, 2026</td>
+<td class="py-3 px-space-lg">
+<div class="flex items-center space-x-1.5">
+<div class="w-5 h-5 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[10px] font-bold text-primary">
+                    H
+                  </div>
+<span class="text-ink font-medium">Hằng</span>
+</div>
+</td>
+<td class="py-3 px-space-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-rented-tint text-muted border border-border font-medium">
+                  Superseded
+                </span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary">
+                Introduced 3-month upfront commitment discounting
+              </td>
+<td class="py-3 px-space-lg text-right">
+<button class="text-muted hover:text-primary font-button text-xs transition-colors">
+                  View diff
+                </button>
+</td>
+</tr>
+<!-- Row 3: v1 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-space-lg">
+<span class="px-1.5 py-0.5 rounded font-code text-code-sm bg-surface-muted text-ink border border-border">v1</span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary text-meta font-meta whitespace-nowrap">Jan 15, 2026</td>
+<td class="py-3 px-space-lg">
+<div class="flex items-center space-x-1.5">
+<div class="w-5 h-5 rounded-full bg-surface-muted border border-border flex items-center justify-center text-[10px] font-bold text-muted">
+                    Q
+                  </div>
+<span class="text-ink font-medium">Quân</span>
+</div>
+</td>
+<td class="py-3 px-space-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-retired-tint text-status-retired border border-status-retired-border font-medium">
+                  Archived
+                </span>
+</td>
+<td class="py-3 px-space-lg text-ink-secondary">
+                Initial facility launch rules for VN-SGN-01
+              </td>
+<td class="py-3 px-space-lg text-right">
+<button class="text-muted hover:text-primary font-button text-xs transition-colors">
+                  View diff
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Footer / System Bar -->
+<footer class="w-full bg-surface border-t border-border mt-auto py-3 px-margin text-meta font-meta text-muted">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+<span class="font-medium text-ink">StorageHub Control Room v2.4</span>
+<span class="text-border-strong">•</span>
+<span>Facility VN-SGN-01 (Tân Bình Gateway)</span>
+<span class="text-border-strong">•</span>
+<span class="inline-flex items-center gap-1 text-status-available font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span>
+          System Status: Operational
+        </span>
+</div>
+<div class="flex items-center space-x-3 text-faint text-[11px]">
+<span>Logged in as <strong class="text-ink font-medium">Hằng (Business Ops Lead)</strong></span>
+<span>•</span>
+<span class="num-tabular">Prices in VND (₫)</span>
+</div>
+</div>
+</footer>
+</body></html>

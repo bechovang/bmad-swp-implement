@@ -1,0 +1,1 @@
+{"jsonrpc": "2.0", "id": 10, "method": "tools/call", "params": {"name": "create_project", "arguments": {"title": "StorageHub SWP391 Control Room"}}}

@@ -1,0 +1,34 @@
+{"key":"F1-03-browse-units","ok":true,"screen":"projects/9794980915577530548/screens/811d0640af714ff08709f0f182d6f84b","html":37124,"png":67246}
+{"key": "F1-01-login", "ok": true, "screen": "projects/9794980915577530548/screens/267ab506fd6542e88017d07ae5ee733d", "html": 18817, "png": 34105}
+{"key": "F1-02-register", "ok": true, "screen": "projects/9794980915577530548/screens/edc5e3f3584d4aa8b73cd4f2b051cf70", "html": 18434, "png": 31930}
+{"key": "F1-04-unit-detail", "ok": true, "screen": "projects/9794980915577530548/screens/a44930757f964c1483e942542ea8b063", "html": 34770, "png": 133932}
+{"key": "F1-05-booking-summary", "ok": true, "screen": "projects/9794980915577530548/screens/fc626efbd97741bab20b542a852f5c10", "html": 25582, "png": 59384}
+{"key": "F1-06-payment-modal", "ok": true, "screen": "projects/9794980915577530548/screens/b2689ebc75a24508b3685e3720354ada", "html": 28838, "png": 54499}
+{"key": "F2-01-task-board", "ok": true, "screen": "projects/9794980915577530548/screens/d6b815ee3f4642c9b178ca8bdb0db11d", "html": 32481, "png": 49192}
+{"key": "F2-02-checkin-task", "ok": true, "screen": "projects/9794980915577530548/screens/cec1ef01442c4d889edb136ace923c6a", "html": 28044, "png": 50118}
+{"key": "F2-03-my-rentals", "ok": true, "screen": "projects/9794980915577530548/screens/27b4e296b64b475b80589fea8416cd05", "html": 29236, "png": 50820}
+{"key": "F2-04-rental-detail", "ok": true, "screen": "projects/9794980915577530548/screens/dcbefda3e8634dbfb50fd7ac9392a67c", "html": 28105, "png": 51718}
+{"key": "F2-05-checkin-pass", "ok": true, "screen": "projects/9794980915577530548/screens/5d72c4541dfa4254b4b47c476f8c821e", "html": 31693, "png": 46682}
+{"key": "F3-01-checkout-task", "ok": true, "screen": "projects/9794980915577530548/screens/48e706a4f2794532a8aea3403a8250b9", "html": 30576, "png": 63693}
+{"key": "F3-02-checkout-request", "ok": true, "screen": "projects/9794980915577530548/screens/391e0ce71eb8449e9bd62f6dc6ec3429", "html": 31143, "png": 65259}
+{"key": "F4-01-business-overview", "ok": true, "screen": "projects/9794980915577530548/screens/1a26f8bdec014afcb10c6ebfba6ddba0", "html": 29907, "png": 45930}
+{"key": "F4-02-policy-management", "ok": true, "screen": "projects/9794980915577530548/screens/3c9ffe4b2f954f889b344de79c4542e6", "html": 34549, "png": 69680}
+{"key": "F4-03-reports", "ok": true, "screen": "projects/9794980915577530548/screens/615300d22ed44cb4b16d27db4dfd4a77", "html": 35199, "png": 69291}
+{"key": "F5-01-facility-overview", "ok": true, "screen": "projects/9794980915577530548/screens/c1e2ca91ce7047cc8487a5cf2b973c33", "html": 31471, "png": 49458}
+{"key": "F5-02-unit-management", "ok": true, "screen": "projects/9794980915577530548/screens/54df55d8c40e44aa85f7d1884387f8fa", "html": 41774, "png": 64147}
+{"key": "F5-03-staff-shifts", "ok": true, "screen": "projects/9794980915577530548/screens/8556d335b0724fb3bacbd714e9169651", "html": 44067, "png": 90681}
+{"key": "F5-04-operations-monitor", "ok": true, "screen": "projects/9794980915577530548/screens/cab7ad895d434e0baab20393cf5973c1", "html": 36202, "png": 75322}
+{"key": "F5-05-activity-log", "ok": true, "screen": "projects/9794980915577530548/screens/b1026534e49c4c8289645192a99a6300", "html": 34301, "png": 47232}
+{"key": "F6-01-extend", "ok": true, "screen": "projects/9794980915577530548/screens/b937c90406144c4d8950898292497fc9", "html": 31173, "png": 59530}
+{"key": "F7-01-new-support", "ok": true, "screen": "projects/9794980915577530548/screens/5df0c5b1ed1e4ee0b6141099a8dba320", "html": 26600, "png": 51969}
+{"key": "F7-02-support-list", "ok": true, "screen": "projects/9794980915577530548/screens/c545692a27034b169030ea016b633e5d", "html": 31251, "png": 66320}
+{"key": "F7-03-support-ticket", "ok": true, "screen": "projects/9794980915577530548/screens/1abeb1609bfd4149bcdd74aecbe0aae4", "html": 30005, "png": 74420}
+{"key": "F7-04-escalation-inbox", "ok": true, "screen": "projects/9794980915577530548/screens/108360f860264e5281a901a9c6105ed1", "html": 33223, "png": 84310}
+{"key": "F7-05-notification-center", "ok": true, "screen": "projects/9794980915577530548/screens/90f918d2b52a4741a728d3adb9fc105a", "html": 32040, "png": 69006}
+{"key": "F5-03-staff-shifts", "ok": true, "screen": "projects/9794980915577530548/screens/77c6ae6421c846c6a44289d0bf15976e", "html": 37056, "png": 79539}
+{"key": "F2-01-task-board", "ok": true, "screen": "projects/9794980915577530548/screens/05f9be8680e64ccc8854949e3fbba12e", "html": 29043, "png": 42013}
+{"key": "F3-01-checkout-task", "ok": true, "screen": "projects/9794980915577530548/screens/46aa320890fe486f91088d13673e5987", "html": 28471, "png": 65137}
+{"key": "F4-02-policy-management", "ok": true, "screen": "projects/9794980915577530548/screens/e470efdc659e4f688eda732b2fb61252", "html": 26514, "png": 59637}
+{"key": "F2-02-checkin-task", "ok": true, "screen": "projects/9794980915577530548/screens/f49223df11c34d1397c5d6940d6138be", "html": 32764, "png": 45246, "note": "contract-step edit 2026-09-14: NEW screen replaces cec1ef01 (Step 3 Contract & Signature; step 4 handover gated)"}
+{"key": "F2-04-rental-detail", "ok": true, "screen": "projects/9794980915577530548/screens/dcbefda3e8634dbfb50fd7ac9392a67c", "note": "Contracts & Addenda card inserted in-place on canvas 2026-09-14; html export stale -> applied same DOM block to local file; PNG is pre-edit preview"}
+{"key": "F6-01-extend", "ok": true, "screen": "projects/9794980915577530548/screens/b937c90406144c4d8950898292497fc9", "note": "After-payment addendum card inserted in-place on canvas 2026-09-14 (retry; 1st call timed out); html export stale -> applied same DOM block to local file; PNG is pre-edit preview"}

@@ -1,0 +1,48 @@
+<mxfile host="app.diagrams.net" version="24.7.7">
+  <diagram id="statechart-task-vi" name="6. Task">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="STATE CHART 6 — TASK (bảng kanban nội bộ)" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="init" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="245" y="110" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="todo" value="ToDo" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="240" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="inprogress" value="InProgress" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="240" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="done" value="Done" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="240" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="final1" value="" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="250" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="hệ thống sinh task [check-in / checkout /&lt;br&gt;cleaning / support / contract]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="init" target="todo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="staff kéo thả&lt;br&gt;hoặc mở task" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="todo" target="inprogress">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="hoàn tất bước chốt [guard: payment /&lt;br&gt;settlement / ảnh bản ký]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="inprogress" target="done">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="snap-back [thiếu bước chốt]&lt;br&gt;+ toast chỉ tên bước thiếu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="done" target="inprogress">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="380" />
+              <mxPoint x="805" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="done" target="final1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

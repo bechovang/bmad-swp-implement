@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StorageHub - Policy Management</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "status-preparing-border": "#E0F2FE",
+            "on-surface-variant": "#464555",
+            "status-preparing": "#0284C7",
+            "inverse-surface": "#302f39",
+            "primary-fixed-dim": "#c3c0ff",
+            "surface": "#FFFFFF",
+            "status-rented-border": "#E2E8F0",
+            "surface-container-low": "#f5f2ff",
+            "primary-outline-border": "#C7D2FE",
+            "on-surface": "#1b1b24",
+            "primary-tint": "#EEF2FF",
+            "on-secondary-container": "#57657b",
+            "surface-container": "#f0ecf9",
+            "status-retired-border": "#E2E8F0",
+            "status-reserved-border": "#E0E7FF",
+            "on-secondary-fixed-variant": "#3a485c",
+            "error-container": "#ffdad6",
+            "error-tint": "#FEF2F2",
+            "status-retired": "#94A3B8",
+            "primary-fixed": "#e2dfff",
+            "on-tertiary": "#ffffff",
+            "divider": "#F1F5F9",
+            "background": "#fcf8ff",
+            "surface-dim": "#dcd8e5",
+            "tertiary-fixed-dim": "#ffb695",
+            "primary-container": "#4f46e5",
+            "status-maintenance": "#C2410C",
+            "secondary-fixed": "#d5e3fd",
+            "outline": "#777587",
+            "outline-variant": "#c7c4d8",
+            "warning-tint": "#FFFBEB",
+            "on-primary-fixed-variant": "#3323cc",
+            "error": "#DC2626",
+            "on-background": "#1b1b24",
+            "surface-tint": "#4d44e3",
+            "status-buffer-border": "#FDE68A",
+            "status-buffer-bar": "#F59E0B",
+            "status-buffer": "#B45309",
+            "surface-container-highest": "#e4e1ee",
+            "inverse-primary": "#c3c0ff",
+            "success": "#059669",
+            "status-available-tint": "#ECFDF5",
+            "on-primary-container": "#dad7ff",
+            "status-retired-tint": "#F8FAFC",
+            "on-secondary": "#ffffff",
+            "status-available": "#059669",
+            "on-primary": "#ffffff",
+            "secondary": "#515f74",
+            "surface-container-lowest": "#ffffff",
+            "status-rented": "#334155",
+            "tertiary-fixed": "#ffdbcc",
+            "secondary-container": "#d5e3fd",
+            "status-available-border": "#D1FAE5",
+            "primary": "#4F46E5",
+            "surface-variant": "#e4e1ee",
+            "tertiary-container": "#a44100",
+            "surface-bright": "#fcf8ff",
+            "success-tint": "#ECFDF5",
+            "warning": "#B45309",
+            "status-reserved-tint": "#EEF2FF",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "surface-container-high": "#eae6f4",
+            "on-secondary-fixed": "#0d1c2f",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "error-border": "#FECACA",
+            "ink-secondary": "#334155",
+            "border-strong": "#CBD5E1",
+            "on-primary-fixed": "#0f0069",
+            "muted": "#64748B",
+            "surface-muted": "#F1F5F9",
+            "secondary-fixed-dim": "#b9c7e0",
+            "status-rented-tint": "#F1F5F9",
+            "tertiary": "#7e3000",
+            "faint": "#94A3B8",
+            "status-buffer-tint": "#FFFBEB",
+            "status-maintenance-tint": "#FFF7ED",
+            "on-tertiary-fixed": "#351000",
+            "ink": "#0F172A",
+            "status-preparing-tint": "#F0F9FF",
+            "status-maintenance-border": "#FFEDD5",
+            "border": "#E2E8F0",
+            "warning-bar": "#F59E0B",
+            "primary-border": "#E0E7FF",
+            "status-reserved": "#4F46E5",
+            "surface-subtle": "#F8FAFC",
+            "app-bg": "#F4F6F9",
+            "on-tertiary-container": "#ffd2be",
+            "inverse-on-surface": "#f3effc"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-3xl": "48px",
+            "space-xs": "4px",
+            "gutter": "14px",
+            "margin": "24px",
+            "space-md": "12px",
+            "space-xl": "24px",
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "space-2xl": "32px"
+          },
+          "fontFamily": {
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-app-bg text-ink min-h-screen font-body text-body antialiased flex flex-col">
+<!-- TOP NAVIGATION BAR (Shared Components Blueprint execution) -->
+<header class="w-full h-[54px] px-margin flex items-center justify-between border-b border-border bg-surface sticky top-0 z-30 shadow-sm">
+<div class="flex items-center space-x-6 h-[54px]">
+<!-- Brand Logo -->
+<div class="flex items-center gap-2">
+<span class="text-headline font-headline text-ink font-semibold tracking-tight">StorageHub</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-1 h-[54px]">
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors" href="#">Overview</a>
+<a class="text-primary border-b-2 border-primary font-nav text-nav font-medium h-[54px] flex items-center px-3" href="#">Policy</a>
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors" href="#">Reports</a>
+</nav>
+<!-- Facility Status Indicator -->
+<div class="hidden lg:flex items-center gap-2 pl-4 border-l border-border h-6 my-auto text-meta font-meta text-muted">
+<span class="text-ink font-medium">Facility VN-SGN-01 (Tân Bình Gateway)</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+<span class="text-success text-[11px] font-semibold">Systems Nominal</span>
+</div>
+</div>
+<!-- Trailing Actions & User Profile -->
+<div class="flex items-center gap-3">
+<!-- Role Badge -->
+<div class="bg-primary-tint border border-primary-border text-primary px-2.5 py-0.5 rounded-full text-label font-label">
+        Business Ops
+      </div>
+<!-- Notifications Icon -->
+<div class="w-8 h-8 flex items-center justify-center text-muted hover:text-ink transition-colors cursor-pointer rounded-lg hover:bg-surface-subtle">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</div>
+<!-- Profile Avatar -->
+<div class="flex items-center gap-2 pl-2 border-l border-border">
+<img alt="Hằng avatar" class="w-7 h-7 rounded-full object-cover border border-border" data-alt="Corporate headshot portrait of Hằng, the Vietnamese operations lead, smiling professionally in business casual attire with soft studio office lighting, natural tones, minimal clean background suited for modern enterprise application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI9OO5pgMtQwZB0NEDNQG1ZWm-30mKHgXswUIiR4Nm6Gi9aAyawX3x_wPr-mILmVY-RzaHpDl09WFvhWJzzAwA3CvjFHcrUBHxUhtfpppADaDPmIFY5OXvElBisjV_5o51rZ3HUUz-aAKw-JfbmKVTyfSr6Yn-8Bvc_-kve7LTJhoZVfD0sH6ZjU2GH-xyYOMrTFwrXCARDKS5xLQVe0jjGMk0cfpKa60iptKWGcyVaD12ISCUdagRt-KrStSp3JrA7XH71fQL6CI"/>
+<div class="hidden xl:flex flex-col">
+<span class="text-body-strong font-body-strong leading-none text-ink text-[12.5px]">Hằng</span>
+<span class="text-label font-label text-muted leading-tight">Ops Lead</span>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="flex-1 max-w-[1400px] w-full mx-auto px-margin py-6 space-y-5">
+<!-- PAGE HEADER / TITLE ROW -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<h1 class="text-display font-display text-ink font-semibold tracking-tight">Policy</h1>
+<div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface border border-border shadow-sm text-meta font-meta text-muted">
+<span class="w-1.5 h-1.5 rounded-full bg-warning-bar"></span>
+<span>Rental Policy v3 · effective Oct 1</span>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-2.5">
+<!-- Ghost button -->
+<button class="border border-border-strong text-ink-secondary bg-transparent hover:bg-surface-subxl rounded-xl px-4 py-2 font-button text-button transition-colors" type="button">
+          Discard changes
+        </button>
+<!-- CRITICAL HARD REQUIREMENT: EXACTLY ONE primary button on entire page -->
+<button class="bg-primary text-white rounded-xl px-4 py-2 font-button text-button shadow-sm hover:opacity-95 transition-opacity" type="button">
+          Save policy
+        </button>
+</div>
+</div>
+<!-- VALIDATION BANNER -->
+<div class="bg-error-tint border border-error-border rounded-xl p-4 flex items-start justify-between gap-3 shadow-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5" data-icon="error">error</span>
+<div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+<span class="text-error font-body-strong text-body-strong">Policy not saved.</span>
+<span class="text-error font-body text-body">Late-checkout fee 15% exceeds the 10% cap in Rental Policy v3. Fix the value, or edit the cap first.</span>
+</div>
+</div>
+<a class="text-error underline hover:text-red-700 font-button text-button whitespace-nowrap text-right shrink-0" href="#cap-rules">
+        View Cap Rule →
+      </a>
+</div>
+<!-- MAIN GRID LAYOUT -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- LEFT 8-COLUMN: RULES AND MATRIX TABLES -->
+<div class="lg:col-span-8 space-y-5">
+<!-- OPERATIONAL CARD: RENTAL GOVERNANCE & PRICING MATRIX -->
+<div class="bg-surface border border-border rounded-xl shadow-sm relative overflow-hidden">
+<!-- 3px Left Accent Status Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<!-- Card Header -->
+<div class="p-5 pl-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-3 bg-surface">
+<div>
+<h2 class="text-headline font-headline text-ink font-semibold">Rental Governance & Pricing Matrix</h2>
+<p class="text-body font-body text-muted mt-0.5">Define base pricing tier rates, operational surcharge triggers, and vacancy turnover parameters.</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="bg-surface-subtle border border-border text-ink-secondary text-meta font-meta px-2.5 py-1 rounded-md">Facility Scope: SGN-01</span>
+<span class="bg-warning-tint border border-status-buffer-border text-status-buffer text-meta font-meta font-semibold px-2 py-1 rounded-md">Draft rev 4</span>
+</div>
+</div>
+<div class="p-5 pl-6 space-y-6">
+<!-- SECTION GROUP 1: BASE RENT -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-body-strong font-body-strong text-ink">Base rent per month</span>
+<span class="text-label font-label text-muted uppercase tracking-wider">(Core Units)</span>
+</div>
+<span class="text-meta font-meta text-muted">VND currency denominator</span>
+</div>
+<div class="border border-border rounded-lg overflow-hidden bg-surface">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="border-b border-border bg-surface-subtle text-muted text-label font-label uppercase">
+<th class="py-2.5 px-4 font-semibold w-20">Code</th>
+<th class="py-2.5 px-4 font-semibold">Unit Type</th>
+<th class="py-2.5 px-4 font-semibold text-right">Configured Unit Rate</th>
+<th class="py-2.5 px-4 font-semibold text-center w-28">Billing Interval</th>
+<th class="py-2.5 px-4 font-semibold text-right w-36">Lifecycle Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider font-body text-body">
+<!-- Row 1: S Indoor -->
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-4 font-code text-code text-ink-secondary">S</td>
+<td class="py-3 px-4 font-medium text-ink">Indoor</td>
+<td class="py-3 px-4 text-right font-price text-price text-ink tabular-nums">345.000 ₫</td>
+<td class="py-3 px-4 text-center text-muted font-meta text-meta">/ mo</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint border border-status-available-border text-status-available">
+                          Active
+                        </span>
+</td>
+</tr>
+<!-- Row 2: S Outdoor (Inline Edit Active) -->
+<tr class="bg-primary-tint/30 hover:bg-primary-tint/50 transition-colors">
+<td class="py-3 px-4 font-code text-code text-ink-secondary">S</td>
+<td class="py-3 px-4 font-medium text-ink">Outdoor</td>
+<td class="py-3 px-4 text-right">
+<div class="inline-flex flex-col items-end">
+<input class="w-32 text-right border-2 border-primary ring-2 ring-primary/20 rounded px-2.5 py-1 bg-surface font-code text-code text-ink tabular-nums focus:outline-none" type="text" value="380.000 ₫"/>
+<span class="text-[10px] text-primary font-medium mt-1">Modified in draft</span>
+</div>
+</td>
+<td class="py-3 px-4 text-center text-muted font-meta text-meta">/ mo</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-reserved-tint border border-status-reserved-border text-status-reserved">
+                          Drafting
+                        </span>
+</td>
+</tr>
+<!-- Row 3: M Climate -->
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-4 font-code text-code text-ink-secondary">M</td>
+<td class="py-3 px-4 font-medium text-ink">Climate</td>
+<td class="py-3 px-4 text-right font-price text-price text-ink tabular-nums">890.000 ₫</td>
+<td class="py-3 px-4 text-center text-muted font-meta text-meta">/ mo</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint border border-status-available-border text-status-available">
+                          Active
+                        </span>
+</td>
+</tr>
+<!-- Row 4: L Climate -->
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-4 font-code text-code text-ink-secondary">L</td>
+<td class="py-3 px-4 font-medium text-ink">Climate</td>
+<td class="py-3 px-4 text-right font-price text-price text-ink tabular-nums">1.280.000 ₫</td>
+<td class="py-3 px-4 text-center text-muted font-meta text-meta">/ mo</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint border border-status-available-border text-status-available">
+                          Active
+                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- SECTION GROUP 2: SURCHARGES -->
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-body-strong font-body-strong text-ink">Surcharges & Operational Parameters</span>
+<span class="text-label font-label text-muted uppercase tracking-wider">(Facility Rules)</span>
+</div>
+<span class="text-meta font-meta text-muted">Strict Governance Constraints</span>
+</div>
+<div class="border border-border rounded-lg overflow-hidden bg-surface">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="border-b border-border bg-surface-subtle text-muted text-label font-label uppercase">
+<th class="py-2.5 px-4 font-semibold">Surcharge Rule</th>
+<th class="py-2.5 px-4 font-semibold">Type</th>
+<th class="py-2.5 px-4 font-semibold">Configured Value</th>
+<th class="py-2.5 px-4 font-semibold">Governance Cap / Constraint</th>
+<th class="py-2.5 px-4 font-semibold text-right">Enforcement</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider font-body text-body">
+<!-- Row 1: Late Checkout (Blocked with Red Pill) -->
+<tr class="bg-error-tint/20 hover:bg-error-tint/30 transition-colors">
+<td class="py-3 px-4">
+<div class="font-body-strong text-body-strong text-ink">Late checkout</div>
+<div class="text-code-sm font-code-sm text-muted">#SUR-001</div>
+</td>
+<td class="py-3 px-4 text-muted font-meta text-meta">Rate penalty</td>
+<td class="py-3 px-4">
+<div class="inline-flex flex-col">
+<span class="inline-block border-2 border-error bg-error-tint text-error font-bold px-3 py-0.5 rounded text-center text-[13px] w-16">
+                            15%
+                          </span>
+<span class="text-[10px] text-error font-semibold mt-1">Exceeds 10% hard cap in v3</span>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="text-body-strong font-body-strong text-ink-secondary">Max 10%</div>
+<div class="text-[10px] text-muted">System Level Ceiling</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-error-tint border border-error-border text-error">
+                          Blocked
+                        </span>
+</td>
+</tr>
+<!-- Row 2: Damage Handling -->
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-4">
+<div class="font-body-strong text-body-strong text-ink">Damage handling</div>
+<div class="text-code-sm font-code-sm text-muted">#SUR-002</div>
+</td>
+<td class="py-3 px-4 text-muted font-meta text-meta">Manual assessment</td>
+<td class="py-3 px-4 text-ink font-medium">
+                        at desk, reason required
+                      </td>
+<td class="py-3 px-4 text-ink-secondary font-meta text-meta">
+                        Customer handover
+                      </td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint border border-status-available-border text-status-available">
+                          Enforced
+                        </span>
+</td>
+</tr>
+<!-- Row 3: Turnover Buffer -->
+<tr class="hover:bg-surface-subtle transition-colors">
+<td class="py-3 px-4">
+<div class="font-body-strong text-body-strong text-ink">Turnover buffer</div>
+<div class="text-code-sm font-code-sm text-muted">#OPS-012</div>
+</td>
+<td class="py-3 px-4 text-muted font-meta text-meta">Sanitization window</td>
+<td class="py-3 px-4 text-ink font-medium">
+                        2 days
+                      </td>
+<td class="py-3 px-4 text-ink-secondary font-meta text-meta">
+                        Post-checkout hold
+                      </td>
+<td class="py-3 px-4 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint border border-status-available-border text-status-available">
+                          Active
+                        </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer Meta Details -->
+<div class="pt-2 flex items-center justify-between text-meta font-meta text-muted border-t border-border">
+<span>All changes tracked in audit trail. Changes take effect on next billing cycle.</span>
+<a class="text-primary hover:underline font-medium" href="#">Download Current Governance Matrix (PDF)</a>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT 4-COLUMN: COMPANION PANEL & AUDIT CHECKLIST -->
+<div class="lg:col-span-4 space-y-5">
+<!-- POLICY LIFECYCLE & COMPLIANCE CARD -->
+<div class="bg-surface border border-border rounded-xl shadow-sm p-5 space-y-5" id="cap-rules">
+<!-- Header -->
+<div class="flex items-center justify-between pb-3 border-b border-border">
+<div>
+<h3 class="text-body-strong font-body-strong text-ink">Policy Lifecycle & Compliance</h3>
+<p class="text-label font-label text-muted">v3.0.4-draft</p>
+</div>
+<span class="text-[11px] text-muted font-meta">Modified 3 mins ago by Hằng</span>
+</div>
+<!-- Compliance Checklist -->
+<div class="space-y-2.5">
+<span class="text-label font-label uppercase text-muted tracking-wider">Automated Compliance Checklist</span>
+<div class="space-y-2 text-body font-body">
+<div class="flex items-start gap-2 text-ink">
+<span class="material-symbols-outlined text-success text-[18px] shrink-0" data-icon="check_circle">check_circle</span>
+<span class="text-[12.5px]">3-month upfront commitment discount valid (7.5%)</span>
+</div>
+<div class="flex items-start gap-2 text-ink">
+<span class="material-symbols-outlined text-success text-[18px] shrink-0" data-icon="check_circle">check_circle</span>
+<span class="text-[12.5px]">15% epoxy damage assessment threshold aligned with lease annex</span>
+</div>
+<div class="flex items-start gap-2 text-error">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0" data-icon="cancel">cancel</span>
+<span class="text-[12.5px] font-semibold">Late-checkout fee exceeds max cap (15% > 10%)</span>
+</div>
+</div>
+</div>
+<!-- Hard Caps Reference -->
+<div class="space-y-2.5 pt-3 border-t border-border">
+<span class="text-label font-label uppercase text-muted tracking-wider">Hard Caps Reference</span>
+<div class="bg-surface-subtle border border-border rounded-lg p-3 space-y-2.5">
+<div class="flex items-center justify-between text-[12px]">
+<span class="text-ink-secondary font-medium">Late checkout ceiling:</span>
+<span class="font-code text-code text-error font-semibold">10.0% <span class="text-muted text-[10px] font-normal">(#CAP-04)</span></span>
+</div>
+<div class="flex items-center justify-between text-[12px]">
+<span class="text-ink-secondary font-medium">Security deposit minimum:</span>
+<span class="font-code text-code text-ink font-semibold">10% / 100.000 ₫ <span class="text-muted text-[10px] font-normal">(#CAP-08)</span></span>
+</div>
+<div class="flex items-center justify-between text-[12px]">
+<span class="text-ink-secondary font-medium">Max promotional grace:</span>
+<span class="font-code text-code text-ink font-semibold">7 days <span class="text-muted text-[10px] font-normal">(#CAP-12)</span></span>
+</div>
+</div>
+</div>
+<!-- Pending Modifications Log -->
+<div class="space-y-2.5 pt-3 border-t border-border">
+<div class="flex items-center justify-between">
+<span class="text-label font-label uppercase text-muted tracking-wider">Pending Modifications</span>
+<span class="text-[11px] text-primary font-medium cursor-pointer hover:underline">Clear all</span>
+</div>
+<div class="space-y-2">
+<!-- Item 1 -->
+<div class="p-2.5 rounded border border-border bg-surface text-[12px] space-y-1">
+<div class="flex items-center justify-between font-code text-code-sm text-ink font-semibold">
+<span>S · Outdoor Base Rate</span>
+<span class="text-success text-[11px]">Valid</span>
+</div>
+<div class="text-muted tabular-nums">
+                  345.000 ₫ → <span class="text-ink font-semibold">380.000 ₫</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-2.5 rounded border border-error-border bg-error-tint/40 text-[12px] space-y-1">
+<div class="flex items-center justify-between font-code text-code-sm text-error font-semibold">
+<span>Late checkout fee</span>
+<span class="text-error text-[11px]">Blocked</span>
+</div>
+<div class="text-ink-secondary">
+                  8% → <span class="text-error font-bold">15%</span>
+</div>
+<div class="text-[11px] text-error font-medium">
+                  Blocked by hard cap #CAP-04 ceiling 10%
+                </div>
+</div>
+</div>
+</div>
+<!-- Guidance Note -->
+<div class="p-3 bg-surface-subtle border border-border rounded-lg text-meta font-meta text-muted">
+            To increase ceilings beyond Policy v3 hard governance caps, an executive protocol exemption request must be submitted to the Regional Committee.
+          </div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

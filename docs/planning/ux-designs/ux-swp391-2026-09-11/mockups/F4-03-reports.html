@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports — StorageHub Business Ops</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with custom theme config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "status-maintenance-border": "#FFEDD5",
+            "primary-fixed-dim": "#c3c0ff",
+            "status-available-border": "#D1FAE5",
+            "on-surface": "#1b1b24",
+            "on-background": "#1b1b24",
+            "error-tint": "#FEF2F2",
+            "border-strong": "#CBD5E1",
+            "status-maintenance-tint": "#FFF7ED",
+            "secondary": "#515f74",
+            "status-rented-border": "#E2E8F0",
+            "status-buffer": "#B45309",
+            "error": "#DC2626",
+            "status-buffer-bar": "#F59E0B",
+            "on-secondary-container": "#57657b",
+            "status-preparing-border": "#E0F2FE",
+            "on-primary-fixed": "#0f0069",
+            "inverse-primary": "#c3c0ff",
+            "surface": "#FFFFFF",
+            "on-tertiary-container": "#ffd2be",
+            "on-surface-variant": "#464555",
+            "status-available": "#059669",
+            "on-tertiary": "#ffffff",
+            "on-primary-container": "#dad7ff",
+            "surface-subtle": "#F8FAFC",
+            "status-retired": "#94A3B8",
+            "on-primary-fixed-variant": "#3323cc",
+            "surface-tint": "#4d44e3",
+            "surface-dim": "#dcd8e5",
+            "error-container": "#ffdad6",
+            "app-bg": "#F4F6F9",
+            "tertiary-fixed": "#ffdbcc",
+            "surface-variant": "#e4e1ee",
+            "success": "#059669",
+            "status-available-tint": "#ECFDF5",
+            "primary-tint": "#EEF2FF",
+            "warning": "#B45309",
+            "status-rented": "#334155",
+            "secondary-fixed": "#d5e3fd",
+            "background": "#fcf8ff",
+            "ink": "#0F172A",
+            "status-buffer-border": "#FDE68A",
+            "surface-container-high": "#eae6f4",
+            "on-error": "#ffffff",
+            "muted": "#64748B",
+            "status-retired-tint": "#F8FAFC",
+            "inverse-on-surface": "#f3effc",
+            "status-maintenance": "#C2410C",
+            "outline": "#777587",
+            "surface-container": "#f0ecf9",
+            "tertiary-fixed-dim": "#ffb695",
+            "surface-muted": "#F1F5F9",
+            "status-preparing": "#0284C7",
+            "on-tertiary-fixed": "#351000",
+            "primary-container": "#4f46e5",
+            "on-secondary-fixed": "#0d1c2f",
+            "faint": "#94A3B8",
+            "status-rented-tint": "#F1F5F9",
+            "surface-container-low": "#f5f2ff",
+            "secondary-fixed-dim": "#b9c7e0",
+            "primary-fixed": "#e2dfff",
+            "status-reserved-tint": "#EEF2FF",
+            "primary-outline-border": "#C7D2FE",
+            "divider": "#F1F5F9",
+            "outline-variant": "#c7c4d8",
+            "on-secondary-fixed-variant": "#3a485c",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "surface-container-lowest": "#ffffff",
+            "tertiary": "#7e3000",
+            "success-tint": "#ECFDF5",
+            "status-preparing-tint": "#F0F9FF",
+            "primary-border": "#E0E7FF",
+            "primary": "#4F46E5",
+            "status-retired-border": "#E2E8F0",
+            "secondary-container": "#d5e3fd",
+            "status-buffer-tint": "#FFFBEB",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#302f39",
+            "ink-secondary": "#334155",
+            "error-border": "#FECACA",
+            "warning-tint": "#FFFBEB",
+            "status-reserved": "#4F46E5",
+            "border": "#E2E8F0",
+            "status-reserved-border": "#E0E7FF",
+            "surface-container-highest": "#e4e1ee",
+            "on-secondary": "#ffffff",
+            "surface-bright": "#fcf8ff",
+            "warning-bar": "#F59E0B",
+            "on-error-container": "#93000a",
+            "tertiary-container": "#a44100"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "14px",
+            "space-sm": "8px",
+            "space-3xl": "48px",
+            "space-2xl": "32px",
+            "space-lg": "16px",
+            "space-xl": "24px",
+            "margin": "24px",
+            "space-xs": "4px",
+            "space-md": "12px"
+          },
+          "fontFamily": {
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""]
+          },
+          "fontSize": {
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "code": ["13px", { "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col antialiased selection:bg-primary-tint selection:text-primary">
+<!-- TOP APP BAR (Shared Component Source of Truth) -->
+<header class="w-full h-[54px] px-margin flex items-center justify-between border-b border-border bg-surface shadow-sm z-30 sticky top-0">
+<div class="flex items-center gap-6 h-full">
+<!-- Brand Logo Anchor -->
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">warehouse</span>
+</div>
+<span class="text-headline font-headline text-ink font-semibold tracking-tight">StorageHub</span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex items-center h-full gap-1 ml-2">
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors duration-150 ease-in-out" href="#">Overview</a>
+<a class="text-muted hover:text-ink font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors duration-150 ease-in-out" href="#">Policy</a>
+<a class="text-primary border-b-2 border-primary font-nav text-nav font-medium h-[54px] flex items-center px-3 transition-colors duration-150 ease-in-out" href="#">Reports</a>
+</nav>
+</div>
+<!-- Trailing Actions Cluster -->
+<div class="flex items-center gap-3">
+<!-- Role Chip -->
+<span class="bg-primary-tint text-primary border border-primary-border px-2.5 py-0.5 rounded-full font-medium text-[12px] leading-tight flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        Business Ops
+      </span>
+<!-- Notification Action -->
+<button aria-label="Notifications" class="relative p-1.5 text-muted hover:text-ink hover:bg-surface-subtle rounded-xl transition-colors duration-150 ease-in-out">
+<span class="material-symbols-outlined text-[20px] text-muted">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
+</button>
+<div class="h-4 w-px bg-border mx-0.5"></div>
+<!-- User Profile Dropdown -->
+<button class="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-surface-subtle transition-colors duration-150 ease-in-out">
+<img alt="Hằng avatar" class="w-7 h-7 rounded-full object-cover border border-border" data-alt="Close up professional portrait of Hằng, a confident Vietnamese Business Operations Lead wearing modern corporate attire with clean minimal background lighting in high key daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCi9NW2KWqhrYWTuqCGmE1vHBjq91PaJcMTHpUk20nWh2TJKr_6toNgNfEV0tmscj7hZghsoJDgYWkk2ISN6ZRI5koOxFNYHf24esPI0Sjqhctz1-eWIZZVmxuRy4SCSrAnM4Ic13odcQ0mvbkLqOz1hp5jYTrAmgvbK2P9Aa6pVD88fDdVTBN2abm5xK1jb2zOq1hdaZXGLT3PTp32yUE8DUb8igCKKVzQz4-x8pRsHxztzlOGZvb6SgDFh5PQwf2y5GeueXK_7cg"/>
+<span class="text-body-strong font-body-strong text-ink text-left hidden lg:block">Hằng (Business Ops Lead)</span>
+<span class="material-symbols-outlined text-[16px] text-muted">expand_more</span>
+</button>
+</div>
+</header>
+<!-- SUB-BAR / METADATA STRIP -->
+<div class="w-full bg-surface border-b border-border px-margin py-1.5 flex items-center justify-between text-meta font-meta text-muted">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 text-ink-secondary">
+<span class="material-symbols-outlined text-[15px] text-primary">location_city</span>
+<span class="font-medium text-ink">VN-SGN-01</span>
+<span class="text-muted">(Tân Bình Gateway)</span>
+</div>
+<span class="text-border">|</span>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-available inline-block animate-pulse"></span>
+<span class="text-status-available font-medium">Systems Nominal</span>
+</div>
+</div>
+<div class="flex items-center gap-4 font-code-sm text-code-sm text-muted">
+<span>UTC+07:00 (HCMC Time)</span>
+<span class="text-border">|</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">dns</span>
+        node: <code class="text-ink-secondary font-code-sm">sgn01-gw-prod-3</code>
+</span>
+</div>
+</div>
+<!-- MAIN CANVAS -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-space-xl space-y-space-xl">
+<!-- PAGE HEADER & CONTROLS -->
+<div class="space-y-3">
+<!-- Breadcrumb -->
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-meta font-meta text-muted">
+<span>StorageHub VN</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Financial Operations</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-ink font-medium">Financial Reporting & Auditing</span>
+</nav>
+<!-- Title & Global Period Controls -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+<div>
+<h1 class="text-display font-display text-ink">Reports</h1>
+<p class="text-meta font-meta text-muted mt-0.5">Automated accounting aggregation & facility revenue ledger reconcilement</p>
+</div>
+<!-- Period Selector Toolbar -->
+<div class="flex flex-wrap items-center gap-2">
+<!-- Preset Chips -->
+<div class="inline-flex p-0.5 bg-surface border border-border rounded-xl shadow-sm">
+<button class="px-3 py-1 text-meta font-meta text-muted hover:text-ink transition-colors rounded-lg">This month</button>
+<button class="px-3 py-1 text-meta font-meta text-muted hover:text-ink transition-colors rounded-lg">Last month</button>
+<button class="px-3 py-1 text-meta font-meta bg-primary-tint text-primary font-semibold border border-primary-outline-border rounded-lg shadow-xs">This quarter</button>
+</div>
+<!-- Custom Range Ghost Button -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border hover:border-border-strong text-ink-secondary hover:text-ink text-meta font-meta rounded-xl transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-muted">calendar_today</span>
+<span>+ Custom range</span>
+</button>
+<!-- Date Span & Comparison Badge -->
+<div class="flex items-center gap-2 pl-1.5">
+<span class="text-meta font-meta text-ink-secondary font-medium">Q3 2026 <span class="text-muted font-normal">(Jul 1 – Sep 30, 2026)</span></span>
+<span class="bg-status-available-tint border border-status-available-border text-status-available px-2 py-0.5 rounded-full text-label font-label">
+              vs Previous Quarter (+6.4%)
+            </span>
+</div>
+</div>
+</div>
+<!-- Domain Navigation Sub-Tabs -->
+<div class="border-b border-border pt-2 flex items-center gap-6">
+<button class="text-primary border-b-2 border-primary font-body-strong text-body-strong pb-2.5 px-1 flex items-center gap-1.5">
+<span>Revenue</span>
+<span class="text-label font-label bg-primary-tint text-primary px-1.5 py-0.2 rounded-full">Active</span>
+</button>
+<button class="text-muted hover:text-ink font-body text-body pb-2.5 px-1 transition-colors">Deposits</button>
+<button class="text-muted hover:text-ink font-body text-body pb-2.5 px-1 transition-colors">Surcharges</button>
+<button class="text-muted hover:text-ink font-body text-body pb-2.5 px-1 transition-colors">Occupancy</button>
+</div>
+</div>
+<!-- SUMMARY METRICS ROW (4 KPI Cards with 3px Signature Left Status Bar) -->
+<section aria-label="Quarterly KPIs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: Gross Revenue -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div>
+<div class="flex items-center justify-between text-meta font-meta text-muted">
+<span>Gross Revenue (Q3)</span>
+<span class="material-symbols-outlined text-[16px] text-muted">payments</span>
+</div>
+<div class="mt-2 text-kpi-value font-kpi-value text-ink tnum tracking-tight">
+            37.450.000 ₫
+          </div>
+</div>
+<div class="mt-3 flex items-center gap-1.5">
+<span class="inline-flex items-center gap-0.5 bg-status-available-tint border border-status-available-border text-status-available px-1.5 py-0.5 rounded text-label font-label">
+<span class="material-symbols-outlined text-[12px]">arrow_upward</span>
+            +4.2%
+          </span>
+<span class="text-label font-label text-muted">vs Q2 performance</span>
+</div>
+</div>
+<!-- Card 2: Base Rent Collections -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#334155]"></div>
+<div>
+<div class="flex items-center justify-between text-meta font-meta text-muted">
+<span>Base Rent Collections</span>
+<span class="material-symbols-outlined text-[16px] text-muted">account_balance_wallet</span>
+</div>
+<div class="mt-2 text-kpi-value font-kpi-value text-ink tnum tracking-tight">
+            31.320.000 ₫
+          </div>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="text-label font-label font-medium text-ink-secondary bg-surface-muted px-1.5 py-0.5 rounded">
+            83.6%
+          </span>
+<span class="text-label font-label text-muted">of total gross revenue</span>
+</div>
+</div>
+<!-- Card 3: Surcharges & Fees -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#F59E0B]"></div>
+<div>
+<div class="flex items-center justify-between text-meta font-meta text-muted">
+<span>Surcharges & Fees</span>
+<span class="material-symbols-outlined text-[16px] text-muted">receipt_long</span>
+</div>
+<div class="mt-2 text-kpi-value font-kpi-value text-ink tnum tracking-tight">
+            1.240.000 ₫
+          </div>
+</div>
+<div class="mt-3 flex items-center gap-1.5">
+<span class="inline-flex items-center gap-0.5 bg-status-available-tint border border-status-available-border text-status-available px-1.5 py-0.5 rounded text-label font-label">
+<span class="material-symbols-outlined text-[12px]">arrow_upward</span>
+            +11.8%
+          </span>
+<span class="text-label font-label text-muted">vs Q2 utility billings</span>
+</div>
+</div>
+<!-- Card 4: Active Leased Units -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#059669]"></div>
+<div>
+<div class="flex items-center justify-between text-meta font-meta text-muted">
+<span>Active Leased Units</span>
+<span class="material-symbols-outlined text-[16px] text-muted">grid_view</span>
+</div>
+<div class="mt-2 text-kpi-value font-kpi-value text-ink tnum tracking-tight">
+            37 <span class="text-price font-price text-muted font-normal">of 42</span>
+</div>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="inline-flex items-center gap-1 text-label font-label text-status-available bg-status-available-tint border border-status-available-border px-1.5 py-0.5 rounded">
+            88.1% occupancy rate
+          </span>
+<span class="text-label font-label text-muted">5 in turnover</span>
+</div>
+</div>
+</section>
+<!-- MAIN ANALYTICS SECTION: BENTO GRID WITH CHART & AUXILIARY METRICS -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- REVENUE CHART CARD (8 Cols) -->
+<div class="lg:col-span-8 bg-surface border border-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+<!-- Chart Header -->
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-divider">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline font-headline text-ink">Revenue — this quarter</h2>
+<span class="text-label font-label bg-surface-muted text-muted px-2 py-0.5 rounded">Audited</span>
+</div>
+<p class="text-meta font-meta text-muted mt-0.5">Monthly breakdown of collected base rent, deposit reserves, and operational surcharges across active leases</p>
+</div>
+<!-- Chart Legend -->
+<div class="flex items-center gap-4 text-meta font-meta">
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-1 bg-[#4F46E5] rounded-full"></span>
+<span class="text-ink-secondary">Gross Rent</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-0.5 border-b-2 border-dotted border-[#0284C7]"></span>
+<span class="text-ink-secondary">Deposits Held</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3.5 h-1 bg-[#F59E0B] rounded-full"></span>
+<span class="text-ink-secondary">Surcharges</span>
+</div>
+</div>
+</div>
+<!-- Chart Graphic Container -->
+<div class="relative w-full h-[280px] pt-4 select-none">
+<!-- Currency Y-Axis Labels -->
+<div class="absolute left-0 top-4 bottom-7 flex flex-col justify-between text-meta font-meta text-muted tnum text-right pr-3 border-r border-divider w-16">
+<span>15M ₫</span>
+<span>12M ₫</span>
+<span>9M ₫</span>
+<span>6M ₫</span>
+<span>3M ₫</span>
+<span>0 ₫</span>
+</div>
+<!-- Chart Surface with SVG Lines -->
+<div class="ml-16 h-full flex flex-col justify-between relative">
+<!-- Background Horizontal Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-7">
+<div class="w-full border-b border-divider border-dashed"></div>
+<div class="w-full border-b border-divider border-dashed"></div>
+<div class="w-full border-b border-divider border-dashed"></div>
+<div class="w-full border-b border-divider border-dashed"></div>
+<div class="w-full border-b border-divider border-dashed"></div>
+<div class="w-full border-b border-border"></div>
+</div>
+<!-- SVG Curves Plotting Area -->
+<svg class="w-full h-[calc(100%-28px)] overflow-visible relative z-10" preserveaspectratio="none" viewbox="0 0 600 220">
+<defs>
+<lineargradient id="primaryAreaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4F46E5" stop-opacity="0.12"></stop>
+<stop offset="100%" stop-color="#4F46E5" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Gross Rent Area fill & Line (July: 11.01M/15M=73.4% -> y=58, Aug: 10.45M/15M=69.6% -> y=66, Sep: 9.86M/15M=65.7% -> y=75) -->
+<path d="M 60,58 L 300,66 L 540,75 L 540,220 L 60,220 Z" fill="url(#primaryAreaGrad)"></path>
+<path d="M 60,58 C 180,62 180,62 300,66 C 420,70 420,70 540,75" fill="none" stroke="#4F46E5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<!-- Deposits Line (July: 1.83M/15M=12.2% -> y=193, Aug: 1.82M/15M=12.1% -> y=193, Sep: 1.24M/15M=8.2% -> y=201) -->
+<path d="M 60,193 C 180,193 180,193 300,193 C 420,193 420,198 540,201" fill="none" stroke="#0284C7" stroke-dasharray="4,4" stroke-width="2"></path>
+<!-- Surcharges Line (July: 450k -> y=213, Aug: 480k -> y=212, Sep: 310k -> y=215) -->
+<path d="M 60,213 C 180,212 180,212 300,212 C 420,212 420,214 540,215" fill="none" stroke="#F59E0B" stroke-linecap="round" stroke-width="2"></path>
+<!-- Jul Data Points -->
+<circle cx="60" cy="58" fill="#FFFFFF" r="4.5" stroke="#4F46E5" stroke-width="2"></circle>
+<circle cx="60" cy="193" fill="#FFFFFF" r="3.5" stroke="#0284C7" stroke-width="2"></circle>
+<circle cx="60" cy="213" fill="#FFFFFF" r="3" stroke="#F59E0B" stroke-width="2"></circle>
+<!-- Aug Data Points -->
+<circle cx="300" cy="66" fill="#FFFFFF" r="4.5" stroke="#4F46E5" stroke-width="2"></circle>
+<circle cx="300" cy="193" fill="#FFFFFF" r="3.5" stroke="#0284C7" stroke-width="2"></circle>
+<circle cx="300" cy="212" fill="#FFFFFF" r="3" stroke="#F59E0B" stroke-width="2"></circle>
+<!-- Sep Data Points (Active / Highlighted) -->
+<circle cx="540" cy="75" fill="#4F46E5" r="5.5" stroke="#FFFFFF" stroke-width="2.5"></circle>
+<circle cx="540" cy="201" fill="#0284C7" r="4" stroke="#FFFFFF" stroke-width="2"></circle>
+<circle cx="540" cy="215" fill="#F59E0B" r="4" stroke="#FFFFFF" stroke-width="2"></circle>
+<!-- Highlight vertical guide on Sep -->
+<line stroke="#CBD5E1" stroke-dasharray="2,2" stroke-width="1" x1="540" x2="540" y1="0" y2="220"></line>
+</svg>
+<!-- SIMULATED HOVER TOOLTIP FLOATING OVER SEPTEMBER -->
+<div class="absolute right-4 top-2 bg-ink text-surface rounded-xl p-3 shadow-lg border border-slate-700 text-meta font-meta z-20 w-64 pointer-events-none">
+<div class="flex items-center justify-between border-b border-slate-700 pb-1.5 mb-1.5">
+<span class="font-semibold text-surface">Sep 2026 Close</span>
+<span class="text-label font-label text-status-available font-semibold bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800">Finalized</span>
+</div>
+<div class="text-body-strong font-body-strong text-surface tnum flex justify-between py-0.5">
+<span>Total Collected:</span>
+<span class="text-emerald-400 font-semibold">11.410.000 ₫</span>
+</div>
+<div class="space-y-1 text-meta text-slate-300 tnum pt-1 border-t border-slate-800">
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#4F46E5]"></span>Base Rent:</span>
+<span class="text-surface font-medium">9.860.000 ₫</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#0284C7]"></span>Deposits:</span>
+<span class="text-surface font-medium">1.240.000 ₫</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>Surcharges:</span>
+<span class="text-surface font-medium">310.000 ₫</span>
+</div>
+</div>
+</div>
+<!-- X-Axis Labels -->
+<div class="h-7 flex items-center justify-between text-meta font-meta text-ink-secondary px-8 font-medium">
+<span>Jul 2026</span>
+<span>Aug 2026</span>
+<span class="text-primary font-semibold">Sep 2026</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AUDIT OVERVIEW & LEDGER HEALTH (4 Cols) -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Vault & Reconciliation Status -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between pb-3 border-b border-divider">
+<span class="text-body-strong font-body-strong text-ink">Settlement Gateway</span>
+<span class="bg-status-available-tint text-status-available border border-status-available-border px-2 py-0.5 rounded-full text-label font-label flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span> Synchronized
+            </span>
+</div>
+<div class="py-3 space-y-2.5 text-body font-body">
+<div class="flex justify-between text-meta font-meta">
+<span class="text-muted">Direct Debit (VietQR/NAPAS)</span>
+<span class="text-ink font-semibold tnum">92.4% (34.60M ₫)</span>
+</div>
+<div class="w-full bg-surface-muted rounded-full h-1.5 overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 92.4%"></div>
+<div class="bg-status-buffer-bar h-full" style="width: 7.6%"></div>
+</div>
+<div class="flex justify-between text-meta font-meta text-muted">
+<span>Manual Bank Transfer</span>
+<span class="text-ink-secondary font-medium tnum">7.6% (2.85M ₫)</span>
+</div>
+</div>
+<div class="pt-2 border-t border-divider flex items-center justify-between text-label font-label text-muted">
+<span>Last automated sweep</span>
+<span class="font-code-sm text-code-sm text-ink">23:59:58 UTC+7</span>
+</div>
+</div>
+<!-- Compliance & Regulatory Retention Card -->
+<div class="bg-surface border border-border rounded-xl p-4 shadow-sm flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+<span class="text-body-strong font-body-strong text-ink">VN VAS Audit Conformance</span>
+</div>
+<p class="text-meta font-meta text-muted leading-relaxed">
+              All electronic invoices (Hóa đơn điện tử) are digitally countersigned via VNPT-CA and synced with the General Department of Taxation portal.
+            </p>
+</div>
+<div class="mt-4 pt-3 border-t border-divider flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-meta font-meta text-ink-secondary">
+<span class="material-symbols-outlined text-[16px] text-status-available">check_circle</span>
+<span>100% Tax Invoiced</span>
+</div>
+<button class="text-primary hover:text-ink font-button text-button transition-colors">
+              Verify Signatures →
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- DATA TABLE CARD: MONTHLY LEDGER SUMMARY -->
+<section class="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+<!-- Card Header -->
+<div class="p-4 sm:px-6 sm:py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline font-headline text-ink">Monthly Ledger Summary</h2>
+<span class="text-label font-label bg-surface-muted text-muted px-2 py-0.5 rounded border border-border">Fiscal Q3</span>
+</div>
+<p class="text-meta font-meta text-muted mt-0.5">Audited financial reconciliation per monthly close</p>
+</div>
+<!-- Table Secondary Action -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-strong hover:bg-surface-subtle text-ink-secondary hover:text-ink text-button font-button rounded-xl transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px] text-muted">download</span>
+<span>Export CSV</span>
+</button>
+</div>
+<!-- Dense Tabular Data Grid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border bg-surface-subtle text-muted text-label font-label uppercase tracking-wider">
+<th class="py-2.5 px-6 font-semibold" scope="col">Month</th>
+<th class="py-2.5 px-4 font-semibold text-right" scope="col">Rent</th>
+<th class="py-2.5 px-4 font-semibold text-right" scope="col">Deposits</th>
+<th class="py-2.5 px-4 font-semibold text-right" scope="col">Surcharges</th>
+<th class="py-2.5 px-4 font-semibold text-right" scope="col">Total</th>
+<th class="py-2.5 px-6 font-semibold text-center" scope="col">Status</th>
+<th class="py-2.5 px-6 font-semibold text-right" scope="col">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider text-body font-body">
+<!-- Row 1: Sep 2026 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-6 text-ink font-body-strong flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Sep 2026</span>
+<span class="text-label font-label text-muted font-normal">(Close)</span>
+</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">9.860.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">1.240.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">310.000 ₫</td>
+<td class="py-3 px-4 text-right tnum font-semibold text-ink">11.410.000 ₫</td>
+<td class="py-3 px-6 text-center">
+<span class="inline-flex items-center gap-1 bg-status-available-tint text-status-available border border-status-available-border px-2 py-0.5 rounded-full text-label font-label">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  Reconciled
+                </span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="text-primary hover:text-on-primary-fixed-variant font-button text-button inline-flex items-center gap-0.5 group-hover:underline">
+                  View breakdown
+                  <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Aug 2026 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-6 text-ink font-body-strong flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span>
+<span>Aug 2026</span>
+</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">10.450.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">1.820.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">480.000 ₫</td>
+<td class="py-3 px-4 text-right tnum font-semibold text-ink">12.750.000 ₫</td>
+<td class="py-3 px-6 text-center">
+<span class="inline-flex items-center gap-1 bg-status-available-tint text-status-available border border-status-available-border px-2 py-0.5 rounded-full text-label font-label">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  Reconciled
+                </span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="text-primary hover:text-on-primary-fixed-variant font-button text-button inline-flex items-center gap-0.5 group-hover:underline">
+                  View breakdown
+                  <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Jul 2026 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3 px-6 text-ink font-body-strong flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span>
+<span>Jul 2026</span>
+</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">11.010.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">1.830.000 ₫</td>
+<td class="py-3 px-4 text-right tnum text-ink-secondary">450.000 ₫</td>
+<td class="py-3 px-4 text-right tnum font-semibold text-ink">13.290.000 ₫</td>
+<td class="py-3 px-6 text-center">
+<span class="inline-flex items-center gap-1 bg-status-available-tint text-status-available border border-status-available-border px-2 py-0.5 rounded-full text-label font-label">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  Reconciled
+                </span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="text-primary hover:text-on-primary-fixed-variant font-button text-button inline-flex items-center gap-0.5 group-hover:underline">
+                  View breakdown
+                  <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+</tbody>
+<!-- Table Summary Footer Row -->
+<tfoot>
+<tr class="border-t-2 border-border bg-surface-muted text-ink font-body-strong">
+<td class="py-3.5 px-6 font-semibold">Total Q3 2026</td>
+<td class="py-3.5 px-4 text-right tnum font-semibold">31.320.000 ₫</td>
+<td class="py-3.5 px-4 text-right tnum font-semibold">4.890.000 ₫</td>
+<td class="py-3.5 px-4 text-right tnum font-semibold">1.240.000 ₫</td>
+<td class="py-3.5 px-4 text-right tnum font-semibold text-primary text-price">37.450.000 ₫</td>
+<td class="py-3.5 px-6 text-center">
+<span class="text-label font-label text-muted">Audited & Locked</span>
+</td>
+<td class="py-3.5 px-6 text-right">
+<span class="text-meta font-meta text-muted">3/3 Closed</span>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="w-full bg-surface border-t border-border mt-auto px-margin py-3 text-meta font-meta text-muted">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+<div class="flex items-center gap-3">
+<span class="font-medium text-ink">StorageHub Control Room v2.4</span>
+<span class="text-border">|</span>
+<span>Facility VN-SGN-01 (Tân Bình Gateway, Ho Chi Minh City)</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-available"></span>
+<span>Ledger Synced: Today at 14:02:18</span>
+</div>
+<span class="text-border">|</span>
+<span>Session: <code class="font-code-sm text-code-sm text-ink-secondary">ops_lead_hang_78a</code></span>
+</div>
+</div>
+</footer>
+</body></html>

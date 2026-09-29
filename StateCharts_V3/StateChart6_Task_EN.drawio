@@ -1,0 +1,40 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="statechart-task-en" name="6. Task (EN)">
+    <mxGraphModel dx="1211" dy="834" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" value="STATE CHART 6 — TASK (internal kanban board)" vertex="1">
+          <mxGeometry height="30" width="700" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="init" parent="1" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="245" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="todo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="ToDo" vertex="1">
+          <mxGeometry height="50" width="200" x="160" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="inprogress" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="InProgress" vertex="1">
+          <mxGeometry height="50" width="220" x="640" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="done" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" value="Done" vertex="1">
+          <mxGeometry height="50" width="200" x="1300" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="final1" parent="1" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1620" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="todo" value="system creates task&amp;nbsp;&lt;div&gt;[check-in / checkout /&lt;br&gt;cleaning / support / contract]&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="todo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" target="inprogress" value="staf receives task">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="inprogress" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" target="done" value="final step completed&amp;nbsp;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="done" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="final1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

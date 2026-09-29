@@ -1,0 +1,17 @@
+# unrelated coursework
+latex dbi/
+
+# junk / build artifacts
+__pycache__/
+*.pyc
+*.log
+*.bkp
+.$*
+docs/planning/ux-designs/*/.working/tmp_*
+docs/planning/ux-designs/*/.working/*resp*
+docs/planning/ux-designs/*/.working/*_rpc*
+docs/planning/ux-designs/*/.working/gen1_*
+docs/planning/ux-designs/*/.working/regen3.json
+
+# Office lock files
+~$*

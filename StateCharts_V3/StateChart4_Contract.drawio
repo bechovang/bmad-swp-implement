@@ -1,0 +1,101 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="statechart-contract-vi" name="4. Contract">
+    <mxGraphModel dx="528" dy="364" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" value="STATE CHART 4 — CONTRACT (hợp đồng gốc CT-)" vertex="1">
+          <mxGeometry height="30" width="700" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="init" parent="1" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="165" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="draft" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Draft" vertex="1">
+          <mxGeometry height="50" width="180" x="120" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="printed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Printed" vertex="1">
+          <mxGeometry height="50" width="180" x="540" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="signed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Signed" vertex="1">
+          <mxGeometry height="50" width="180" x="940" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="active" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Active" vertex="1">
+          <mxGeometry height="50" width="180" x="1340" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="closed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;fontColor=#666666;" value="Closed" vertex="1">
+          <mxGeometry height="50" width="180" x="1180" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="superseded" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;fontColor=#666666;" value="Superseded" vertex="1">
+          <mxGeometry height="50" width="200" x="1620" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="final1" parent="1" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1440" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="notePrinted" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=8;" value="Printed chặn cấp access code cho tới khi có ảnh bản ký.&lt;br&gt;&lt;br&gt;Không ai sửa được hợp đồng — mọi thay đổi = phụ lục riêng (bảng contract_addendums — state chart 3)." vertex="1">
+          <mxGeometry height="120" width="360" x="1150" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="draft" value="deposit thành công (auto-draft,&lt;br&gt;snapshot theo policy version)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="draft" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="printed" value="staff in tại quầy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="printed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="printed" value="in lại [giấy mất / khách chưa ký]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="675" y="205" />
+              <mxPoint x="620" y="205" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="printed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="signed" value="khách ký + staff&lt;br&gt;chụp ảnh attach">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="signed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="active" value="check-in hoàn tất (reservation CHECKED_IN)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="active" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="closed" value="&lt;strong data-start=&quot;186&quot; data-end=&quot;213&quot;&gt;quyết toán (settlement)&lt;/strong&gt;&amp;nbsp;theo hợp đồng">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1385" y="520" />
+              <mxPoint x="1270" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="active" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="superseded" value="addendum thay ngày kết thúc">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1570" y="265" />
+              <mxPoint x="1570" y="605" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="closed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="final1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="final3" parent="1" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1880" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="superseded" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="final3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="draft" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="closed" value="booking huỷ / quá hạn check-in&lt;br&gt;[hoàn cọc theo policy]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="165" y="660" />
+              <mxPoint x="1180" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="printed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontSize=11;" target="closed" value="booking huỷ / quá hạn check-in&lt;br&gt;[hoàn cọc theo policy]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="680" />
+              <mxPoint x="1225" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,32 @@
+%% StorageHub — State chart: vòng đời Unit (kho)
+stateDiagram-v2
+    direction LR
+    [*] --> Available : tạo unit mới
+
+    Available --> Reserved : deposit 10% thành công
+    Reserved --> Rented : check-in hoàn tất (hợp đồng đã ký)
+    Reserved --> Available : hết hạn giữ chỗ / huỷ đặt
+
+    Rented --> Preparing : checkout + settlement hoàn tất
+    Preparing --> Available : cleaning task xong
+    Preparing --> Reserved : cleaning xong [có reservation kế tiếp]
+
+    Rented --> Maintenance : escalate mức severe
+    Available --> Maintenance : manager set [bắt buộc reason]
+    Maintenance --> Preparing : sửa chữa xong
+    Maintenance --> Retired : bỏ khỏi tồn kho
+
+    Available --> Retired : retire [guard: không rental/reservation]
+    Reserved --> Retired : retire [guard: không rental/reservation]
+
+    note right of Available
+        Buffer không phải trạng thái riêng:
+        Available + ngày bắt đầu trễ
+        (turnover buffer) hiển thị
+        "Available soon" trên Browse.
+    end note
+    note right of Rented
+        Merge 2 unit liền kề [guard:
+        không rental/reservation cả 2 phía]
+        tạo unit mới, unit cũ về Retired.
+    end note

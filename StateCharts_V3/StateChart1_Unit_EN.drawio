@@ -1,0 +1,116 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="statechart-unit-en" name="1. Unit (EN)">
+    <mxGraphModel dx="1715" dy="1182" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" value="STATE CHART 1 — UNIT (storage unit)" vertex="1">
+          <mxGeometry height="30" width="700" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="init" parent="1" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="20" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="avail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Available" vertex="1">
+          <mxGeometry height="50" width="200" x="120" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="reserved" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Reserved" vertex="1">
+          <mxGeometry height="50" width="200" x="560" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="rented" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Rented" vertex="1">
+          <mxGeometry height="50" width="200" x="1000" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="preparing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Preparing" vertex="1">
+          <mxGeometry height="50" width="200" x="1440" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="maintenance" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;fontStyle=1;" value="Maintenance" vertex="1">
+          <mxGeometry height="50" width="200" x="560" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="MOJUpSKl-dVpdzJfvdjJ-2" edge="1" parent="1" source="retired" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="MOJUpSKl-dVpdzJfvdjJ-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="retired" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;fontColor=#666666;" value="Retired" vertex="1">
+          <mxGeometry height="50" width="200" x="1240" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="avail" value="create new unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="avail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" target="reserved" value="10% deposit succeeded">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="reserved" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;fontSize=11;" target="avail" value="hold expired / booking cancelled">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="reserved" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="rented" value="check-in completed&lt;br&gt;[contract signed]">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="rented" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="preparing" value="checkout + settlement completed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="preparing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=11;" target="avail" value="cleaning task done">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1540" y="420" />
+              <mxPoint x="220" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="preparing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.3;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="reserved" value="cleaning done&lt;br&gt;[next reservation exists]">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1500" y="200" />
+              <mxPoint x="700" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="rented" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="maintenance" value="severe escalation">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1050" y="470" />
+              <mxPoint x="710" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="avail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="maintenance" value="manager sets">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="90" y="267" />
+              <mxPoint x="90" y="545" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="maintenance" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontSize=11;" target="preparing" value="repair completed">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="490" />
+              <mxPoint x="1490" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="maintenance" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="retired" value="removed from inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="avail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=11;" target="retired" value="retire&amp;nbsp;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="645" />
+              <mxPoint x="1340" y="645" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="reserved" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.6;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontSize=11;" target="retired" value="retire">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="360" />
+              <mxPoint x="500" y="360" />
+              <mxPoint x="500" y="595" />
+              <mxPoint x="1290" y="595" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MOJUpSKl-dVpdzJfvdjJ-1" parent="1" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1540" y="540" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

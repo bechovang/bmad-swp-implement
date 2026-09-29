@@ -1,0 +1,235 @@
+%% StorageHub — ERD (crow's foot) — 22 thực thể, 8 nhóm — V3 2026-09-18
+%% Thay đổi V3: gộp RENTALS vào RESERVATIONS (1 bảng trọn vòng đời);
+%% tách CONTRACT_ADDENDUMS khỏi CONTRACTS (bỏ self-FK); RESERVATIONS 1:1 CONTRACTS.
+%% Nền tảng: EXPERIENCE.md (ux-swp391-2026-09-11) + 7 flows swimlane + tính năng hợp đồng CT-
+erDiagram
+    %% ── Nhóm 1: Người dùng & cơ sở ──
+    ROLES ||--o{ USERS : "phân vai"
+    FACILITIES ||--o{ ZONES : "có"
+    ZONES ||--o{ UNITS : "chứa"
+    UNIT_TYPES ||--o{ UNITS : "phân loại"
+    USERS ||--o{ STAFF_ASSIGNMENTS : "được gán"
+    ZONES ||--o{ STAFF_ASSIGNMENTS : "phụ trách"
+
+    %% ── Nhóm 2: Kho & chính sách ──
+    RENTAL_POLICIES ||--o{ POLICY_RULES : "định nghĩa"
+    UNIT_TYPES ||--o{ POLICY_RULES : "áp dụng cho"
+
+    %% ── Nhóm 3: Đặt chỗ & thuê (V3: gộp Rental) ──
+    USERS ||--o{ RESERVATIONS : "đặt"
+    UNITS ||--o{ RESERVATIONS : "được giữ"
+    RESERVATIONS ||--o{ EXTENSIONS : "gia hạn"
+    RESERVATIONS ||--o{ CHECKOUT_REQUESTS : "xin trả"
+
+    %% ── Nhóm 4: Hợp đồng & phụ lục (V3: tách Addendum) ──
+    RESERVATIONS ||--|| CONTRACTS : "sinh"
+    RENTAL_POLICIES ||--o{ CONTRACTS : "khóa phiên bản"
+    CONTRACTS ||--o{ CONTRACT_ADDENDUMS : "có"
+    EXTENSIONS ||--o{ CONTRACT_ADDENDUMS : "kèm theo"
+
+    %% ── Nhóm 5: Tiền ──
+    USERS ||--o{ PAYMENTS : "thanh toán"
+    RESERVATIONS ||--o{ PAYMENTS : "cọc 10% + thuê 100%"
+    EXTENSIONS ||--o| PAYMENTS : "phí gia hạn"
+    SETTLEMENTS ||--o{ PAYMENTS : "damage / extra"
+
+    %% ── Nhóm 6: Trả kho & thanh lý ──
+    RESERVATIONS ||--o| SETTLEMENTS : "thanh lý"
+    CONTRACTS ||--o{ SETTLEMENTS : "đối chiếu"
+    SETTLEMENTS ||--o{ INSPECTIONS : "kiểm hạng mục"
+
+    %% ── Nhóm 7: Hỗ trợ ──
+    USERS ||--o{ SUPPORT_TICKETS : "gửi"
+    UNITS ||--o{ SUPPORT_TICKETS : "liên quan"
+    RESERVATIONS ||--o{ SUPPORT_TICKETS : "thuộc phiên thuê"
+    SUPPORT_TICKETS ||--o| ESCALATIONS : "được nâng cấp"
+
+    %% ── Nhóm 8: Vận hành & hệ thống ──
+    USERS ||--o{ TASKS : "nhận việc"
+    USERS ||--o{ NOTIFICATIONS : "nhận"
+    USERS ||--o{ ACTIVITY_LOGS : "ghi audit"
+    UNITS ||--o{ UNITS : "merge vào"
+
+    %% ── Thuộc tính các thực thể chính ──
+    ROLES {
+        int RoleID PK
+        varchar Name UK
+        varchar Description
+    }
+    USERS {
+        bigint UserID PK
+        varchar FullName
+        varchar Email UK
+        varchar Phone
+        varchar PasswordHash
+        int RoleID FK
+        tinyint Status
+        datetime CreatedAt
+    }
+    FACILITIES {
+        int FacilityID PK
+        varchar Name
+        varchar Address
+        varchar Phone
+        tinyint Status
+    }
+    ZONES {
+        int ZoneID PK
+        int FacilityID FK
+        varchar Code
+        int Floor
+    }
+    STAFF_ASSIGNMENTS {
+        bigint AssignmentID PK
+        bigint StaffID FK
+        int ZoneID FK
+        enum Shift
+        date WorkDate
+    }
+    UNIT_TYPES {
+        int TypeID PK
+        varchar Name
+        varchar Description
+    }
+    UNITS {
+        bigint UnitID PK
+        varchar Code UK
+        int TypeID FK
+        int ZoneID FK
+        decimal SizeM2
+        int Floor
+        varchar AccessType
+        enum Status
+        bigint MergedIntoID FK
+    }
+    RENTAL_POLICIES {
+        int PolicyID PK
+        varchar Version UK
+        date EffectiveDate
+        tinyint Status
+    }
+    POLICY_RULES {
+        bigint RuleID PK
+        int PolicyID FK
+        int TypeID FK
+        enum RuleType
+        enum SurchargeType
+        decimal Value
+        decimal Cap
+    }
+    RESERVATIONS {
+        bigint ReservationID PK
+        varchar Code UK
+        bigint CustomerID FK
+        bigint UnitID FK
+        date StartDate
+        date EndDate
+        decimal DepositAmount
+        varchar AccessCode
+        enum Status
+    }
+    EXTENSIONS {
+        bigint ExtensionID PK
+        bigint ReservationID FK
+        date OldEndDate
+        date NewEndDate
+        decimal ExtensionFee
+        enum Status
+    }
+    CHECKOUT_REQUESTS {
+        bigint RequestID PK
+        bigint ReservationID FK
+        date RequestedDate
+        enum Status
+    }
+    CONTRACTS {
+        bigint ContractID PK
+        varchar Code UK
+        bigint ReservationID FK
+        int PolicyID FK
+        text ContentSnapshot
+        varchar SignedPhotoUrl
+        enum Status
+    }
+    CONTRACT_ADDENDUMS {
+        bigint AddendumID PK
+        bigint ContractID FK
+        bigint ExtensionID FK
+        text ContentSnapshot
+        varchar SignedPhotoUrl
+        date SignatureDueDate
+        enum Status
+    }
+    PAYMENTS {
+        bigint PaymentID PK
+        varchar ReceiptCode UK
+        bigint PayerID FK
+        bigint ReservationID FK
+        bigint ExtensionID FK
+        bigint SettlementID FK
+        enum Purpose
+        enum Method
+        decimal Amount
+        enum Status
+    }
+    SETTLEMENTS {
+        bigint SettlementID PK
+        bigint ReservationID FK
+        bigint ContractID FK
+        bigint StaffID FK
+        decimal DamageFee
+        varchar DamageReason
+        decimal RefundAmount
+        varchar ReceiptCode UK
+    }
+    INSPECTIONS {
+        bigint InspectionID PK
+        bigint SettlementID FK
+        enum Item
+        enum Result
+        varchar Note
+    }
+    SUPPORT_TICKETS {
+        bigint TicketID PK
+        varchar Code UK
+        bigint CustomerID FK
+        bigint UnitID FK
+        bigint ReservationID FK
+        enum IncidentType
+        enum Status
+        bigint AssignedStaffID FK
+    }
+    ESCALATIONS {
+        bigint EscalationID PK
+        bigint TicketID FK
+        bigint EscalatedByStaffID FK
+        bigint ManagerID FK
+        text Note
+        enum Decision
+    }
+    TASKS {
+        bigint TaskID PK
+        enum Type
+        varchar RefCode
+        bigint AssignedStaffID FK
+        date WorkDate
+        enum Status
+    }
+    NOTIFICATIONS {
+        bigint NotificationID PK
+        bigint UserID FK
+        varchar Type
+        varchar Title
+        varchar DeepLink
+        tinyint IsRead
+    }
+    ACTIVITY_LOGS {
+        bigint LogID PK
+        bigint ActorID FK
+        varchar EntityType
+        bigint EntityID
+        varchar Action
+        varchar FromValue
+        varchar ToValue
+        varchar Reason
+    }

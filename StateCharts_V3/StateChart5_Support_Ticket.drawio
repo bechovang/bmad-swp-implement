@@ -1,0 +1,71 @@
+<mxfile host="app.diagrams.net" version="24.7.7">
+  <diagram id="statechart-ticket-vi" name="5. Support Ticket">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="STATE CHART 5 — SUPPORT TICKET (yêu cầu hỗ trợ SR-)" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="760" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="init" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="215" y="110" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="open" value="Open" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="240" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="inprogress" value="InProgress" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="240" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="resolved" value="Resolved" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="240" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="escalated" value="Escalated" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="560" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="final1" value="" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="250" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="noteEsc" value="Ticket severe không bao giờ bị bỏ rơi: quyết định ghi vào Activity Log, khách nhận notification ở mọi bước." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="540" width="400" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="khách gửi support request" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="init" target="open">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="route tới staff trực ca&lt;br&gt;[theo unit + shift]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="open" target="inprogress">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="staff xử lý xong + note" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="inprogress" target="resolved">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="staff escalate [bắt buộc note]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="inprogress" target="escalated">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="500" />
+              <mxPoint x="920" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="manager quyết severe + phân công NV&lt;br&gt;[unit → Maintenance + tái định vị khách]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="escalated" target="inprogress">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1120" y="585" />
+              <mxPoint x="1120" y="340" />
+              <mxPoint x="710" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="manager trả về staff [kèm guidance]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fontSize=11;" edge="1" parent="1" source="escalated" target="inprogress">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="585" />
+              <mxPoint x="530" y="277" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="resolved" target="final1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

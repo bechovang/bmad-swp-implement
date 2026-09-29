@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Depot Check-in Pass — StorageHub</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-low": "#f5f2ff",
+            "muted": "#64748B",
+            "status-buffer-tint": "#FFFBEB",
+            "status-buffer": "#B45309",
+            "status-reserved-border": "#E0E7FF",
+            "error-container": "#ffdad6",
+            "status-buffer-bar": "#F59E0B",
+            "error-border": "#FECACA",
+            "ink-secondary": "#334155",
+            "surface": "#FFFFFF",
+            "secondary-container": "#d5e3fd",
+            "primary-fixed": "#e2dfff",
+            "app-bg": "#F4F6F9",
+            "success-tint": "#ECFDF5",
+            "on-tertiary-container": "#ffd2be",
+            "inverse-surface": "#302f39",
+            "status-reserved": "#4F46E5",
+            "on-error": "#ffffff",
+            "faint": "#94A3B8",
+            "divider": "#F1F5F9",
+            "outline": "#777587",
+            "on-secondary-container": "#57657b",
+            "on-primary-container": "#dad7ff",
+            "on-primary-fixed": "#0f0069",
+            "inverse-on-surface": "#f3effc",
+            "surface-container": "#f0ecf9",
+            "on-tertiary": "#ffffff",
+            "surface-tint": "#4d44e3",
+            "success": "#059669",
+            "status-retired": "#94A3B8",
+            "on-surface-variant": "#464555",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#d5e3fd",
+            "on-secondary-fixed-variant": "#3a485c",
+            "error": "#DC2626",
+            "status-maintenance-tint": "#FFF7ED",
+            "surface-muted": "#F1F5F9",
+            "status-available": "#059669",
+            "surface-dim": "#dcd8e5",
+            "status-retired-border": "#E2E8F0",
+            "tertiary-fixed": "#ffdbcc",
+            "warning": "#B45309",
+            "surface-variant": "#e4e1ee",
+            "inverse-primary": "#c3c0ff",
+            "primary-container": "#4f46e5",
+            "status-available-tint": "#ECFDF5",
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#1b1b24",
+            "status-preparing-border": "#E0F2FE",
+            "secondary-fixed-dim": "#b9c7e0",
+            "tertiary-container": "#a44100",
+            "warning-bar": "#F59E0B",
+            "primary-border": "#E0E7FF",
+            "on-error-container": "#93000a",
+            "status-maintenance-border": "#FFEDD5",
+            "surface-bright": "#fcf8ff",
+            "background": "#fcf8ff",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-maintenance": "#C2410C",
+            "warning-tint": "#FFFBEB",
+            "primary": "#4F46E5",
+            "status-buffer-border": "#FDE68A",
+            "primary-fixed-dim": "#c3c0ff",
+            "status-preparing-tint": "#F0F9FF",
+            "border": "#E2E8F0",
+            "surface-container-high": "#eae6f4",
+            "secondary": "#515f74",
+            "primary-tint": "#EEF2FF",
+            "on-primary": "#ffffff",
+            "ink": "#0F172A",
+            "on-background": "#1b1b24",
+            "border-strong": "#CBD5E1",
+            "status-preparing": "#0284C7",
+            "primary-outline-border": "#C7D2FE",
+            "on-tertiary-fixed": "#351000",
+            "status-rented-tint": "#F1F5F9",
+            "status-rented-border": "#E2E8F0",
+            "status-available-border": "#D1FAE5",
+            "tertiary": "#7e3000",
+            "status-rented": "#334155",
+            "surface-container-highest": "#e4e1ee",
+            "status-reserved-tint": "#EEF2FF",
+            "error-tint": "#FEF2F2",
+            "surface-subtle": "#F8FAFC",
+            "status-retired-tint": "#F8FAFC",
+            "outline-variant": "#c7c4d8",
+            "on-secondary-fixed": "#0d1c2f",
+            "on-primary-fixed-variant": "#3323cc",
+            "on-tertiary-fixed-variant": "#7b2f00"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "14px",
+            "space-3xl": "48px",
+            "space-2xl": "32px",
+            "margin": "24px",
+            "space-xl": "24px",
+            "space-md": "12px",
+            "space-lg": "16px",
+            "space-xs": "4px",
+            "space-sm": "8px"
+          },
+          "fontFamily": {
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col antialiased selection:bg-primary-tint selection:text-primary">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="bg-surface docked full-width top-0 h-[54px] border-b border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] sticky z-50">
+<div class="w-full h-[54px] px-margin flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left Anchor & Brand Logo -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[17px]">warehouse</span>
+</div>
+<span class="font-headline text-headline text-ink font-semibold tracking-tight">StorageHub</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary-tint border border-primary-border font-label text-label text-primary">Customer</span>
+</div>
+<!-- Global Navigation Links -->
+<nav class="hidden md:flex items-center space-x-6 h-[54px]">
+<!-- Link 1: Browse Units (Inactive) -->
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">
+            Browse Units
+          </a>
+<!-- Link 2: My Rentals (Active - Target section for Check-in pass) -->
+<a class="text-primary font-body-strong text-body-strong border-b-2 border-primary py-3.5" href="#">
+            My Rentals
+          </a>
+<!-- Link 3: Support (Inactive) -->
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">
+            Support
+          </a>
+</nav>
+</div>
+<!-- Right Trailing Profile & Operational Context -->
+<div class="flex items-center gap-3">
+<!-- Depot Location Status Indicator -->
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-subtle border border-border text-ink-secondary font-meta text-meta">
+<span class="w-2 h-2 rounded-full bg-status-available"></span>
+<span>Depot SGN-01 (Tân Bình Gateway)</span>
+</div>
+<!-- Notification Action -->
+<button aria-label="Notifications" class="p-1.5 rounded-lg text-ink-secondary hover:bg-surface-subtle active:scale-[0.98] transition-transform duration-150 relative" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full"></span>
+</button>
+<div class="h-4 w-[1px] bg-border mx-0.5"></div>
+<!-- User Profile Pill -->
+<div class="flex items-center gap-2 pl-1 py-1 pr-2 rounded-lg hover:bg-surface-subtle transition-colors cursor-pointer">
+<div class="w-7 h-7 rounded-full bg-primary-tint border border-primary-outline-border flex items-center justify-center text-primary font-body-strong text-body-strong" title="Lan">
+            L
+          </div>
+<div class="flex flex-col text-left">
+<span class="font-body-strong text-body-strong text-ink leading-tight">Lan</span>
+<span class="font-code-sm text-code-sm text-muted font-normal">SGN-8842</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas Container -->
+<main class="flex-1 w-full max-w-4xl mx-auto px-margin py-6">
+<!-- Breadcrumb and Navigation Hierarchy -->
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+<nav aria-label="Breadcrumb" class="flex items-center gap-2 font-meta text-meta text-muted">
+<a class="hover:text-ink transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[15px]">arrow_back</span>
+<span>Back to My Rentals</span>
+</a>
+<span class="text-faint">/</span>
+<span class="font-code text-code text-muted">Unit S-3</span>
+<span class="text-faint">/</span>
+<span class="text-ink font-body-strong">Check-in Pass</span>
+</nav>
+<!-- Print/Download Header Quick Action -->
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border hover:border-border-strong rounded-xl text-ink font-button text-button shadow-[0_1px_2px_rgba(15,23,42,0.05)] active:scale-[0.98] transition-all" onclick="window.print()">
+<span class="material-symbols-outlined text-[16px] text-muted">print</span>
+<span>Print Pass</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border hover:border-border-strong rounded-xl text-ink font-button text-button shadow-[0_1px_2px_rgba(15,23,42,0.05)] active:scale-[0.98] transition-all" id="downloadPdfBtn">
+<span class="material-symbols-outlined text-[16px] text-primary">download</span>
+<span>PDF Pass</span>
+</button>
+</div>
+</div>
+<!-- Screen Title & Live Operational Status Pill -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-border mb-6">
+<div>
+<h1 class="font-display text-display text-ink tracking-tight">Depot Check-in Pass</h1>
+<p class="font-body text-body text-muted mt-0.5">Present this digital voucher at the Tân Bình Gateway reception desk upon arrival.</p>
+</div>
+<div>
+<!-- Live arrival status badge -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-available-tint border border-status-available-border text-status-available font-meta text-meta shadow-sm">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-available opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-status-available"></span>
+</span>
+<span class="font-body-strong">Ready for Onboarding · Oct 3, 2026</span>
+</div>
+</div>
+</div>
+<!-- Grid / Flow Container -->
+<div class="space-y-5">
+<!-- HERO CHECK-IN PASS CARD (Stripe/Linear Utilitarian Blueprint) -->
+<section class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] relative overflow-hidden transition-all hover:border-border-strong">
+<!-- 3px Signature Left Status Bar (Indigo / Reserved) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-reserved"></div>
+<div class="p-6 md:p-8 pl-7 sm:pl-8">
+<!-- Card Header / Meta Top Row -->
+<div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-divider">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded bg-primary-tint border border-primary-border flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[14px]">confirmation_number</span>
+</span>
+<span class="font-label text-label tracking-wider uppercase text-muted">Customer Onboarding Authorization</span>
+</div>
+<div class="flex items-center gap-2 font-code-sm text-code-sm text-muted">
+<span>REF: <span class="text-ink font-semibold">BK-1042-SGN</span></span>
+<span class="text-faint">·</span>
+<span>DEPOT: <span class="text-ink font-semibold">SGN-01</span></span>
+</div>
+</div>
+<!-- Hero Reservation Code Block -->
+<div class="mt-6 mb-6 text-center">
+<span class="font-label text-label tracking-widest text-muted uppercase">Your Reservation Code</span>
+<div class="relative max-w-md mx-auto my-3 group">
+<div class="flex items-center justify-center py-4 px-6 bg-surface-subtle border border-dashed border-border-strong rounded-xl select-all transition-colors group-hover:bg-primary-tint/20 group-hover:border-primary-outline-border">
+<span class="font-code text-4xl sm:text-5xl font-bold tracking-widest text-ink tabular-nums select-all" id="reservationCode">BK-1042</span>
+</div>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface border border-border shadow-sm text-ink-secondary hover:text-ink font-meta text-meta active:scale-95 transition-all" id="copyCodeBtn" onclick="copyReservationCode()" type="button">
+<span class="material-symbols-outlined text-[15px]" id="copyIcon">content_copy</span>
+<span id="copyText">Copy</span>
+</button>
+</div>
+<p class="font-meta text-meta text-muted flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-muted">qr_code_scanner</span>
+<span>Present barcode or verbally state code to the attendant</span>
+</p>
+<!-- Technical Barcode Scan Simulation for Depot Optical Scanner -->
+<div class="mt-4 pt-3 flex flex-col items-center justify-center">
+<div aria-hidden="true" class="h-10 flex items-center gap-[3px] opacity-80">
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[4px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[4px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[4px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[4px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+<span class="w-[4px] h-9 bg-ink inline-block"></span>
+<span class="w-[1px] h-9 bg-ink inline-block"></span>
+<span class="w-[2px] h-9 bg-ink inline-block"></span>
+<span class="w-[3px] h-9 bg-ink inline-block"></span>
+</div>
+<span class="font-code-sm text-[10px] text-faint tracking-widest mt-1">SGN-01-BK1042-S3</span>
+</div>
+</div>
+<!-- Structured Tabular Meta Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t border-border">
+<!-- Allocated Unit -->
+<div class="p-3.5 rounded-lg bg-surface-subtle border border-border flex flex-col justify-between">
+<span class="font-label text-label text-muted uppercase">Allocated Unit</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-code text-price font-bold text-ink">Unit S-3</span>
+<span class="font-meta text-meta text-muted">(Small 3.5m²)</span>
+</div>
+<span class="font-meta text-meta text-ink-secondary mt-1">Ground Floor · Sector A</span>
+</div>
+<!-- Scheduled Arrival Window -->
+<div class="p-3.5 rounded-lg bg-surface-subtle border border-border flex flex-col justify-between">
+<span class="font-label text-label text-muted uppercase">Scheduled Arrival</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-body-strong text-body-strong text-ink">Oct 3, 2026</span>
+<span class="font-meta text-meta text-muted">from 09:00</span>
+</div>
+<span class="font-meta text-meta text-status-available flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span>
+                Bay reserved for unloading
+              </span>
+</div>
+<!-- Depot Assignment -->
+<div class="p-3.5 rounded-lg bg-surface-subtle border border-border flex flex-col justify-between">
+<span class="font-label text-label text-muted uppercase">Depot Check-in Desk</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-body-strong text-body-strong text-ink truncate">Tân Bình Gateway</span>
+</div>
+<span class="font-meta text-meta text-ink-secondary mt-1">Ground Floor Bay #A-14</span>
+</div>
+</div>
+<!-- Quiet Required Document Notice -->
+<div class="mt-4 p-3 rounded-lg bg-status-reserved-tint border border-status-reserved-border flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-primary flex-shrink-0">badge</span>
+<p class="font-meta text-meta text-ink-secondary">
+<span class="font-semibold text-primary">Identity Check Required:</span> Please bring your valid national ID card (<strong class="font-semibold text-ink">CCCD</strong>) or <strong class="font-semibold text-ink">Passport</strong> matching account holder name <em>Lan</em>.
+            </p>
+</div>
+</div>
+</section>
+<!-- NUMBERED ACTION PROTOCOL / NEXT STEPS AT DEPOT -->
+<section class="bg-surface rounded-xl border border-border p-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<h2 class="font-headline text-headline text-ink">Next Steps at Tân Bình Depot</h2>
+</div>
+<span class="font-meta text-meta text-muted">Estimated time: 3–5 minutes</span>
+</div>
+<div class="space-y-3.5">
+<!-- Step 1 -->
+<div class="flex items-start gap-3.5 p-3.5 rounded-lg border border-border bg-surface hover:bg-surface-subtle transition-colors">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-code-sm text-code-sm flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+              1
+            </div>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<h3 class="font-body-strong text-body-strong text-ink">Show this code at the Tân Bình depot desk</h3>
+<span class="font-code-sm text-code-sm text-primary font-semibold">Ref: BK-1042</span>
+</div>
+<p class="font-body text-body text-ink-secondary mt-0.5">Staff will verify your booking reference <span class="font-code text-code text-ink">BK-1042</span> and match your physical government-issued identity document.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-3.5 p-3.5 rounded-lg border border-border bg-surface hover:bg-surface-subtle transition-colors">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-code-sm text-code-sm flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+              2
+            </div>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div class="flex items-center gap-2">
+<h3 class="font-body-strong text-body-strong text-ink">Pay the remaining rent balance</h3>
+<span class="font-label text-label px-1.5 py-0.5 rounded bg-surface-subtle border border-border text-muted">Multiple Options</span>
+</div>
+<!-- Strict Tabular Price formatting -->
+<span class="font-price text-price text-ink tabular-nums font-bold">1.035.000 ₫</span>
+</div>
+<p class="font-body text-body text-ink-secondary mt-0.5">Settlement for the initial 3-month term. Your pre-booking reservation deposit of <span class="font-semibold text-ink tabular-nums">103.500 ₫</span> has already been credited.</p>
+<!-- Payment Rails Chips -->
+<div class="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-divider text-muted font-meta text-meta">
+<span class="font-label text-label uppercase text-muted">Accepted rails:</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-subtle border border-border text-ink">
+<span class="material-symbols-outlined text-[13px]">credit_card</span> Card (Visa/Mastercard)
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-subtle border border-border text-ink">
+<span class="material-symbols-outlined text-[13px]">qr_code_2</span> MoMo Wallet
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-subtle border border-border text-ink">
+<span class="material-symbols-outlined text-[13px]">account_balance</span> VNPay QR
+                </span>
+</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-3.5 p-3.5 rounded-lg border border-border bg-surface hover:bg-surface-subtle transition-colors">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary font-code-sm text-code-sm flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
+              3
+            </div>
+<div class="flex-1">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<h3 class="font-body-strong text-body-strong text-ink">Receive your access code and move in</h3>
+<span class="inline-flex items-center gap-1 text-status-available font-meta text-meta">
+<span class="material-symbols-outlined text-[14px]">lock_open</span> Keyless 24/7
+                </span>
+</div>
+<p class="font-body text-body text-ink-secondary mt-0.5">Your dynamic 6-digit perimeter gate & electronic roller-door PIN will be activated instantly via SMS and in your StorageHub portal.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- TWO-COLUMN BENTO: DEPOT LOCATION & QUICK ASSISTANCE -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card: Depot Location & Access Guidelines -->
+<div class="bg-surface rounded-xl border border-border p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[19px]">location_on</span>
+<h3 class="font-body-strong text-body-strong text-ink">Tân Bình Gateway Depot</h3>
+</div>
+<span class="font-label text-label px-1.5 py-0.5 rounded bg-surface-muted text-ink-secondary border border-border font-mono">SGN-01</span>
+</div>
+<p class="font-body text-body text-ink font-medium">120 Trường Chinh, Ward 12, Tân Bình District, Ho Chi Minh City</p>
+<div class="mt-4 space-y-2 border-t border-divider pt-3 text-ink-secondary font-meta text-meta">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-muted mt-0.5">schedule</span>
+<div>
+<strong class="font-semibold text-ink">Staff Desk:</strong> 07:00 – 20:00 Daily (Check-in available)
+                </div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-muted mt-0.5">lock_clock</span>
+<div>
+<strong class="font-semibold text-ink">Gate Access:</strong> 24/7 Keyless via PIN once checked in
+                </div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-muted mt-0.5">local_shipping</span>
+<div>
+<strong class="font-semibold text-ink">Unloading Bay:</strong> Dedicated Bay #A-14 assigned for 90 minutes
+                </div>
+</div>
+</div>
+</div>
+<div class="mt-5 pt-3 border-t border-border flex items-center gap-2">
+<a class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-border bg-surface hover:bg-surface-subtle text-ink font-button text-button shadow-[0_1px_2px_rgba(15,23,42,0.05)] active:scale-[0.98] transition-all" href="https://maps.google.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[16px] text-primary">directions</span>
+<span>View Map & Directions</span>
+</a>
+</div>
+</div>
+<!-- Card: Depot Desk Assistance & Direct Hotline -->
+<div class="bg-surface rounded-xl border border-border p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[19px]">support_agent</span>
+<h3 class="font-body-strong text-body-strong text-ink">Depot Concierge Support</h3>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-status-available-tint text-status-available text-[11px] font-semibold border border-status-available-border">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span> Live
+              </span>
+</div>
+<p class="font-body text-body text-ink-secondary">Running late or need heavy freight equipment (pallet jack, heavy trolley)? Contact the depot duty officer directly.</p>
+<div class="mt-4 p-3.5 rounded-lg bg-surface-subtle border border-border space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="font-meta text-meta text-muted">Duty Concierge</span>
+<span class="font-body-strong text-body-strong text-ink">Trần Quang Nam (Depot Lead)</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-meta text-meta text-muted">Direct Desk Line</span>
+<span class="font-code text-code text-ink font-bold">+84 28 3844 1100</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-meta text-meta text-muted">Radio Frequency</span>
+<span class="font-code-sm text-code-sm text-muted">Ch-04 (Ground Operations)</span>
+</div>
+</div>
+</div>
+<div class="mt-5 pt-3 border-t border-border flex items-center gap-2">
+<a class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-button text-button shadow-[0_1px_2px_rgba(79,70,229,.35)] active:scale-[0.98] transition-all" href="tel:+842838441100">
+<span class="material-symbols-outlined text-[16px]">phone_in_talk</span>
+<span>Call Depot (+84 28 3844 1100)</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Quick Action Utilities Strip -->
+<div class="p-4 rounded-xl bg-surface border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] flex flex-wrap items-center justify-between gap-3 text-ink-secondary font-meta text-meta">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-muted">info</span>
+<span>Need to modify arrival slot or delegate check-in to a moving contractor?</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-primary hover:underline font-semibold flex items-center gap-1" type="button">
+<span>Authorize Courier or Moving Lead</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Technical Operations Footer (Linear/Developer Infrastructure Register) -->
+<footer class="mt-12 border-t border-border bg-surface py-5">
+<div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-3 font-meta text-meta text-muted">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-available"></span>
+<span class="font-semibold text-ink">Gate Automation Online</span>
+</div>
+<span class="text-faint">|</span>
+<span class="font-code-sm text-code-sm">Depot SGN-01 (Tân Bình)</span>
+<span class="text-faint">|</span>
+<span class="font-code-sm text-code-sm">Control Room v2.4.12</span>
+</div>
+<div class="flex items-center gap-4 text-ink-secondary">
+<span>© 2026 StorageHub Infrastructure Inc.</span>
+<a class="hover:text-ink transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-ink transition-colors" href="#">Security Specs</a>
+<a class="hover:text-ink transition-colors" href="#">Depot Terms</a>
+</div>
+</div>
+</footer>
+<!-- Micro-Interactions Script (Vanilla JavaScript) -->
+<script>
+    function copyReservationCode() {
+      const code = "BK-1042";
+      navigator.clipboard.writeText(code).then(() => {
+        const copyIcon = document.getElementById('copyIcon');
+        const copyText = document.getElementById('copyText');
+        const copyBtn = document.getElementById('copyCodeBtn');
+
+        copyIcon.textContent = 'check';
+        copyText.textContent = 'Copied!';
+        copyBtn.classList.add('bg-success-tint', 'border-status-available-border', 'text-status-available');
+
+        setTimeout(() => {
+          copyIcon.textContent = 'content_copy';
+          copyText.textContent = 'Copy';
+          copyBtn.classList.remove('bg-success-tint', 'border-status-available-border', 'text-status-available');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy code: ', err);
+      });
+    }
+
+    // PDF Download Micro-Feedback
+    document.getElementById('downloadPdfBtn')?.addEventListener('click', function() {
+      const originalHtml = this.innerHTML;
+      this.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">sync</span><span>Preparing PDF...</span>`;
+      setTimeout(() => {
+        this.innerHTML = originalHtml;
+        window.print();
+      }, 700);
+    });
+  </script>
+</body></html>

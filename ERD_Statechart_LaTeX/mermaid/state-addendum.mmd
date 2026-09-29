@@ -1,0 +1,23 @@
+%% StorageHub — State chart: vòng đời Contract Addendum (CT-…-A1) — V3 2026-09-18
+%% Tách khỏi vòng đời Contract gốc; sinh từ Extension, không hold unit
+%% 2026-09-18 (phương án C): thêm 2 terminal EXPIRED + VOIDED — đóng hồ sơ không ký
+stateDiagram-v2
+    direction LR
+    [*] --> AwaitingSignature : phí gia hạn thành công [auto-draft, hạn ký 7 ngày]
+
+    AwaitingSignature --> Signed : ký tại quầy + staff chụp ảnh attach
+    AwaitingSignature --> AwaitingSignature : quá hạn [banner amber + nhắc việc]
+    AwaitingSignature --> Expired : không đến ký [staff đóng hồ sơ — sau khi hết nhắc]
+    AwaitingSignature --> Voided : staff huỷ [soạn nhầm / khách trả kho sớm]
+
+    Signed --> [*] : phụ lục hoàn tất hồ sơ giấy
+    Expired --> [*] : đóng hồ sơ không ký
+    Voided --> [*] : đóng hồ sơ (soạn lại = bản ghi mới)
+
+    note right of AwaitingSignature
+        Quá hạn KHÔNG tự đóng: EndDate đã dịch
+        từ lúc trả phí, phụ lục chỉ là hồ sơ giấy —
+        không hold unit; khách đến trễ vẫn ký được.
+        Staff đóng tay: Expired (không đến ký)
+        hoặc Voided (soạn nhầm / trả kho sớm).
+    end note

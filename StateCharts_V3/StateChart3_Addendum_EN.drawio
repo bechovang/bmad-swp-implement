@@ -1,0 +1,70 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="statechart-addendum-en" name="3. Contract Addendum (EN)">
+    <mxGraphModel dx="1211" dy="834" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="780" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#333333;" value="STATE CHART 3 — CONTRACT ADDENDUM (CT-…-A1) — V3" vertex="1">
+          <mxGeometry height="30" width="900" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="init" parent="1" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="175" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="awaiting" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" value="AwaitingSignature" vertex="1">
+          <mxGeometry height="50" width="260" x="140" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="signed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Signed" vertex="1">
+          <mxGeometry height="50" width="180" x="640" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="final1" parent="1" style="ellipse;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1100" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="expired" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;fontColor=#666666;" value="Expired" vertex="1">
+          <mxGeometry height="50" width="200" x="140" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="voided" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;fontColor=#666666;" value="Voided" vertex="1">
+          <mxGeometry height="50" width="180" x="420" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="awaiting" value="renewal fee paid&amp;nbsp;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="awaiting" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="signed" value="signed at counter + staff attaches photo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="signed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" target="final1" value="addendum paperwork complete">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="awaiting" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.328;entryY=0.006;entryDx=0;entryDy=0;fontSize=11;entryPerimeter=0;" target="expired" value="overdue&amp;nbsp;&lt;div&gt;&lt;br&gt;&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="205" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="expired" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.988;entryY=0.324;entryDx=0;entryDy=0;entryPerimeter=0;" target="final1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="510" />
+              <mxPoint x="1200" y="510" />
+              <mxPoint x="1200" y="260" />
+            </Array>
+            <mxPoint x="700.0000000000134" y="455" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="awaiting" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" target="voided" value="staff voids">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="335" y="380" />
+              <mxPoint x="510" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="voided" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="final1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700.0000000000134" y="455" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

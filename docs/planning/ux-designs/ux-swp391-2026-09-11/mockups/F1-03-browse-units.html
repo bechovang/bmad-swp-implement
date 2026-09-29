@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Browse Units — StorageHub Customer Portal</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "status-preparing-tint": "#F0F9FF",
+            "on-primary-fixed": "#0f0069",
+            "outline": "#777587",
+            "divider": "#F1F5F9",
+            "status-reserved-border": "#E0E7FF",
+            "status-rented": "#334155",
+            "border": "#E2E8F0",
+            "warning-tint": "#FFFBEB",
+            "warning-bar": "#F59E0B",
+            "border-strong": "#CBD5E1",
+            "surface-container-high": "#eae6f4",
+            "status-preparing-border": "#E0F2FE",
+            "primary-tint": "#EEF2FF",
+            "primary-border": "#E0E7FF",
+            "primary": "#4F46E5",
+            "surface": "#FFFFFF",
+            "status-buffer-bar": "#F59E0B",
+            "status-maintenance-tint": "#FFF7ED",
+            "on-surface": "#1b1b24",
+            "surface-variant": "#e4e1ee",
+            "status-reserved-tint": "#EEF2FF",
+            "inverse-surface": "#302f39",
+            "on-error-container": "#93000a",
+            "background": "#fcf8ff",
+            "surface-container-lowest": "#ffffff",
+            "primary-outline-border": "#C7D2FE",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-rented-border": "#E2E8F0",
+            "inverse-primary": "#c3c0ff",
+            "status-maintenance-border": "#FFEDD5",
+            "outline-variant": "#c7c4d8",
+            "status-rented-tint": "#F1F5F9",
+            "secondary-fixed-dim": "#b9c7e0",
+            "on-secondary-fixed": "#0d1c2f",
+            "surface-muted": "#F1F5F9",
+            "surface-subtle": "#F8FAFC",
+            "error-container": "#ffdad6",
+            "status-buffer-tint": "#FFFBEB",
+            "warning": "#B45309",
+            "success-tint": "#ECFDF5",
+            "error-tint": "#FEF2F2",
+            "surface-container": "#f0ecf9",
+            "surface-container-low": "#f5f2ff",
+            "surface-bright": "#fcf8ff",
+            "secondary-fixed": "#d5e3fd",
+            "on-primary-container": "#dad7ff",
+            "on-error": "#ffffff",
+            "error-border": "#FECACA",
+            "status-available-tint": "#ECFDF5",
+            "status-reserved": "#4F46E5",
+            "status-preparing": "#0284C7",
+            "ink-secondary": "#334155",
+            "tertiary-fixed": "#ffdbcc",
+            "surface-container-highest": "#e4e1ee",
+            "on-secondary": "#ffffff",
+            "app-bg": "#F4F6F9",
+            "primary-fixed-dim": "#c3c0ff",
+            "on-surface-variant": "#464555",
+            "ink": "#0F172A",
+            "surface-tint": "#4d44e3",
+            "on-tertiary": "#ffffff",
+            "primary-fixed": "#e2dfff",
+            "status-maintenance": "#C2410C",
+            "on-primary-fixed-variant": "#3323cc",
+            "on-tertiary-container": "#ffd2be",
+            "on-primary": "#ffffff",
+            "secondary": "#515f74",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "error": "#DC2626",
+            "on-tertiary-fixed": "#351000",
+            "secondary-container": "#d5e3fd",
+            "status-retired-border": "#E2E8F0",
+            "status-buffer": "#B45309",
+            "muted": "#64748B",
+            "faint": "#94A3B8",
+            "tertiary": "#7e3000",
+            "status-buffer-border": "#FDE68A",
+            "status-available-border": "#D1FAE5",
+            "on-secondary-fixed-variant": "#3a485c",
+            "surface-dim": "#dcd8e5",
+            "primary-container": "#4f46e5",
+            "on-secondary-container": "#57657b",
+            "status-retired": "#94A3B8",
+            "inverse-on-surface": "#f3effc",
+            "tertiary-container": "#a44100",
+            "success": "#059669",
+            "status-retired-tint": "#F8FAFC",
+            "status-available": "#059669",
+            "on-background": "#1b1b24"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "12px",
+            "margin": "24px",
+            "space-2xl": "32px",
+            "space-xl": "24px",
+            "space-lg": "16px",
+            "space-sm": "8px",
+            "space-xs": "4px",
+            "gutter": "14px",
+            "space-3xl": "48px"
+          },
+          "fontFamily": {
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""]
+          },
+          "fontSize": {
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .schematic-grid {
+      background-size: 16px 16px;
+      background-image: 
+        linear-gradient(to right, rgba(226, 232, 240, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.4) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink antialiased min-h-screen flex flex-col">
+<!-- TopNavBar (Derived directly from Shared Components JSON) -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-border dark:border-outline shadow-[0_1px_2px_rgba(15,23,42,0.05)] sticky top-0 z-50 h-[54px]">
+<div class="w-full h-[54px] px-margin flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left: Brand & Nav Links -->
+<div class="flex items-center space-x-8">
+<a class="flex items-center gap-2.5 font-headline text-headline text-ink dark:text-surface font-semibold tracking-tight hover:opacity-90 transition-opacity" href="#">
+<div class="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[17px]">warehouse</span>
+</div>
+<span>StorageHub</span>
+</a>
+<!-- Desktop Navigation Links -->
+<nav class="hidden md:flex items-center space-x-6 h-[54px]">
+<!-- Active: Browse Units -->
+<a class="text-primary dark:text-inverse-primary font-body-strong text-body-strong border-b-2 border-primary dark:border-inverse-primary py-3.5 h-[54px] flex items-center" href="#">
+            Browse Units
+          </a>
+<!-- Inactive: My Rentals -->
+<a class="text-ink-secondary dark:text-muted font-nav text-nav hover:text-ink dark:hover:text-surface py-3.5 h-[54px] flex items-center transition-colors" href="#">
+            My Rentals
+          </a>
+<!-- Inactive: Support -->
+<a class="text-ink-secondary dark:text-muted font-nav text-nav hover:text-ink dark:hover:text-surface py-3.5 h-[54px] flex items-center transition-colors" href="#">
+            Support
+          </a>
+</nav>
+</div>
+<!-- Right Action Cluster -->
+<div class="flex items-center space-x-3.5">
+<!-- Role Chip -->
+<span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-primary-tint border border-primary-border text-primary font-label text-label tracking-wide">
+          Customer
+        </span>
+<!-- Notification Bell Action -->
+<button class="relative p-1.5 text-ink-secondary hover:text-ink hover:bg-surface-subtle rounded-xl transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-on-error font-code-sm text-[9px] flex items-center justify-center font-bold">
+            3
+          </span>
+</button>
+<div class="h-4 w-px bg-border"></div>
+<!-- User Profile Dropdown -->
+<button class="flex items-center space-x-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-surface-subtle transition-colors active:scale-[0.98]">
+<div aria-label="Lan" class="w-7 h-7 rounded-full bg-primary-tint border border-primary-outline-border text-primary font-body-strong text-body-strong flex items-center justify-center">
+            L
+          </div>
+<span class="font-nav text-nav text-ink hidden sm:block">Lan</span>
+<span class="material-symbols-outlined text-muted text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Canvas Layout -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-margin py-6">
+<!-- Page Header Title Area -->
+<div class="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+<div>
+<h1 class="font-display text-display text-ink tracking-tight flex items-center gap-2">
+          Available Storage Units
+          <span class="font-code-sm text-code-sm text-muted font-normal bg-surface border border-border px-2 py-0.5 rounded-full">Zone A & B</span>
+</h1>
+<p class="font-body text-body text-muted mt-0.5">Select and book high-security, automated self-storage lockers and warehouse spaces.</p>
+</div>
+<!-- Quick Facility Metric Badge -->
+<div class="hidden lg:flex items-center space-x-3 bg-surface border border-border px-3 py-1.5 rounded-xl text-ink-secondary font-meta text-meta">
+<span class="flex items-center gap-1.5 text-success font-semibold">
+<span class="material-symbols-outlined text-[16px]">verified_user</span> 24/7 Access Active
+        </span>
+<span class="text-border-strong">•</span>
+<span>Saigon Gateway Depot (VN-SGN-01)</span>
+</div>
+</div>
+<!-- Filter Bar Card (8px radius, white bg, 1px border) -->
+<section class="bg-surface border border-border rounded-xl p-4 mb-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end">
+<!-- 1. Type Filter -->
+<div>
+<label class="block font-label text-label text-muted uppercase tracking-wider mb-1.5">Type</label>
+<div class="relative">
+<select class="w-full bg-surface border border-border rounded-xl font-body text-body text-ink py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer hover:border-border-strong transition-colors">
+<option>Indoor / Outdoor / Climate</option>
+<option>Indoor Units</option>
+<option>Outdoor Units</option>
+<option>Climate Controlled</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-2.5 text-muted text-[18px]">unfold_more</span>
+</div>
+</div>
+<!-- 2. Size Filter -->
+<div>
+<label class="block font-label text-label text-muted uppercase tracking-wider mb-1.5">Size</label>
+<div class="relative">
+<select class="w-full bg-surface border border-border rounded-xl font-body text-body text-ink py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer hover:border-border-strong transition-colors">
+<option>3 / 5 / 8 / 12 m²</option>
+<option>Small (3 m²)</option>
+<option>Medium (5 - 8 m²)</option>
+<option>Large (12+ m²)</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-2.5 text-muted text-[18px]">unfold_more</span>
+</div>
+</div>
+<!-- 3. Start Date Filter -->
+<div>
+<label class="block font-label text-label text-muted uppercase tracking-wider mb-1.5">Start Date</label>
+<div class="relative">
+<button class="w-full bg-surface border border-border rounded-xl font-body text-body text-ink py-2 pl-8 pr-3 text-left flex items-center justify-between hover:border-border-strong transition-colors focus:ring-1 focus:ring-primary" type="button">
+<span class="material-symbols-outlined absolute left-2.5 top-2.5 text-muted text-[18px]">calendar_today</span>
+<span>Oct 3, 2026</span>
+<span class="material-symbols-outlined text-muted text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- 4. Duration Filter -->
+<div>
+<label class="block font-label text-label text-muted uppercase tracking-wider mb-1.5">Duration</label>
+<div class="relative">
+<select class="w-full bg-surface border border-border rounded-xl font-body text-body text-ink py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer hover:border-border-strong transition-colors">
+<option>3 months</option>
+<option>1 month (flexible)</option>
+<option>6 months (5% off)</option>
+<option>12 months (12% off)</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-2.5 text-muted text-[18px]">unfold_more</span>
+</div>
+</div>
+<!-- 5. Search Action Button -->
+<div>
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 px-4 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-2 active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<span>Search</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Results Summary Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+<!-- Live Status Pill -->
+<div class="flex items-center space-x-2">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-status-available-tint border border-status-available-border text-status-available font-meta text-meta">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-available opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-status-available"></span>
+</span>
+<span class="font-semibold">6 units available · live</span>
+</div>
+<span class="font-meta text-meta text-muted hidden sm:inline">Instant PIN provisioning active</span>
+</div>
+<!-- Sort Selector Dropdown -->
+<div class="flex items-center space-x-2">
+<label class="font-meta text-meta text-muted" for="sort-select">Sort by:</label>
+<div class="relative">
+<select class="bg-surface border border-border rounded-xl font-meta text-meta text-ink py-1 pl-2.5 pr-7 appearance-none focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer hover:border-border-strong transition-colors" id="sort-select">
+<option>Price: low to high</option>
+<option>Price: high to low</option>
+<option>Size: small to large</option>
+<option>Size: large to small</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-1.5 top-1.5 text-muted text-[16px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- 3-Column Operational Unit Card Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+<!-- CARD 1: Unit S-1 -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Available Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              S-1
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-primary-outline-border">inventory_2</span>
+<span class="font-code-sm text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Standard Locker</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row (6px radius) -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">3 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Indoor</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Standard</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">badge</span>
+            Ground floor · Keycard 24/7 access
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">450.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-available"></span>
+<span class="font-meta text-meta text-success font-medium">Available Oct 3</span>
+</div>
+</div>
+<!-- Solid Indigo Primary Action -->
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Book S-1</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 2: Unit S-3 -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Available Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              S-3
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-primary-outline-border">garage_door</span>
+<span class="font-code-sm text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Direct Drive-Up</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">5 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Indoor</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">directions_car</span>
+            Direct drive-up roll-up door · High ceiling
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">345.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-available"></span>
+<span class="font-meta text-meta text-success font-medium">Available Oct 3</span>
+</div>
+</div>
+<!-- Solid Indigo Primary Action -->
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Book S-3</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 3: Unit M-2 -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Available Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              M-2
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-primary-outline-border">elevator</span>
+<span class="font-code-sm text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Elevator Bay M</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">8 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Outdoor</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Elevator access</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">videocam</span>
+            Floor 2 · Freight lift · CCTV surveillance
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">720.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-available"></span>
+<span class="font-meta text-meta text-success font-medium">Available Oct 3</span>
+</div>
+</div>
+<!-- Solid Indigo Primary Action -->
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Book M-2</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 4: Unit M-5 (Alert Badge: Only 1 left) -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Available Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              M-5
+            </span>
+</div>
+<!-- Top-Right Amber Alert Badge -->
+<div class="absolute top-2.5 right-3.5 z-10">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-tint border border-status-buffer-border text-warning font-label text-label font-bold">
+<span class="material-symbols-outlined text-[13px] text-warning-bar">warning</span>
+              Only 1 left
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-primary-outline-border">thermostat</span>
+<span class="font-code-sm text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Thermal Vault</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">8 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-tint border border-primary-border text-primary font-meta text-meta">Climate controlled</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">21°C Constant</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">lock</span>
+            Humidity monitored · Electronic padlock
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">890.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-available"></span>
+<span class="font-meta text-meta text-success font-medium">Available Oct 3</span>
+</div>
+</div>
+<!-- Solid Indigo Primary Action -->
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Book M-5</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 5: Unit L-1 -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Available Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              L-1
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-primary-outline-border">warehouse</span>
+<span class="font-code-sm text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Warehouse Standard</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">12 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Indoor</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">Warehouse grade</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">local_shipping</span>
+            Ground floor · Double wide loading bay
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">1.150.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-available"></span>
+<span class="font-meta text-meta text-success font-medium">Available Oct 3</span>
+</div>
+</div>
+<!-- Solid Indigo Primary Action -->
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-button text-button py-2 rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Book L-1</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 6: Unit L-3 (Cleaning Buffer Amber State) -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-border-strong transition-all relative overflow-hidden flex flex-col">
+<!-- 3px Signature Left Status Bar (Buffer Amber) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-buffer-bar"></div>
+<!-- Technical Schematic Top Area -->
+<div class="h-32 bg-slate-900 schematic-grid relative border-b border-border flex items-center justify-center p-3 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+<!-- Monospace ID Pin Top-Left -->
+<div class="absolute top-2.5 left-3.5 z-10">
+<span class="font-code-sm text-code-sm px-2 py-0.5 rounded bg-slate-800/90 text-surface border border-slate-700 tracking-wider">
+              L-3
+            </span>
+</div>
+<!-- Top-Right Sanitizing Tag -->
+<div class="absolute top-2.5 right-3.5 z-10">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-buffer-tint border border-status-buffer-border text-status-buffer font-label text-label">
+<span class="material-symbols-outlined text-[12px]">cleaning_services</span>
+              Sanitizing
+            </span>
+</div>
+<!-- Unit Isometric Icon Silhouette -->
+<div class="relative z-10 flex flex-col items-center opacity-85 text-slate-300">
+<span class="material-symbols-outlined text-[38px] text-amber-300">sanitizer</span>
+<span class="font-code-sm text-[10px] text-amber-200 mt-1 uppercase tracking-wider">Terminal Clean</span>
+</div>
+</div>
+<!-- Card Content Body -->
+<div class="p-4 flex-1 flex flex-col pl-5">
+<!-- Chips Row -->
+<div class="flex flex-wrap gap-1.5 mb-2.5">
+<span class="px-2 py-0.5 rounded-full bg-surface-muted border border-border text-ink-secondary font-meta text-meta">12 m²</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-tint border border-primary-border text-primary font-meta text-meta">Climate controlled</span>
+</div>
+<!-- Feature Line -->
+<p class="font-body text-body text-muted mb-4 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-faint text-[15px]">ramp_right</span>
+            Ground floor · Dedicated ramp access
+          </p>
+<div class="mt-auto pt-3 border-t border-divider">
+<!-- Price and Availability Block -->
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">1.280.000 ₫</span>
+<span class="font-meta text-meta text-muted">/mo</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-[7px] h-[7px] rounded-full bg-status-buffer-bar"></span>
+<span class="font-meta text-meta text-status-buffer font-medium">Available Oct 5 · cleaning buffer</span>
+</div>
+</div>
+<!-- Outline/Secondary Action for Buffer State -->
+<button class="w-full bg-surface hover:bg-surface-subtle text-primary border border-border-strong font-button text-button py-2 rounded-xl flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all" type="button">
+<span>Pre-book L-3</span>
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Information Callout -->
+<div class="mt-8 bg-surface border border-border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-tint border border-primary-border text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+</div>
+<div>
+<div class="font-body-strong text-body-strong text-ink">Need programmatic facility access or custom pallet space?</div>
+<div class="font-body text-body text-muted">Our enterprise logistics team provides dedicated docks and automated inventory webhooks.</div>
+</div>
+</div>
+<a class="font-button text-button text-primary hover:text-primary-container inline-flex items-center gap-1 whitespace-nowrap" href="#">
+        Contact Operations
+        <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+</main>
+<!-- Technical Operational Footer -->
+<footer class="mt-auto border-t border-border bg-surface py-3.5 px-margin">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+<p class="font-code-sm text-code-sm text-muted">
+        StorageHub Control Room v2.4 • Facility ID: VN-SGN-01 • Systems Nominal • Prices in VND (₫)
+      </p>
+<div class="flex items-center gap-4 font-meta text-meta text-muted">
+<span class="inline-flex items-center gap-1 text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          Gate Automation Online
+        </span>
+<a class="hover:text-ink transition-colors" href="#">Audit Logs</a>
+<a class="hover:text-ink transition-colors" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

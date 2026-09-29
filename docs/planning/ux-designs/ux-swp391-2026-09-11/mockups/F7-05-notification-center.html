@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Center — StorageHub</title>
+<!-- Material Symbols Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-container": "#ffd2be",
+            "on-error-container": "#93000a",
+            "status-available": "#059669",
+            "inverse-primary": "#c3c0ff",
+            "status-buffer-tint": "#FFFBEB",
+            "primary-fixed": "#e2dfff",
+            "on-background": "#1b1b24",
+            "surface-container-low": "#f5f2ff",
+            "divider": "#F1F5F9",
+            "status-buffer-border": "#FDE68A",
+            "error-container": "#ffdad6",
+            "status-maintenance": "#C2410C",
+            "status-maintenance-tint": "#FFF7ED",
+            "tertiary-container": "#a44100",
+            "success": "#059669",
+            "primary-outline-border": "#C7D2FE",
+            "app-bg": "#F4F6F9",
+            "on-tertiary-fixed": "#351000",
+            "status-buffer-bar": "#F59E0B",
+            "error-tint": "#FEF2F2",
+            "status-buffer": "#B45309",
+            "status-preparing-border": "#E0F2FE",
+            "primary-container": "#4f46e5",
+            "on-secondary-fixed": "#0d1c2f",
+            "status-retired-border": "#E2E8F0",
+            "primary-border": "#E0E7FF",
+            "error-border": "#FECACA",
+            "surface-variant": "#e4e1ee",
+            "primary-tint": "#EEF2FF",
+            "surface-subtle": "#F8FAFC",
+            "on-surface-variant": "#464555",
+            "success-tint": "#ECFDF5",
+            "tertiary-fixed": "#ffdbcc",
+            "inverse-on-surface": "#f3effc",
+            "surface": "#FFFFFF",
+            "on-tertiary": "#ffffff",
+            "status-available-border": "#D1FAE5",
+            "background": "#fcf8ff",
+            "ink-secondary": "#334155",
+            "primary-fixed-dim": "#c3c0ff",
+            "status-rented": "#334155",
+            "on-secondary": "#ffffff",
+            "muted": "#64748B",
+            "ink": "#0F172A",
+            "outline": "#777587",
+            "status-maintenance-border": "#FFEDD5",
+            "on-secondary-fixed-variant": "#3a485c",
+            "on-primary": "#ffffff",
+            "border-strong": "#CBD5E1",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed-dim": "#b9c7e0",
+            "warning": "#B45309",
+            "warning-bar": "#F59E0B",
+            "surface-container-high": "#eae6f4",
+            "error": "#DC2626",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-retired-tint": "#F8FAFC",
+            "surface-muted": "#F1F5F9",
+            "on-primary-fixed-variant": "#3323cc",
+            "warning-tint": "#FFFBEB",
+            "secondary": "#515f74",
+            "inverse-surface": "#302f39",
+            "primary": "#4F46E5",
+            "on-error": "#ffffff",
+            "tertiary": "#7e3000",
+            "on-secondary-container": "#57657b",
+            "border": "#E2E8F0",
+            "surface-bright": "#fcf8ff",
+            "status-reserved": "#4F46E5",
+            "surface-dim": "#dcd8e5",
+            "status-retired": "#94A3B8",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "secondary-container": "#d5e3fd",
+            "status-reserved-tint": "#EEF2FF",
+            "status-preparing": "#0284C7",
+            "status-rented-tint": "#F1F5F9",
+            "status-available-tint": "#ECFDF5",
+            "on-surface": "#1b1b24",
+            "status-reserved-border": "#E0E7FF",
+            "on-primary-fixed": "#0f0069",
+            "surface-container-highest": "#e4e1ee",
+            "surface-container": "#f0ecf9",
+            "secondary-fixed": "#d5e3fd",
+            "faint": "#94A3B8",
+            "status-rented-border": "#E2E8F0",
+            "surface-tint": "#4d44e3",
+            "status-preparing-tint": "#F0F9FF",
+            "on-primary-container": "#dad7ff",
+            "outline-variant": "#c7c4d8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "14px",
+            "space-lg": "16px",
+            "space-3xl": "48px",
+            "margin": "24px",
+            "space-xl": "24px",
+            "space-2xl": "32px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "space-sm": "8px"
+          },
+          "fontFamily": {
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-app-bg text-ink min-h-screen font-body text-body selection:bg-primary-tint selection:text-primary relative overflow-x-hidden">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="w-full sticky top-0 z-40 flex justify-between items-center h-[54px] px-margin bg-surface border-b border-border shadow-sm">
+<!-- Left: Brand Logo + Role Chip + Depot Status -->
+<div class="flex items-center space-x-3">
+<div class="flex items-center space-x-2">
+<div class="w-7 h-7 bg-primary text-on-primary rounded flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[18px]" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="font-headline text-headline font-bold text-ink tracking-tight">StorageHub</span>
+</div>
+<!-- Customer Role Pill -->
+<span class="bg-primary-tint border border-primary-outline-border text-primary font-label text-label px-2 py-0.5 rounded-[6px]">
+        Customer
+      </span>
+<!-- Depot Operational Status Indicator -->
+<div class="hidden lg:flex items-center space-x-1.5 px-2.5 py-1 bg-surface-subtle border border-border rounded-[6px] text-ink-secondary">
+<span class="w-2 h-2 rounded-full bg-status-available animate-pulse"></span>
+<span class="font-meta text-meta text-ink-secondary font-medium">Depot SGN-01 (Tân Bình Gateway) • Systems Nominal</span>
+</div>
+</div>
+<!-- Center: Navigation Links -->
+<nav class="hidden md:flex items-center space-x-6 h-full">
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-2 transition-colors" href="#">Browse Units</a>
+<a class="text-primary font-nav text-nav border-b-2 border-primary pb-[16px] mt-[16px] font-semibold" href="#">My Rentals</a>
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-2 transition-colors" href="#">Support</a>
+</nav>
+<!-- Right: Trailing Actions + Profile -->
+<div class="flex items-center space-x-3">
+<!-- Help Action -->
+<button class="w-8 h-8 flex items-center justify-center rounded text-muted hover:text-ink hover:bg-surface-subtle transition-colors" title="Support & Docs">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+</button>
+<!-- Active Notification Bell Button -->
+<div class="relative">
+<button aria-expanded="true" aria-label="Notifications" class="w-8 h-8 flex items-center justify-center rounded bg-primary-tint text-primary border border-primary-outline-border shadow-sm transition-all focus:outline-none" id="notification-toggle-btn">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</button>
+<!-- Unread Counter Badge -->
+<span class="absolute -top-1 -right-1 bg-error text-on-error font-code-sm text-[10px] leading-none px-1.5 py-0.5 rounded-full border border-surface flex items-center justify-center font-bold">
+          2
+        </span>
+</div>
+<div class="h-4 w-[1px] bg-border mx-1"></div>
+<!-- User Avatar / Tenant Meta -->
+<div class="flex items-center space-x-2 pl-1 cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary font-body-strong text-body-strong flex items-center justify-center border border-primary-outline-border">
+          LN
+        </div>
+<div class="hidden sm:flex flex-col text-left">
+<span class="font-body-strong text-body-strong text-ink leading-none">Lan Nguyen</span>
+<span class="font-code-sm text-[10.5px] text-muted leading-tight mt-0.5">PIN #8842</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Contextual Backdrop Scrim for open modal/dropdown state -->
+<div class="fixed inset-0 bg-ink/10 backdrop-blur-[0.5px] z-40 transition-opacity pointer-events-none"></div>
+<!-- FLOATING NOTIFICATION DROPDOWN MENU -->
+<aside class="fixed top-[58px] right-6 w-[430px] bg-surface rounded-xl border border-border shadow-[0_12px_32px_rgba(15,23,42,0.12),0_2px_6px_rgba(15,23,42,0.04)] z-50 overflow-hidden flex flex-col max-h-[calc(100vh-80px)] transition-all">
+<!-- Dropdown Header -->
+<div class="px-4 py-3 bg-surface border-b border-divider flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<h2 class="font-body-strong text-[15px] font-semibold text-ink">Notifications</h2>
+<span class="bg-primary-tint text-primary font-label text-[11px] font-semibold px-2 py-0.5 rounded-full">
+          2 unread
+        </span>
+</div>
+<button class="font-button text-[12px] font-medium text-muted hover:text-primary transition-colors flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="done_all">done_all</span>
+<span>Mark all read</span>
+</button>
+</div>
+<!-- Scrollable Notification List -->
+<div class="overflow-y-auto divide-y divide-divider flex-1">
+<!-- GROUP 1: TODAY -->
+<div class="sticky top-0 z-10 px-4 py-1.5 bg-surface-subtle border-b border-divider flex items-center justify-between">
+<span class="font-label text-[10.5px] font-semibold text-muted tracking-wider uppercase">TODAY</span>
+<span class="font-code-sm text-[10.5px] text-muted">Oct 14, 2026</span>
+</div>
+<!-- Notification 1 (Unread) -->
+<article class="relative flex items-start p-3.5 bg-[#F8FAFF] hover:bg-primary-tint/30 transition-colors border-l-[3px] border-primary group cursor-pointer">
+<div class="mr-3 pt-1 flex flex-col items-center">
+<span class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary-tint"></span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-success-tint text-success border border-status-available-border font-label text-[10.5px] font-semibold px-1.5 py-0.5 rounded-[4px]">
+              Payment
+            </span>
+<span class="font-meta text-[11px] text-muted">10 mins ago • 14:15 ICT</span>
+</div>
+<p class="font-body-strong text-body text-ink leading-snug">
+            Deposit paid — <span class="font-semibold tabular-nums">103.500 ₫</span>. Unit <span class="font-code-sm text-ink bg-surface-muted px-1 py-0.5 rounded border border-border">S-3</span> reserved.
+          </p>
+<p class="font-meta text-meta text-muted mt-1 leading-normal">
+            Holding deposit vaulted in escrow. Keyless 6-digit access PIN ready upon lease activation.
+          </p>
+</div>
+<div class="self-center pl-1 text-muted group-hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+<!-- Notification 2 (Read) -->
+<article class="relative flex items-start p-3.5 bg-surface hover:bg-surface-subtle transition-colors border-l-[3px] border-transparent group cursor-pointer">
+<div class="mr-3 pt-1 flex flex-col items-center">
+<span class="w-2 h-2 rounded-full bg-transparent"></span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-surface-muted text-ink-secondary border border-border font-label text-[10.5px] font-semibold px-1.5 py-0.5 rounded-[4px]">
+              Support
+            </span>
+<span class="font-meta text-[11px] text-muted">3 hours ago • 11:20 ICT</span>
+</div>
+<p class="font-body text-body text-ink leading-snug">
+            Resolved — door hinge replaced by site staff.
+          </p>
+<p class="font-meta text-meta text-muted mt-1 leading-normal">
+            Ticket <span class="font-code-sm text-ink-secondary">#SR-0032</span> closed by tech Minh. Roller tension calibrated to 42 Nm.
+          </p>
+</div>
+<div class="self-center pl-1 text-muted group-hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+<!-- GROUP 2: YESTERDAY -->
+<div class="sticky top-0 z-10 px-4 py-1.5 bg-surface-subtle border-b border-divider flex items-center justify-between">
+<span class="font-label text-[10.5px] font-semibold text-muted tracking-wider uppercase">YESTERDAY</span>
+<span class="font-code-sm text-[10.5px] text-muted">Oct 13, 2026</span>
+</div>
+<!-- Notification 3 (Read) -->
+<article class="relative flex items-start p-3.5 bg-surface hover:bg-surface-subtle transition-colors border-l-[3px] border-transparent group cursor-pointer">
+<div class="mr-3 pt-1 flex flex-col items-center">
+<span class="w-2 h-2 rounded-full bg-transparent"></span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-primary-tint text-primary border border-primary-border font-label text-[10.5px] font-semibold px-1.5 py-0.5 rounded-[4px]">
+              Lease
+            </span>
+<span class="font-meta text-[11px] text-muted">Yesterday • 16:45 ICT</span>
+</div>
+<p class="font-body text-body text-ink leading-snug">
+            Rental active. Access code sent.
+          </p>
+<p class="font-meta text-meta text-muted mt-1 leading-normal">
+            Unit <span class="font-code-sm text-ink bg-surface-muted px-1 py-0.5 rounded border border-border">S-3</span> direct drive-up roll-up door is online. Gate turnstile synced.
+          </p>
+</div>
+<div class="self-center pl-1 text-muted group-hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+<!-- Notification 4 (Unread Alert) -->
+<article class="relative flex items-start p-3.5 bg-error-tint/60 hover:bg-error-tint transition-colors border-l-[3px] border-error group cursor-pointer">
+<div class="mr-3 pt-1 flex flex-col items-center">
+<span class="w-2 h-2 rounded-full bg-error ring-2 ring-error-border"></span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-error-tint text-error border border-error-border font-label text-[10.5px] font-semibold px-1.5 py-0.5 rounded-[4px] flex items-center space-x-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="warning">warning</span>
+<span>Incident Alert</span>
+</span>
+<span class="font-meta text-[11px] text-muted">Yesterday • 09:12 ICT</span>
+</div>
+<p class="font-body-strong text-body text-ink leading-snug">
+            Escalated to Facility Manager — flooding, Unit <span class="font-code-sm text-ink bg-surface-muted px-1 py-0.5 rounded border border-border">M-2</span>.
+          </p>
+<p class="font-meta text-meta text-muted mt-1 leading-normal">
+            Incident <span class="font-code-sm text-ink-secondary">#SR-0035</span> logged: floor drainage backup. Tenant notification protocol active.
+          </p>
+</div>
+<div class="self-center pl-1 text-muted group-hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+<!-- GROUP 3: OLDER -->
+<div class="sticky top-0 z-10 px-4 py-1.5 bg-surface-subtle border-b border-divider flex items-center justify-between">
+<span class="font-label text-[10.5px] font-semibold text-muted tracking-wider uppercase">OLDER</span>
+<span class="font-code-sm text-[10.5px] text-muted">Previous Cycle</span>
+</div>
+<!-- Notification 5 (Read) -->
+<article class="relative flex items-start p-3.5 bg-surface hover:bg-surface-subtle transition-colors border-l-[3px] border-transparent group cursor-pointer">
+<div class="mr-3 pt-1 flex flex-col items-center">
+<span class="w-2 h-2 rounded-full bg-transparent"></span>
+</div>
+<div class="flex-1 min-w-0 pr-1">
+<div class="flex items-center justify-between mb-1">
+<span class="bg-success-tint text-success border border-status-available-border font-label text-[10.5px] font-semibold px-1.5 py-0.5 rounded-[4px]">
+              Billing
+            </span>
+<span class="font-meta text-[11px] text-muted">Oct 10, 2026 • 14:00 ICT</span>
+</div>
+<p class="font-body text-body text-ink leading-snug">
+            Extension paid — <span class="font-semibold tabular-nums">690.000 ₫</span>. New checkout date: Oct 18.
+          </p>
+<p class="font-meta text-meta text-muted mt-1 leading-normal">
+            Invoice <span class="font-code-sm text-ink-secondary">#INV-2026-8842</span> issued under VAT #0314981290. Lease extended by 1 day.
+          </p>
+</div>
+<div class="self-center pl-1 text-muted group-hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</article>
+</div>
+<!-- Dropdown Footer -->
+<div class="px-4 py-3 bg-surface-subtle border-t border-border flex items-center justify-between text-[12px] font-button text-muted">
+<button class="flex items-center space-x-1.5 hover:text-ink transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="settings">settings</span>
+<span>Notification settings</span>
+</button>
+<a class="text-primary hover:text-primary-container font-semibold flex items-center space-x-1" href="#">
+<span>View all history</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</aside>
+<!-- Realistic Underlay Content Canvas (Customer Portal: My Rentals) -->
+<main class="max-w-[1360px] mx-auto px-margin py-6">
+<!-- Top Header Bar on Page -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+<div>
+<div class="flex items-center space-x-2">
+<h1 class="font-display text-display text-ink tracking-tight">Customer Portal</h1>
+<span class="bg-success-tint border border-status-available-border text-success font-label text-label px-2 py-0.5 rounded-[6px]">
+            Account Active
+          </span>
+</div>
+<p class="font-meta text-meta text-muted mt-0.5">Manage your active self-storage units, electronic gate passcodes, and invoices.</p>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex items-center space-x-3">
+<button class="bg-surface border border-border-strong text-ink-secondary font-button text-button px-3.5 py-2 rounded-lg hover:bg-surface-subtle transition-colors flex items-center space-x-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="key">key</span>
+<span>Regenerate Gate PIN</span>
+</button>
+<button class="bg-primary text-on-primary font-button text-button px-4 py-2 rounded-lg hover:bg-primary-container transition-colors shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+<span>Rent New Unit</span>
+</button>
+</div>
+</div>
+<!-- Operational KPI Metrics (Dense Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-6">
+<div class="bg-surface border border-border rounded-lg p-4 shadow-sm border-l-[3px] border-primary">
+<div class="flex items-center justify-between text-muted mb-1">
+<span class="font-label text-label uppercase tracking-wider">Active Units</span>
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="warehouse">warehouse</span>
+</div>
+<div class="font-kpi-value text-kpi-value text-ink tabular-nums">1 <span class="text-sm font-normal text-muted">/ 2 registered</span></div>
+<div class="font-meta text-meta text-muted mt-1">Unit S-3 (Active) • Unit M-2 (Pending)</div>
+</div>
+<div class="bg-surface border border-border rounded-lg p-4 shadow-sm border-l-[3px] border-success">
+<div class="flex items-center justify-between text-muted mb-1">
+<span class="font-label text-label uppercase tracking-wider">Next Renewal</span>
+<span class="material-symbols-outlined text-[18px] text-success" data-icon="event">event</span>
+</div>
+<div class="font-kpi-value text-kpi-value text-ink tabular-nums">Oct 18, 2026</div>
+<div class="font-meta text-meta text-success mt-1">Auto-debit scheduled (690.000 ₫)</div>
+</div>
+<div class="bg-surface border border-border rounded-lg p-4 shadow-sm border-l-[3px] border-status-buffer-bar">
+<div class="flex items-center justify-between text-muted mb-1">
+<span class="font-label text-label uppercase tracking-wider">Storage Volume</span>
+<span class="material-symbols-outlined text-[18px] text-status-buffer" data-icon="inventory">inventory</span>
+</div>
+<div class="font-kpi-value text-kpi-value text-ink tabular-nums">12.5 <span class="text-sm font-normal text-muted">m³</span></div>
+<div class="font-meta text-meta text-muted mt-1">Ground floor drive-up • Zone B</div>
+</div>
+<div class="bg-surface border border-border rounded-lg p-4 shadow-sm border-l-[3px] border-secondary">
+<div class="flex items-center justify-between text-muted mb-1">
+<span class="font-label text-label uppercase tracking-wider">Facility Access</span>
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="lock_open">lock_open</span>
+</div>
+<div class="font-kpi-value text-kpi-value text-ink tabular-nums">24 / 7</div>
+<div class="font-meta text-meta text-muted mt-1">Keyless PIN #8842-99 verified</div>
+</div>
+</div>
+<!-- Active Unit Bento Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Unit S-3 Operational Detail Card (Left 2 cols) -->
+<div class="lg:col-span-2 bg-surface border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
+<div class="p-4 border-b border-divider flex items-center justify-between bg-surface-subtle">
+<div class="flex items-center space-x-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-status-available"></span>
+<span class="font-body-strong text-body-strong text-ink">Active Storage Locker — Unit S-3</span>
+<span class="font-code-sm bg-primary-tint text-primary border border-primary-border px-1.5 py-0.5 rounded">
+              STANDARD LOCKER
+            </span>
+</div>
+<span class="font-meta text-meta text-muted">Last entry: Today, 08:42 ICT</span>
+</div>
+<div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+<!-- Facility Map / Access Spec Thumbnail -->
+<div class="relative rounded-lg overflow-hidden border border-border bg-surface-muted flex flex-col justify-between p-3 min-h-[160px]">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply" data-alt="Architectural technical blueprint of clean modular self storage facility lockers and industrial corridors with soft blue studio lighting and hyper clean utilitarian design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpb8nMdY7tf45b_9XwbIA8oLSwJf1lYjIjsECO3peCeERdLQy5iqwqxBAYzfQBCK4VbJB0JOrc51bG4KBaIkb3FqniY3Uvzf_BSUAD5fY94BUpCp88l89qdI8Dcg-6d7NBzAoMe3nmbBIHA_GUfgWVISOqp377OBy_NJUIIN0E4AtlgC90vDZ6DkQHpeWli4keZqUpw0EFoUs1EvEIW9h7rh905vIIBDTRmOJn-hkG-YRgMMMZj_QGL6LEJemjyy3a55baWJKk5TE"/>
+<div class="relative z-10 flex justify-between items-start">
+<span class="bg-surface/90 backdrop-blur font-code-sm text-[10.5px] px-1.5 py-0.5 rounded border border-border text-ink">Depot SGN-01</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="pin_drop">pin_drop</span>
+</div>
+<div class="relative z-10 bg-surface/95 backdrop-blur p-2 rounded border border-border/80">
+<p class="font-label text-[10px] text-muted uppercase">Door Status</p>
+<p class="font-body-strong text-[12px] text-success flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span>Latched & Secured</span>
+</p>
+</div>
+</div>
+<!-- Unit Specs -->
+<div class="space-y-2.5 text-[12.5px]">
+<div class="flex justify-between pb-1.5 border-b border-divider">
+<span class="text-muted">Unit Type:</span>
+<span class="font-body-strong text-ink">Standard S (1.5 x 2.0 m)</span>
+</div>
+<div class="flex justify-between pb-1.5 border-b border-divider">
+<span class="text-muted">Ceiling Height:</span>
+<span class="font-body-strong text-ink tabular-nums">2.8 m (Clear)</span>
+</div>
+<div class="flex justify-between pb-1.5 border-b border-divider">
+<span class="text-muted">Floor & Corridor:</span>
+<span class="font-body-strong text-ink">Ground Level, Bay 3</span>
+</div>
+<div class="flex justify-between">
+<span class="text-muted">Climate Controlled:</span>
+<span class="font-body-strong text-ink">22°C • 55% RH</span>
+</div>
+</div>
+<!-- Quick Access Code Dial -->
+<div class="bg-surface-subtle p-3.5 rounded-lg border border-border flex flex-col justify-between">
+<div>
+<span class="font-label text-label uppercase text-muted">Gate & Unit Passcode</span>
+<div class="mt-1 flex items-center justify-between">
+<span class="font-code text-headline tracking-widest text-ink font-bold">8842-01</span>
+<button class="text-primary hover:text-ink transition-colors" title="Copy PIN">
+<span class="material-symbols-outlined text-[18px]" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+<p class="font-meta text-[11px] text-muted mt-1">Valid at main vehicle turnstile & Corridor S gate.</p>
+</div>
+<button class="w-full mt-3 bg-surface border border-border-strong text-ink font-button text-[12px] py-1.5 rounded hover:bg-surface-muted transition-colors flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-[15px]" data-icon="cell_tower">cell_tower</span>
+<span>Open Gate via Bluetooth</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Billing & Support Summary (Right col) -->
+<div class="bg-surface border border-border rounded-lg shadow-sm p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3 border-b border-divider">
+<h3 class="font-body-strong text-body-strong text-ink">Escrow & Billing Status</h3>
+<span class="font-code-sm text-status-available bg-status-available-tint px-1.5 py-0.5 rounded border border-status-available-border">
+              PAID IN ADVANCE
+            </span>
+</div>
+<div class="mt-3 space-y-3">
+<div class="p-2.5 rounded bg-surface-subtle border border-border">
+<div class="flex justify-between text-meta text-muted">
+<span>Monthly Rent (S-3)</span>
+<span class="text-ink font-body-strong tabular-nums">690.000 ₫</span>
+</div>
+<div class="flex justify-between text-meta text-muted mt-1">
+<span>Security Deposit (Escrow)</span>
+<span class="text-ink font-body-strong tabular-nums">103.500 ₫</span>
+</div>
+<div class="mt-2 pt-2 border-t border-divider flex justify-between font-body-strong text-ink text-[12px]">
+<span>Total Vaulted Value</span>
+<span class="tabular-nums font-bold">793.500 ₫</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded border border-divider">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-muted text-[18px]" data-icon="receipt_long">receipt_long</span>
+<div>
+<p class="font-body-strong text-[12px] text-ink">Invoice #INV-2026-8842</p>
+<p class="font-meta text-[11px] text-muted">Issued Oct 10 • VAT receipt available</p>
+</div>
+</div>
+<a class="text-primary hover:underline text-[12px] font-button" href="#">PDF</a>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-divider">
+<button class="w-full bg-surface-subtle hover:bg-surface-muted text-ink-secondary border border-border font-button text-button py-2 rounded transition-colors flex items-center justify-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px]" data-icon="support_agent">support_agent</span>
+<span>Request Facility Support</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Operational Footer Bar -->
+<footer class="w-full bg-surface border-t border-border mt-8 py-2.5 px-margin text-muted font-meta text-[11px] flex flex-col sm:flex-row items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span>
+<span>StorageHub Control Room v2.4 • Facility ID: VN-SGN-01 (Tân Bình Gateway) • Systems Nominal</span>
+</div>
+<div class="flex items-center space-x-4 mt-1 sm:mt-0 font-code-sm text-[11px]">
+<span>Prices in VND (₫)</span>
+<span>•</span>
+<span>Latency: 28ms</span>
+<span>•</span>
+<span class="text-primary cursor-pointer hover:underline">API Status</span>
+</div>
+</footer>
+<!-- Micro-interaction toggle logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('notification-toggle-btn');
+      const dropdown = document.querySelector('aside');
+      
+      if (toggleBtn && dropdown) {
+        toggleBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = dropdown.classList.contains('hidden');
+          if (isHidden) {
+            dropdown.classList.remove('hidden');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+          } else {
+            dropdown.classList.add('hidden');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+    });
+  </script>
+</body></html>

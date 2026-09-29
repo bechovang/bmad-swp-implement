@@ -1,0 +1,30 @@
+%% StorageHub — State chart: vòng đời Reservation (BK-) — V3 2026-09-18
+%% Gộp vòng đời Rental cũ: cọc duy trì phiên, CheckedIn = đang thuê
+stateDiagram-v2
+    direction LR
+    [*] --> PendingPayment : KH đặt unit (Booking Summary)
+
+    PendingPayment --> Reserved : payment gateway xác nhận deposit
+    PendingPayment --> PendingPayment : payment fail [retry / đổi method]
+    PendingPayment --> [*] : KH bỏ qua [không giữ unit]
+
+    Reserved --> CheckedIn : trả 100% rent + ký hợp đồng (cấp access code)
+    Reserved --> Expired : quá hạn check-in [unit trả về Available]
+    Reserved --> Cancelled : huỷ đặt [hoàn deposit theo policy — dự phòng, v1 không kích hoạt]
+
+    CheckedIn --> CheckedIn : gia hạn [fee đã trả: EndDate dịch ngay] (sinh extension + addendum chờ ký)
+    CheckedIn --> CheckoutRequested : KH gửi checkout request
+    CheckoutRequested --> Closed : settlement hoàn tất [refund = deposit − damage fee]
+
+    Closed --> [*]
+    Expired --> [*]
+
+    note right of CheckedIn
+        CheckedIn = trạng thái "đang thuê"
+        (Rental cũ gộp vào Reservation — V3):
+        giữ cọc, AccessCode, EndDate
+        dịch ngay khi gia hạn.
+        Conflict guard: không đè
+        reservation kế tiếp
+        ("Latest new checkout: Oct 18").
+    end note

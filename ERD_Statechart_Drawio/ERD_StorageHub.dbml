@@ -1,0 +1,437 @@
+// ============================================================================
+// StorageHub — ERD (dbdiagram.io) — V3 2026-09-18
+// Nguồn: ERD_Statechart_LaTeX/report — 22 bảng, 31 quan hệ (kèm 1 tự tham chiếu)
+// Cách dùng: paste toàn bộ file vào https://dbdiagram.io/d → New Diagram
+// Quy ước: PK = khoá chính, UK = unique; cột ENUM khớp 1-1 với 7 state chart
+// Thay đổi V3: (1) gộp rentals vào reservations (1 bảng trọn vòng đời đặt chỗ
+// → thuê → trả); (2) reservations 1:1 contracts ("sinh"); (3) tách bảng
+// contract_addendums riêng (bỏ self-FK ParentContractID); (4) FK RentalID
+// ở extensions/checkout_requests/settlements/support_tickets/payments đổi
+// nguồn sang reservations; payments bỏ cột RentalID.
+// ============================================================================
+
+Project StorageHub {
+  database_type: 'MySQL'
+  Note: 'StorageHub — Hệ thống quản lý kho thuê tự phục vụ (SWP391). Tiền tệ DECIMAL(18,2) VND. Mã hồ sơ: BK- / SR- / CT- / CT-…-A1 / TL- (BK- duy nhất suốt vòng đời đặt chỗ → thuê → trả).'
+}
+
+// ---------------------------------------------------------------- ENUMS ----
+Enum staff_shift {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+Enum policy_rule_type {
+  DEPOSIT_RATE
+  RENT_RATE
+  LATE_FEE
+  SURCHARGE
+}
+
+Enum surcharge_type {
+  PERCENT
+  FIXED
+}
+
+Enum unit_status {
+  AVAILABLE
+  RESERVED
+  RENTED
+  PREPARING
+  MAINTENANCE
+  RETIRED
+}
+
+// V3: gộp vòng đời rental — thêm CHECKOUT_REQUESTED + CLOSED (từ rental_status cũ)
+Enum reservation_status {
+  PENDING_PAYMENT
+  RESERVED
+  CHECKED_IN
+  CHECKOUT_REQUESTED
+  CLOSED
+  EXPIRED
+  CANCELLED // dự phòng theo policy — v1 không kích hoạt (PRD §6 Non-Goals)
+}
+
+Enum extension_status {
+  PENDING_PAYMENT
+  APPLIED
+}
+
+Enum checkout_request_status {
+  PENDING
+  DONE
+}
+
+// V3: 6 giá trị — AWAITING_SIGNATURE chuyển sang addendum_status
+Enum contract_status {
+  DRAFT
+  PRINTED
+  SIGNED
+  ACTIVE
+  CLOSED
+  SUPERSEDED
+}
+
+// V3: mới — vòng đời phụ lục tách khỏi hợp đồng gốc
+Enum addendum_status {
+  AWAITING_SIGNATURE
+  SIGNED
+  EXPIRED
+  VOIDED
+}
+
+Enum payment_purpose {
+  DEPOSIT
+  RENT
+  EXTENSION_FEE
+  DAMAGE_FEE
+  EXTRA_FEE
+}
+
+Enum payment_method {
+  CARD
+  MOMO
+  VNPAY
+}
+
+Enum payment_status {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+}
+
+Enum inspection_item {
+  ACCESS_CARD
+  PADLOCK
+  CLEANLINESS
+  STRUCTURE
+}
+
+Enum inspection_result {
+  OK
+  MINOR
+  MAJOR
+}
+
+Enum incident_type {
+  LOST_ACCESS
+  DEVICE_ISSUE
+  SECURITY
+  CLEANLINESS
+  OTHER
+}
+
+Enum ticket_status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ESCALATED
+}
+
+Enum escalation_decision {
+  PENDING
+  MAINTENANCE_RELOCATE
+  RETURN_TO_STAFF
+}
+
+Enum task_type {
+  CHECK_IN
+  CHECKOUT
+  CLEANING
+  SUPPORT
+  CONTRACT
+}
+
+Enum task_status {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+// ------------------------------------------- NHÓM 1: NGƯỜI DÙNG & CƠ SỞ ----
+Table roles {
+  RoleID int [pk, increment]
+  Name varchar(50) [unique, not null]
+  Description varchar(200) [null]
+  Note: 'Danh mục 4 vai trò (Customer / Staff / Facility Manager / Business Ops). Quyết định tập màn hình và quyền thao tác.'
+}
+
+Table users {
+  UserID bigint [pk, increment]
+  FullName varchar(100) [not null]
+  Email varchar(100) [unique, not null]
+  Phone varchar(20) [null]
+  PasswordHash varchar(255) [not null]
+  RoleID int [not null]
+  Status tinyint [not null, default: 1] // 0=không hoạt động, 1=hoạt động, 2=bị khoá
+  CreatedAt datetime [not null, default: `CURRENT_TIMESTAMP`]
+  Note: 'Bản ghi trung tâm dùng chung cho 4 vai trò. Khách tự đăng ký; staff/manager do manager provisioning. Status 2 = khoá tài khoản (kiểm soát an toàn).'
+}
+
+Table facilities {
+  FacilityID int [pk, increment]
+  Name varchar(100) [not null]
+  Address varchar(255) [not null]
+  Phone varchar(20) [null]
+  Status tinyint [not null, default: 1] // 0=đóng cửa, 1=hoạt động
+  Note: 'Cơ sở vật chất (toà nhà trong khuôn viên FPT), chứa nhiều zone, giờ mở cửa riêng.'
+}
+
+Table zones {
+  ZoneID int [pk, increment]
+  FacilityID int [not null]
+  Code varchar(20) [not null]
+  Floor int [not null]
+  Note: 'Phân vùng trong cơ sở (A/B/C...). Đơn vị phân ca trực của staff. UNIQUE(FacilityID, Code).'
+}
+
+Table staff_assignments {
+  AssignmentID bigint [pk, increment]
+  StaffID bigint [not null]
+  ZoneID int [not null]
+  Shift staff_shift [not null]
+  WorkDate date [not null]
+  Note: 'Lịch trực theo ngày + ca + zone. UNIQUE(StaffID, WorkDate, Shift) — guard chống giao lịch trùng.'
+}
+
+// ------------------------------------ NHÓM 2: KHO & ĐƠN VỊ LƯU TRỮ ----
+Table unit_types {
+  TypeID int [pk, increment]
+  Name varchar(50) [unique, not null]
+  Description varchar(200) [null]
+  Note: 'Danh mục loại unit (Locker, S, M, L...). Căn cứ tính giá theo policy.'
+}
+
+Table units {
+  UnitID bigint [pk, increment]
+  Code varchar(20) [unique, not null]
+  TypeID int [not null]
+  ZoneID int [not null]
+  SizeM2 decimal(6,2) [not null]
+  Floor int [not null]
+  AccessType varchar(20) [not null] // PIN / QR / smart lock
+  Status unit_status [not null]
+  MergedIntoID bigint [null]
+  Note: 'Thực thể nghiệp vụ trung tâm. MergedIntoID: merge 2 unit liền kề → unit cũ RETIRED, trỏ sang unit mới. Buffer "Available soon" là trạng thái suy dẫn, không lưu cột.'
+}
+
+// -------------------------------------------- NHÓM 3: CHÍNH SÁCH GIÁ ----
+Table rental_policies {
+  PolicyID int [pk, increment]
+  Version varchar(20) [unique, not null]
+  EffectiveDate date [not null]
+  Status tinyint [not null, default: 0] // 0=nháp, 1=đang dùng, 2=ngừng
+  Note: 'Chính sách giá theo phiên bản có ngày hiệu lực. Hợp đồng khoá PolicyID tại thời điểm ký (snapshot).'
+}
+
+Table policy_rules {
+  RuleID bigint [pk, increment]
+  PolicyID int [not null]
+  TypeID int [not null]
+  RuleType policy_rule_type [not null]
+  SurchargeType surcharge_type [null]
+  Value decimal(18,2) [not null]
+  Cap decimal(18,2) [null]
+  Note: 'Quy tắc giá áp theo loại unit: tỷ lệ cọc, giá thuê, phụ thu, phí trễ. Phụ thu có trần (Cap).'
+}
+
+// -------------------------------------- NHÓM 4: ĐẶT CHỖ & THUÊ (BK-) ----
+// V3: bảng rentals gộp vào reservations — 1 bản ghi trọn vòng đời
+// đặt chỗ → thuê → trả; cọc duy trì phiên
+Table reservations {
+  ReservationID bigint [pk, increment]
+  Code varchar(20) [unique, not null] // BK-2026-0001 — duy nhất suốt vòng đời
+  CustomerID bigint [not null]
+  UnitID bigint [not null]
+  StartDate date [not null] // đã cộng turnover buffer
+  EndDate date [not null] // dịch ngay khi phí gia hạn được thanh toán
+  DepositAmount decimal(18,2) [not null] // cọc 10% giữ suốt phiên
+  AccessCode varchar(10) [null] // cấp khi check-in (CHECKED_IN = đang thuê)
+  Status reservation_status [not null]
+  Note: 'V3: gộp vòng đời rental. CHECKED_IN = trạng thái "đang thuê" (nắm AccessCode, cọc giữ, EndDate). Quá hạn check-in → EXPIRED, unit trả về AVAILABLE. CANCELLED dự phòng — v1 không kích hoạt.'
+}
+
+Table extensions {
+  ExtensionID bigint [pk, increment]
+  ReservationID bigint [not null] // V3: đổi nguồn từ rentals
+  OldEndDate date [not null]
+  NewEndDate date [not null]
+  ExtensionFee decimal(18,2) [not null]
+  Status extension_status [not null]
+  Note: 'Chuỗi kiểm toán mỗi lần gia hạn: ngày cũ → ngày mới + phí. Căn cứ sinh phụ lục hợp đồng (contract_addendums).'
+}
+
+Table checkout_requests {
+  RequestID bigint [pk, increment]
+  ReservationID bigint [not null] // V3: đổi nguồn từ rentals
+  RequestedDate date [not null]
+  Status checkout_request_status [not null]
+  Note: 'Ngày trả mới nhất luôn thắng ("Latest new checkout") để không đè reservation kế tiếp. Sinh task checkout cho staff trực zone.'
+}
+
+// ------------------------------- NHÓM 5: HỢP ĐỒNG & PHỤ LỤC (CT-/CT-…-A1) ----
+Table contracts {
+  ContractID bigint [pk, increment]
+  Code varchar(20) [unique, not null] // CT-2026-0001
+  ReservationID bigint [unique, not null] // V3: 1:1 với reservation ("sinh")
+  PolicyID int [not null]
+  ContentSnapshot text [not null]
+  SignedPhotoUrl varchar(255) [null]
+  Status contract_status [not null]
+  Note: 'V3: mỗi đặt chỗ sinh đúng MỘT hợp đồng gốc (1:1, auto-draft khi đặt cọc thành công, khoá phiên bản policy). Không bao giờ bị sửa — mọi thay đổi = phụ lục riêng (contract_addendums). Ảnh bản ký là điều kiện cấp access code.'
+}
+
+Table contract_addendums {
+  AddendumID bigint [pk, increment]
+  ContractID bigint [not null] // hợp đồng gốc
+  ExtensionID bigint [null] // 1:N — bỏ UNIQUE (2026-09-18): VOIDED soạn lại = bản ghi mới cùng extension
+  ContentSnapshot text [not null]
+  SignedPhotoUrl varchar(255) [null]
+  SignatureDueDate date [not null] // hạn ký 7 ngày
+  Status addendum_status [not null]
+  Note: 'V3: bảng riêng thay self-FK ParentContractID. Sinh từ nghiệp vụ gia hạn (auto-draft khi phí xác nhận). Quá hạn KHÔNG auto-đóng (EndDate đã dịch từ lúc trả phí, phụ lục không hold unit) — staff đóng EXPIRED (khách không đến ký, sau khi hết nhắc) hoặc VOIDED (soạn nhầm / khách trả kho sớm).'
+}
+
+// --------------------------------- NHÓM 6: THANH TOÁN & THANH LÝ ----
+Table payments {
+  PaymentID bigint [pk, increment]
+  ReceiptCode varchar(20) [unique, not null]
+  PayerID bigint [not null]
+  ReservationID bigint [null] // cọc 10% + thuê 100% (V3: gộp 2 touchpoint)
+  ExtensionID bigint [null] // phí gia hạn
+  SettlementID bigint [null] // phí hư hại / phát sinh vượt cọc
+  Purpose payment_purpose [not null]
+  Method payment_method [not null]
+  Amount decimal(18,2) [not null] // > 0
+  Status payment_status [not null]
+  Note: 'CHECK: đúng một trong BA cột tham chiếu (Reservation/Extension/Settlement) NOT NULL. 4 touchpoint: deposit / rent / extension fee / extra fee. State chart Payment: Pending → Processing → Succeeded/Failed/Expired.'
+}
+
+Table settlements {
+  SettlementID bigint [pk, increment]
+  ReservationID bigint [unique, not null] // V3: 1:0..1 với reservation
+  ContractID bigint [not null]
+  StaffID bigint [not null]
+  DamageFee decimal(18,2) [not null, default: 0]
+  DamageReason varchar(255) [null] // NOT NULL khi DamageFee > 0
+  RefundAmount decimal(18,2) [not null] // hoàn = cọc giữ - phí hư hại
+  ReceiptCode varchar(20) [unique, not null]
+  Note: 'Bản thanh lý mỗi lần trả kho. Phí hư hại chỉ thu khi có lý do bắt buộc.'
+}
+
+Table inspections {
+  InspectionID bigint [pk, increment]
+  SettlementID bigint [not null]
+  Item inspection_item [not null]
+  Result inspection_result [not null]
+  Note varchar(255) [null]
+  Note: 'Checklist kiểm tra hạng mục khi trả kho. Kết quả MAJOR là căn cứ thu phí hư hại.'
+}
+
+// ------------------------------------------------- NHÓM 7: HỖ TRỢ ----
+Table support_tickets {
+  TicketID bigint [pk, increment]
+  Code varchar(20) [unique, not null] // SR-2026-0001
+  CustomerID bigint [not null]
+  UnitID bigint [not null]
+  ReservationID bigint [null] // V3: ngữ cảnh phiên đặt chỗ — thuê
+  IncidentType incident_type [not null]
+  Status ticket_status [not null]
+  AssignedStaffID bigint [null]
+  Note: 'Định tuyến tới staff trực ca theo unit + shift. Vòng đời: Open → InProgress → Resolved, nhánh Escalated.'
+}
+
+Table escalations {
+  EscalationID bigint [pk, increment]
+  TicketID bigint [unique, not null] // 1:0..1 với ticket
+  EscalatedByStaffID bigint [not null]
+  ManagerID bigint [null]
+  Note text [not null] // ghi chú bắt buộc khi escalate
+  Decision escalation_decision [not null, default: 'PENDING']
+  Note: 'Staff escalate bắt buộc kèm ghi chú. Manager quyết định severe (Maintenance + tái định vị) hoặc trả về staff kèm guidance.'
+}
+
+// ------------------------------------ NHÓM 8: VẬN HÀNH & HỆ THỐNG ----
+Table tasks {
+  TaskID bigint [pk, increment]
+  Type task_type [not null]
+  RefCode varchar(20) [null] // BK- / SR- / CT- (V3: không còn RT-)
+  AssignedStaffID bigint [not null]
+  WorkDate date [not null]
+  Status task_status [not null]
+  Note: 'Kanban ToDo / InProgress / Done. Chặn kéo sang Done nếu còn bước chốt (payment / settlement / ảnh bản ký) — snap-back kèm toast chỉ tên bước thiếu.'
+}
+
+Table notifications {
+  NotificationID bigint [pk, increment]
+  UserID bigint [not null]
+  Type varchar(50) [not null]
+  Title varchar(200) [not null]
+  DeepLink varchar(255) [null]
+  IsRead tinyint [not null, default: 0]
+  Note: 'Chuông thông báo trong app, trỏ màn hình chi tiết qua DeepLink.'
+}
+
+Table activity_logs {
+  LogID bigint [pk, increment]
+  ActorID bigint [not null]
+  EntityType varchar(50) [not null] // UNIT, CONTRACT...
+  EntityID bigint [not null]
+  Action varchar(50) [not null] // STATUS_CHANGE...
+  FromValue varchar(255) [null]
+  ToValue varchar(255) [null]
+  Reason varchar(255) [not null]
+  Note: 'Nhật ký kiểm toán append-only (chỉ INSERT). Mọi thay đổi trạng thái kèm giá trị trước/sau và lý do.'
+}
+
+// ---------------------------------------------------- QUAN HỆ (31) ----
+// Nhóm 1: Người dùng & cơ sở
+Ref: roles.RoleID > users.RoleID                       // 1:N phân vai
+Ref: facilities.FacilityID > zones.FacilityID          // 1:N cơ sở có zone
+Ref: zones.ZoneID > units.ZoneID                       // 1:N zone chứa unit
+Ref: unit_types.TypeID > units.TypeID                  // 1:N phân loại
+Ref: users.UserID > staff_assignments.StaffID          // 1:N lịch trực
+Ref: zones.ZoneID > staff_assignments.ZoneID           // 1:N phụ trách
+
+// Nhóm 2: Chính sách giá
+Ref: rental_policies.PolicyID > policy_rules.PolicyID  // 1:N định nghĩa
+Ref: unit_types.TypeID > policy_rules.TypeID           // 1:N áp dụng cho
+
+// Nhóm 3: Đặt chỗ & thuê (V3: rentals gộp vào reservations)
+Ref: users.UserID > reservations.CustomerID            // 1:N khách đặt
+Ref: units.UnitID > reservations.UnitID                // 1:N unit được giữ (và thuê)
+Ref: reservations.ReservationID > extensions.ReservationID       // 1:N gia hạn
+Ref: reservations.ReservationID > checkout_requests.ReservationID // 1:N xin trả
+
+// Nhóm 4: Hợp đồng & phụ lục (V3: 1:1 + bảng addendum riêng)
+Ref: reservations.ReservationID - contracts.ReservationID // 1:1 sinh đúng 1 hợp đồng gốc
+Ref: rental_policies.PolicyID > contracts.PolicyID     // 1:N khoá phiên bản
+Ref: contracts.ContractID > contract_addendums.ContractID // 1:N hợp đồng có phụ lục
+Ref: extensions.ExtensionID > contract_addendums.ExtensionID // 1:N phụ lục gia hạn (VOIDED soạn lại = bản ghi mới)
+
+// Nhóm 5: Tiền (V3: cọc + thuê 100% cùng nguồn reservation)
+Ref: users.UserID > payments.PayerID                   // 1:N người trả
+Ref: reservations.ReservationID > payments.ReservationID // 1:N cọc 10% + thuê 100%
+Ref: extensions.ExtensionID - payments.ExtensionID     // 1:0..1 phí gia hạn
+Ref: settlements.SettlementID > payments.SettlementID  // 1:N phí hư hại/phát sinh
+
+// Nhóm 6: Trả kho & thanh lý
+Ref: reservations.ReservationID - settlements.ReservationID // 1:0..1 mỗi phiên thanh lý 1 lần
+Ref: contracts.ContractID > settlements.ContractID     // 1:N đối chiếu
+Ref: settlements.SettlementID > inspections.SettlementID // 1:N checklist
+
+// Nhóm 7: Hỗ trợ
+Ref: users.UserID > support_tickets.CustomerID         // 1:N khách gửi
+Ref: units.UnitID > support_tickets.UnitID             // 1:N unit liên quan
+Ref: reservations.ReservationID > support_tickets.ReservationID // 1:N ngữ cảnh
+Ref: support_tickets.TicketID - escalations.TicketID   // 1:0..1 escalate
+
+// Nhóm 8: Vận hành & hệ thống
+Ref: users.UserID > tasks.AssignedStaffID              // 1:N nhận việc
+Ref: users.UserID > notifications.UserID               // 1:N nhận thông báo
+Ref: users.UserID > activity_logs.ActorID              // 1:N ghi audit
+Ref: units.MergedIntoID > units.UnitID                 // 1:N tự tham chiếu (merge)

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rental Detail — StorageHub</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#ffdbcc",
+            "status-retired-tint": "#F8FAFC",
+            "status-retired-border": "#E2E8F0",
+            "primary-fixed": "#e2dfff",
+            "surface-tint": "#4d44e3",
+            "status-maintenance-tint": "#FFF7ED",
+            "surface-muted": "#F1F5F9",
+            "on-tertiary-fixed": "#351000",
+            "surface-container-high": "#eae6f4",
+            "status-buffer": "#B45309",
+            "surface-bright": "#fcf8ff",
+            "border-strong": "#CBD5E1",
+            "surface-variant": "#e4e1ee",
+            "ink": "#0F172A",
+            "secondary-container": "#d5e3fd",
+            "primary-border": "#E0E7FF",
+            "primary": "#4F46E5",
+            "outline-variant": "#c7c4d8",
+            "status-reserved-tint": "#EEF2FF",
+            "muted": "#64748B",
+            "status-maintenance": "#C2410C",
+            "primary-fixed-dim": "#c3c0ff",
+            "tertiary-fixed-dim": "#ffb695",
+            "on-surface-variant": "#464555",
+            "on-primary": "#ffffff",
+            "status-maintenance-border": "#FFEDD5",
+            "secondary-fixed-dim": "#b9c7e0",
+            "secondary": "#515f74",
+            "inverse-primary": "#c3c0ff",
+            "status-rented-border": "#E2E8F0",
+            "divider": "#F1F5F9",
+            "background": "#fcf8ff",
+            "surface-container": "#f0ecf9",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "warning-bar": "#F59E0B",
+            "surface-dim": "#dcd8e5",
+            "success": "#059669",
+            "status-preparing-border": "#E0F2FE",
+            "status-preparing": "#0284C7",
+            "on-secondary-container": "#57657b",
+            "tertiary-container": "#a44100",
+            "status-reserved-border": "#E0E7FF",
+            "error-tint": "#FEF2F2",
+            "status-retired": "#94A3B8",
+            "status-buffer-bar": "#F59E0B",
+            "on-primary-container": "#dad7ff",
+            "on-background": "#1b1b24",
+            "surface": "#FFFFFF",
+            "on-surface": "#1b1b24",
+            "on-secondary": "#ffffff",
+            "primary-container": "#4f46e5",
+            "ink-secondary": "#334155",
+            "app-bg": "#F4F6F9",
+            "status-rented-tint": "#F1F5F9",
+            "on-secondary-fixed": "#0d1c2f",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f5f2ff",
+            "status-available-tint": "#ECFDF5",
+            "error-container": "#ffdad6",
+            "warning": "#B45309",
+            "surface-container-lowest": "#ffffff",
+            "status-buffer-tint": "#FFFBEB",
+            "on-primary-fixed-variant": "#3323cc",
+            "warning-tint": "#FFFBEB",
+            "surface-container-highest": "#e4e1ee",
+            "error-border": "#FECACA",
+            "outline": "#777587",
+            "status-buffer-border": "#FDE68A",
+            "on-error-container": "#93000a",
+            "tertiary": "#7e3000",
+            "status-rented": "#334155",
+            "inverse-surface": "#302f39",
+            "primary-outline-border": "#C7D2FE",
+            "border": "#E2E8F0",
+            "surface-subtle": "#F8FAFC",
+            "on-secondary-fixed-variant": "#3a485c",
+            "on-tertiary-container": "#ffd2be",
+            "on-primary-fixed": "#0f0069",
+            "inverse-on-surface": "#f3effc",
+            "status-available": "#059669",
+            "secondary-fixed": "#d5e3fd",
+            "status-available-border": "#D1FAE5",
+            "on-error": "#ffffff",
+            "faint": "#94A3B8",
+            "primary-tint": "#EEF2FF",
+            "status-preparing-tint": "#F0F9FF",
+            "status-reserved": "#4F46E5",
+            "error": "#DC2626",
+            "success-tint": "#ECFDF5"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-3xl": "48px",
+            "space-xl": "24px",
+            "space-2xl": "32px",
+            "margin": "24px",
+            "space-md": "12px",
+            "gutter": "14px",
+            "space-lg": "16px",
+            "space-sm": "8px",
+            "space-xs": "4px"
+          },
+          "fontFamily": {
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col font-body text-body antialiased selection:bg-primary selection:text-white">
+<!-- Top Navigation Bar (Shared Component: TopNavBar with active state on 'My Rentals') -->
+<header class="bg-surface docked full-width top-0 h-[54px] border-b border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] sticky z-40">
+<div class="w-full h-[54px] px-margin flex items-center justify-between mx-auto max-w-7xl">
+<!-- Left Anchor & Navigation Links -->
+<div class="flex items-center gap-6">
+<!-- Logo -->
+<a class="flex items-center gap-2 text-decoration-none" href="#">
+<div class="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-white shadow-[0_1px_2px_rgba(79,70,229,.35)]">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+</div>
+<span class="font-headline text-headline text-ink font-semibold tracking-tight">StorageHub</span>
+</a>
+<!-- System Role Chip -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-label font-label bg-primary-tint border border-primary-border text-primary uppercase tracking-wider">
+          Customer
+        </span>
+<!-- Navigation Links Cluster -->
+<nav class="hidden md:flex items-center gap-6 ml-4">
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">Browse Units</a>
+<a class="text-primary font-body-strong text-body-strong border-b-2 border-primary py-3.5" href="#">My Rentals</a>
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">Support</a>
+</nav>
+</div>
+<!-- Right Trailing Profile & Actions Cluster -->
+<div class="flex items-center gap-4">
+<!-- Gate Status Indicator -->
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-surface-subtle border border-border rounded-xl">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="font-meta text-meta text-ink-secondary">Gate Automation Online</span>
+</div>
+<!-- Notification Bell Action with 3 Unread Indicator -->
+<button class="relative p-1.5 text-ink-secondary hover:text-ink hover:bg-surface-subtle rounded-xl transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+</button>
+<div class="h-4 w-px bg-border"></div>
+<!-- User Identity Block -->
+<div class="flex items-center gap-2 pl-1">
+<div class="w-7 h-7 rounded-xl bg-surface-muted border border-border flex items-center justify-center font-body-strong text-body-strong text-ink">
+            L
+          </div>
+<div class="flex flex-col text-left leading-tight">
+<span class="font-body-strong text-[12.5px] text-ink">Lan</span>
+<span class="font-code-sm text-code-sm text-faint">SGN-8842</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Secondary Operational Breadcrumb Strip -->
+<div class="bg-surface border-b border-border py-2 px-margin text-meta font-meta text-muted">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span>Depot SGN-01 (Tân Bình Gateway)</span>
+<span class="text-faint">/</span>
+<a class="text-ink-secondary hover:text-primary transition-colors" href="#">My Rentals</a>
+<span class="text-faint">/</span>
+<span class="font-code-sm text-code-sm text-ink bg-surface-muted px-1.5 py-0.5 rounded border border-border">Unit S-3</span>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-faint">
+<span class="material-symbols-outlined text-[14px]">cloud_download</span>
+<span>Operational Depot SGN-01 · Active Latch Lock Sync</span>
+</div>
+</div>
+</div>
+<!-- Primary Page Container -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-margin py-6 space-y-6">
+<!-- Page Header & Key Metadata Strip -->
+<div class="space-y-3">
+<div>
+<a class="inline-flex items-center gap-1.5 font-meta text-meta text-muted hover:text-primary transition-colors mb-2" href="#">
+<span class="material-symbols-outlined text-[15px]">arrow_back</span>
+<span>Back to My Rentals</span>
+</a>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Title & Status Line -->
+<div class="flex flex-wrap items-center gap-3">
+<span class="font-code text-code px-2 py-1 rounded-xl bg-surface border border-border-strong text-ink font-semibold shadow-[0_1px_2px_rgba(15,23,42,.05)]">
+            S-3
+          </span>
+<h1 class="font-headline text-headline text-ink font-semibold tracking-tight">
+            Unit S-3 · 5 m² · Indoor · Tân Bình depot
+          </h1>
+<!-- Status Badge (Rented) -->
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label font-label bg-status-rented-tint border border-status-rented-border text-status-rented">
+<span class="w-1.5 h-1.5 rounded-full bg-status-rented"></span>
+            Rented
+          </span>
+</div>
+<!-- Term Pill / Metadata -->
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-2 px-3 py-1 bg-surface border border-border rounded-xl font-meta text-meta text-ink-secondary shadow-[0_1px_2px_rgba(15,23,42,.05)]">
+<span class="material-symbols-outlined text-[16px] text-muted">date_range</span>
+<span>Oct 3, 2026 → Jan 3, 2027</span>
+<span class="text-faint">•</span>
+<span class="text-ink font-medium">3 months commitment</span>
+</span>
+</div>
+</div>
+<!-- Quick Facility Metadata Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+<div class="flex items-center gap-2 text-meta font-meta text-muted bg-surface py-2 px-3 rounded-xl border border-border">
+<span class="material-symbols-outlined text-[16px] text-primary">garage</span>
+<span>Direct drive-up roll-up door</span>
+</div>
+<div class="flex items-center gap-2 text-meta font-meta text-muted bg-surface py-2 px-3 rounded-xl border border-border">
+<span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
+<span>Ground floor Bay <strong class="text-ink font-code-sm font-semibold">#A-14</strong></span>
+</div>
+<div class="flex items-center gap-2 text-meta font-meta text-muted bg-surface py-2 px-3 rounded-xl border border-border">
+<span class="material-symbols-outlined text-[16px] text-success">autorenew</span>
+<span>Auto-renew: <strong class="text-ink font-medium">Enabled (Card *8842)</strong></span>
+</div>
+</div>
+</div>
+<!-- Main Content Cards Grid (3 Columns Bento Layout) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-start">
+<!-- Column 1: Card 1 (Deposit Card) & Quick Info -->
+<div class="space-y-gutter">
+<!-- Card 1: Deposit Card with 3px slate left status bar -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,.05)] relative overflow-hidden flex flex-col">
+<!-- 3px Slate status bar -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-rented"></div>
+<div class="p-5 pl-6 space-y-4">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-label font-label text-muted uppercase tracking-wider block">Security Deposit</span>
+<span class="text-kpi-value font-kpi-value text-ink tabular-nums mt-1 block">
+                  103.500 ₫
+                </span>
+</div>
+<span class="inline-flex items-center p-1.5 rounded-xl bg-surface-subtle text-muted border border-border">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</span>
+</div>
+<div class="py-2 px-3 rounded-xl bg-surface-subtle border border-border space-y-1">
+<div class="text-meta font-meta text-ink-secondary flex items-center justify-between">
+<span>10% of monthly rent</span>
+<span class="font-code-sm text-code-sm text-ink">LSE-99140-DEP</span>
+</div>
+<p class="text-meta font-meta text-muted">
+                Refundable at checkout inspection, settled strictly under Depot SGN-01 return policy.
+              </p>
+</div>
+<!-- Escrow Trust Indicator -->
+<div class="flex items-center gap-2 pt-1 border-t border-divider">
+<span class="material-symbols-outlined text-[16px] text-success">lock_open_right</span>
+<div class="text-meta font-meta text-ink-secondary">
+                Escrow Status: <span class="text-ink font-semibold">Safely Vaulted & Reconciled</span>
+<span class="text-faint font-code-sm block text-[11px] mt-0.5">Reference ID: TXN-90281</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Specs Box -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,.05)] p-5 space-y-3">
+<div class="flex items-center justify-between border-b border-divider pb-2.5">
+<span class="text-meta font-meta text-muted">Unit Dimensions</span>
+<span class="text-body-strong font-body-strong text-ink tabular-nums">2.0m × 2.5m × 3.0m</span>
+</div>
+<div class="flex items-center justify-between border-b border-divider pb-2.5">
+<span class="text-meta font-meta text-muted">Ceiling Height</span>
+<span class="text-body-strong font-body-strong text-ink tabular-nums">3.0 meters (Roll-up max)</span>
+</div>
+<div class="flex items-center justify-between border-b border-divider pb-2.5">
+<span class="text-meta font-meta text-muted">Environment</span>
+<span class="text-body-strong font-body-strong text-ink">Indoor Climate Regulated</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-meta font-meta text-muted">Protection Tier</span>
+<span class="inline-flex items-center gap-1 text-meta font-meta text-success">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+              Basic 50.000.000 ₫ included
+            </span>
+</div>
+</div>
+</div>
+<!-- Column 2 & 3 (Span 2): Payment History & Access PIN Bento -->
+<div class="lg:col-span-2 space-y-gutter">
+<!-- Card 3: Access & Keyless PIN Card -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,.05)] relative overflow-hidden">
+<!-- 3px status bar (Primary/Slate) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div class="p-5 pl-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">pin</span>
+<h2 class="text-body-strong font-body-strong text-ink">Facility & Latch Access</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label font-label bg-status-available-tint text-status-available border border-status-available-border">
+                  24/7 Keyless
+                </span>
+</div>
+<p class="text-meta font-meta text-muted">
+                Access code sent to your notifications · Ground floor Bay #A-14 Direct Roll-up
+              </p>
+<div class="text-[12px] text-ink-secondary font-meta pt-1 flex items-center gap-3">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-success">check_circle</span>
+                  Gate #1 Online
+                </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-success">check_circle</span>
+                  Elevator Bay A
+                </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-success">check_circle</span>
+                  Unit Latch-Sync Active
+                </span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="inline-flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-subtle border border-border-strong rounded-xl text-button font-button text-ink-secondary active:scale-[0.98] transition-all shadow-[0_1px_2px_rgba(15,23,42,.05)]">
+<span class="material-symbols-outlined text-[16px] text-primary">key</span>
+<span>View code</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 bg-surface hover:bg-surface-subtle border border-border rounded-xl text-button font-button text-muted hover:text-ink transition-colors" title="Depot map & directions">
+<span class="material-symbols-outlined text-[16px]">map</span>
+<span>Depot Map</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2: Payment History Card with 3px status bar -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,.05)] relative overflow-hidden flex flex-col">
+<!-- 3px Slate status bar -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-rented"></div>
+<div class="p-5 pl-6">
+<!-- Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-3 border-b border-divider gap-2">
+<div>
+<h2 class="text-body-strong font-body-strong text-ink">Payment & Billing History</h2>
+<p class="text-meta font-meta text-muted">Receipts for active lease <span class="font-code-sm text-code-sm text-ink font-semibold">LSE-99140</span></p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-label font-label text-muted uppercase">Default Payment:</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-subtle border border-border text-meta font-meta text-ink-secondary">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+                  Visa ending *8842
+                </span>
+</div>
+</div>
+<!-- Receipts Dense Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-divider text-label font-label text-muted uppercase tracking-wider">
+<th class="py-2.5 font-semibold">Description</th>
+<th class="py-2.5 font-semibold">Date Paid</th>
+<th class="py-2.5 font-semibold">Payment Channel</th>
+<th class="py-2.5 font-semibold text-right">Amount (VND)</th>
+<th class="py-2.5 font-semibold text-center w-16">Receipt</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-divider font-body text-body text-ink">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3">
+<div class="font-body-strong text-body-strong text-ink">Deposit</div>
+<div class="text-[11.5px] font-meta text-muted">Refundable holding charge</div>
+</td>
+<td class="py-3 text-ink-secondary tabular-nums text-meta font-meta">
+                      Oct 1, 2026
+                    </td>
+<td class="py-3">
+<div class="inline-flex items-center gap-1.5 text-meta font-meta text-ink-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                        Cleared (VNPay QR)
+                      </div>
+</td>
+<td class="py-3 text-right font-body-strong text-body-strong text-ink tabular-nums">
+                      103.500 ₫
+                    </td>
+<td class="py-3 text-center">
+<a class="inline-flex items-center justify-center p-1 text-muted hover:text-primary rounded hover:bg-surface-muted transition-colors" href="#" title="Download PDF Receipt">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</a>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3">
+<div class="font-body-strong text-body-strong text-ink">Rent (Q1 upfront)</div>
+<div class="text-[11.5px] font-meta text-muted">Billing term Oct 3 - Nov 3, 2026</div>
+</td>
+<td class="py-3 text-ink-secondary tabular-nums text-meta font-meta">
+                      Oct 3, 2026
+                    </td>
+<td class="py-3">
+<div class="inline-flex items-center gap-1.5 text-meta font-meta text-ink-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                        Cleared (Card ending *8842)
+                      </div>
+</td>
+<td class="py-3 text-right font-body-strong text-body-strong text-ink tabular-nums">
+                      1.035.000 ₫
+                    </td>
+<td class="py-3 text-center">
+<a class="inline-flex items-center justify-center p-1 text-muted hover:text-primary rounded hover:bg-surface-muted transition-colors" href="#" title="Download PDF Receipt">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</a>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-subtle transition-colors group">
+<td class="py-3">
+<div class="font-body-strong text-body-strong text-ink">Extension (2 months)</div>
+<div class="text-[11.5px] font-meta text-muted">Term extension Nov 3 - Jan 3, 2027</div>
+</td>
+<td class="py-3 text-ink-secondary tabular-nums text-meta font-meta">
+                      Oct 10, 2026
+                    </td>
+<td class="py-3">
+<div class="inline-flex items-center gap-1.5 text-meta font-meta text-ink-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                        Cleared (MoMo)
+                      </div>
+</td>
+<td class="py-3 text-right font-body-strong text-body-strong text-ink tabular-nums">
+                      690.000 ₫
+                    </td>
+<td class="py-3 text-center">
+<a class="inline-flex items-center justify-center p-1 text-muted hover:text-primary rounded hover:bg-surface-muted transition-colors" href="#" title="Download PDF Receipt">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Summary Footer Line -->
+<div class="mt-4 pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center gap-2 text-meta font-meta text-muted">
+<span class="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
+<span>Tax Invoices issued under VAT #0314981290 (VN)</span>
+</div>
+<div class="flex items-center justify-end gap-3">
+<span class="text-meta font-meta text-muted">Total paid to date:</span>
+<span class="font-headline text-[17px] text-ink font-semibold tabular-nums">
+                  1.828.500 ₫
+                </span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,.05)] relative overflow-hidden flex flex-col p-5 pl-6"><div class="flex items-center justify-between pb-3 mb-3 border-b border-divider"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">description</span><h2 class="text-body-strong font-body-strong text-ink">Contracts &amp; Addenda</h2></div><span class="text-meta font-meta text-muted">2 records</span></div><div class="bg-warning-tint border-l-4 border-warning-bar rounded-r-md p-3 mb-4 text-[12px] text-warning flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] shrink-0 text-warning-bar">warning</span><p class="font-meta leading-tight">Addendum CT-1042-A1 is still unsigned. Sign at the desk by Oct 25 — the new checkout date Oct 18 already applies.</p></div><div class="space-y-2.5"><div class="bg-surface rounded border border-border p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-border-strong transition-colors"><div class="flex items-center gap-3"><div class="w-7 h-8 rounded border border-border bg-surface-subtle flex items-center justify-center text-muted shrink-0"><span class="material-symbols-outlined text-[18px]">article</span></div><div class="flex flex-wrap items-center gap-2"><span class="font-mono font-semibold text-[12px] bg-surface-muted text-ink-secondary px-2 py-0.5 rounded border border-border">CT-1042</span><span class="text-[13px] font-semibold text-ink">Original contract</span><span class="inline-flex items-center gap-1 bg-status-available-tint text-status-available border border-status-available-border text-[10.5px] font-semibold px-2 py-0.5 rounded"><span class="material-symbols-outlined text-[13px]">check_circle</span>Signed</span></div></div><div class="flex items-center"><a href="#" class="text-[12px] font-medium text-primary hover:text-primary/90 hover:underline inline-flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">visibility</span><span>View signed copy</span></a></div></div><div class="bg-surface rounded border border-border p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-border-strong transition-colors"><div class="flex items-center gap-3"><div class="w-7 h-8 rounded border border-border bg-surface-subtle flex items-center justify-center text-muted shrink-0"><span class="material-symbols-outlined text-[18px]">edit_document</span></div><div class="flex flex-wrap items-center gap-2"><span class="font-mono font-semibold text-[12px] bg-surface-muted text-ink-secondary px-2 py-0.5 rounded border border-border">CT-1042-A1</span><span class="text-[13px] font-semibold text-ink">Extension addendum · new checkout Oct 18</span><span class="inline-flex items-center gap-1 bg-status-buffer-tint text-warning border border-status-buffer-border text-[10.5px] font-semibold px-2 py-0.5 rounded"><span class="material-symbols-outlined text-[13px]">schedule</span>Awaiting signature</span></div></div><div class="flex items-center"><span class="text-[11.5px] text-muted font-medium">Sign at the desk by Oct 25</span></div></div></div></div>
+
+</div>
+</div>
+</main>
+<!-- Bottom Sticky / Anchored Operational Action Row -->
+<div class="sticky bottom-0 z-30 bg-surface border-t border-border shadow-[0_-2px_6px_rgba(15,23,42,0.04)] py-3 px-margin">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<!-- Left Context Info -->
+<div class="flex items-center gap-2 text-meta font-meta text-ink-secondary">
+<span class="material-symbols-outlined text-[18px] text-primary">calendar_month</span>
+<span>Next scheduled billing: <strong class="text-ink tabular-nums">Oct 28, 2026</strong></span>
+<span class="text-faint">•</span>
+<span class="inline-flex items-center gap-1 text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          Auto-renew is active
+        </span>
+</div>
+<!-- Action Buttons Cluster -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Ghost Button: New Support Request -->
+<button class="inline-flex items-center gap-1.5 px-3 py-2 bg-transparent hover:bg-surface-subtle text-ink-secondary hover:text-ink rounded-xl text-button font-button transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[17px]">headset_mic</span>
+<span>New support request</span>
+</button>
+<!-- Secondary Button: Request checkout -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface hover:bg-surface-subtle border border-border-strong text-ink-secondary rounded-xl text-button font-button active:scale-[0.98] transition-all shadow-[0_1px_2px_rgba(15,23,42,.05)]">
+<span class="material-symbols-outlined text-[17px]">exit_to_app</span>
+<span>Request checkout</span>
+</button>
+<!-- Primary CTA: Extend rental -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary/95 text-white rounded-xl text-button font-button active:scale-[0.98] transition-all shadow-[0_1px_2px_rgba(79,70,229,.35)]">
+<span>Extend rental</span>
+<span class="material-symbols-outlined text-[17px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Standard Technical Footer -->
+<footer class="bg-surface-subtle border-t border-border py-4 px-margin text-meta font-meta text-muted">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="font-code-sm text-code-sm text-ink font-semibold">StorageHub Control Room v2.4</span>
+<span class="text-faint">|</span>
+<span>Operational Depot SGN-01 (Tân Bình)</span>
+<span class="text-faint">|</span>
+<span class="inline-flex items-center gap-1 text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+          Gate Automation Online
+        </span>
+</div>
+<div class="flex items-center gap-3 tabular-nums">
+<span>System Status: <strong class="text-ink font-medium">Operational</strong></span>
+<span class="text-faint">•</span>
+<span>Depot Time: <strong class="text-ink font-mono">14:32:08 ICT (UTC+7)</strong></span>
+</div>
+</div>
+</footer>
+</body></html>

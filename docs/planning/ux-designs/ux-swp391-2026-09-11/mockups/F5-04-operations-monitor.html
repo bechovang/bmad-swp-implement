@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StorageHub Control Room - Operations Monitor</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "warning-tint": "#FFFBEB",
+            "primary-border": "#E0E7FF",
+            "surface-muted": "#F1F5F9",
+            "border-strong": "#CBD5E1",
+            "on-surface": "#1b1b24",
+            "status-reserved-tint": "#EEF2FF",
+            "on-secondary-fixed": "#0d1c2f",
+            "status-available-border": "#D1FAE5",
+            "status-maintenance": "#C2410C",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-maintenance-border": "#FFEDD5",
+            "secondary-fixed-dim": "#b9c7e0",
+            "outline": "#777587",
+            "success-tint": "#ECFDF5",
+            "primary": "#4F46E5",
+            "error-tint": "#FEF2F2",
+            "error-border": "#FECACA",
+            "secondary-fixed": "#d5e3fd",
+            "status-available-tint": "#ECFDF5",
+            "on-secondary-container": "#57657b",
+            "divider": "#F1F5F9",
+            "warning": "#B45309",
+            "tertiary-fixed": "#ffdbcc",
+            "on-primary": "#ffffff",
+            "app-bg": "#F4F6F9",
+            "muted": "#64748B",
+            "on-primary-fixed-variant": "#3323cc",
+            "status-retired-tint": "#F8FAFC",
+            "on-secondary": "#ffffff",
+            "surface-container": "#f0ecf9",
+            "primary-fixed-dim": "#c3c0ff",
+            "on-primary-fixed": "#0f0069",
+            "primary-container": "#4f46e5",
+            "on-background": "#1b1b24",
+            "secondary": "#515f74",
+            "status-buffer-border": "#FDE68A",
+            "on-error": "#ffffff",
+            "error": "#DC2626",
+            "on-tertiary": "#ffffff",
+            "ink-secondary": "#334155",
+            "faint": "#94A3B8",
+            "on-surface-variant": "#464555",
+            "surface-container-low": "#f5f2ff",
+            "tertiary-container": "#a44100",
+            "status-preparing-border": "#E0F2FE",
+            "status-rented-tint": "#F1F5F9",
+            "status-rented": "#334155",
+            "on-secondary-fixed-variant": "#3a485c",
+            "border": "#E2E8F0",
+            "status-preparing-tint": "#F0F9FF",
+            "status-available": "#059669",
+            "primary-outline-border": "#C7D2FE",
+            "on-tertiary-fixed": "#351000",
+            "status-retired-border": "#E2E8F0",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "status-reserved-border": "#E0E7FF",
+            "surface-bright": "#fcf8ff",
+            "secondary-container": "#d5e3fd",
+            "tertiary": "#7e3000",
+            "status-preparing": "#0284C7",
+            "surface-dim": "#dcd8e5",
+            "on-primary-container": "#dad7ff",
+            "status-reserved": "#4F46E5",
+            "background": "#fcf8ff",
+            "outline-variant": "#c7c4d8",
+            "primary-tint": "#EEF2FF",
+            "surface-container-high": "#eae6f4",
+            "status-buffer-bar": "#F59E0B",
+            "warning-bar": "#F59E0B",
+            "surface-subtle": "#F8FAFC",
+            "surface-container-highest": "#e4e1ee",
+            "on-error-container": "#93000a",
+            "error-container": "#ffdad6",
+            "surface-container-lowest": "#ffffff",
+            "status-buffer": "#B45309",
+            "success": "#059669",
+            "primary-fixed": "#e2dfff",
+            "inverse-on-surface": "#f3effc",
+            "on-tertiary-container": "#ffd2be",
+            "inverse-primary": "#c3c0ff",
+            "surface": "#FFFFFF",
+            "status-buffer-tint": "#FFFBEB",
+            "inverse-surface": "#302f39",
+            "surface-variant": "#e4e1ee",
+            "ink": "#0F172A",
+            "status-maintenance-tint": "#FFF7ED",
+            "surface-tint": "#4d44e3",
+            "status-retired": "#94A3B8",
+            "status-rented-border": "#E2E8F0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "12px",
+            "space-xs": "4px",
+            "space-3xl": "48px",
+            "space-2xl": "32px",
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "space-xl": "24px",
+            "gutter": "14px",
+            "margin": "24px"
+          },
+          "fontFamily": {
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          "fontSize": {
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "nav": ["13px", { "fontWeight": "500" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      display: inline-block;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink min-h-screen antialiased flex flex-col font-body text-body selection:bg-primary-tint selection:text-primary">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="flex justify-between items-center w-full h-[54px] px-margin bg-surface dark:bg-on-surface border-b border-border dark:border-outline shadow-sm dark:shadow-none sticky top-0 z-50">
+<!-- Brand & Navigation Cluster -->
+<div class="flex items-center space-x-space-2xl h-full">
+<div class="flex items-center space-x-space-sm cursor-pointer">
+<div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+</div>
+<span class="font-headline text-headline text-ink dark:text-on-primary tracking-tight font-semibold">StorageHub</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-space-lg h-full">
+<a class="text-muted dark:text-faint hover:text-ink dark:hover:text-surface py-4 transition-colors duration-150 font-nav text-nav" href="#">Overview</a>
+<a class="text-muted dark:text-faint hover:text-ink dark:hover:text-surface py-4 transition-colors duration-150 font-nav text-nav" href="#">Units</a>
+<a class="text-muted dark:text-faint hover:text-ink dark:hover:text-surface py-4 transition-colors duration-150 font-nav text-nav" href="#">Staff & Shifts</a>
+<!-- Operations is ACTIVE according to Semantic Shell Mandate and instructions -->
+<a class="text-primary dark:text-inverse-primary border-b-2 border-primary dark:border-inverse-primary font-semibold py-4 font-nav text-nav" href="#">Operations</a>
+<a class="text-muted dark:text-faint hover:text-ink dark:hover:text-surface py-4 transition-colors duration-150 font-nav text-nav" href="#">Activity Log</a>
+<a class="text-muted dark:text-faint hover:text-ink dark:hover:text-surface py-4 transition-colors duration-150 font-nav text-nav" href="#">Escalations</a>
+</nav>
+</div>
+<!-- Trailing Actions Cluster -->
+<div class="flex items-center space-x-space-md">
+<!-- Depot Selector -->
+<button class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-subtle transition-colors duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined text-muted text-[16px]">warehouse</span>
+<span class="font-body-strong text-body-strong text-ink">VN-SGN-01 (Tân Bình)</span>
+<span class="material-symbols-outlined text-muted text-[16px]">expand_more</span>
+</button>
+<!-- Role Chip -->
+<div class="px-2 py-0.5 rounded-full bg-primary-tint border border-primary-border flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-label text-label text-primary">Facility Manager</span>
+</div>
+<!-- Notifications Icon Action -->
+<div class="relative">
+<button class="p-1.5 text-muted hover:text-ink rounded-lg hover:bg-surface-subtle transition-colors duration-150 active:scale-[0.98] flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
+</div>
+<!-- Profile Avatar -->
+<div class="flex items-center space-x-2 pl-1 border-l border-border">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-button text-button ring-1 ring-border">
+          T
+        </div>
+<span class="text-ink font-body-strong text-body-strong hidden lg:inline">Tuấn</span>
+</div>
+</div>
+</header>
+<!-- Sub-header Telemetry Bar -->
+<div class="w-full bg-surface border-b border-border px-margin py-2 flex flex-wrap items-center justify-between text-meta font-meta text-muted">
+<div class="flex items-center space-x- space-x-4">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-muted text-[15px]">domain</span>
+<span class="text-ink-secondary font-body-strong text-body-strong">VN-SGN-01</span>
+<span>(Tân Bình Gateway)</span>
+</div>
+<span class="text-border">|</span>
+<div class="flex items-center space-x-1.5">
+<span class="inline-block w-2 h-2 rounded-full bg-success"></span>
+<span class="text-success font-body-strong text-body-strong">Systems Nominal</span>
+</div>
+<span class="text-border">|</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-success text-[15px]">sensor_door</span>
+<span class="text-ink-secondary">Gate Automation Online</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-muted text-[15px]">schedule</span>
+<span>Shift Window:</span>
+<span class="font-code-sm text-code-sm text-ink-secondary">Morning (07:00 – 15:00)</span>
+</div>
+<span class="text-border">|</span>
+<div class="flex items-center space-x-1.5 font-code-sm text-code-sm bg-surface-subtle px-2 py-0.5 rounded border border-border">
+<span class="material-symbols-outlined text-muted text-[13px]">access_time</span>
+<span class="text-ink font-semibold" id="telemetry-clock">14:12:08 ICT (UTC+07)</span>
+</div>
+</div>
+</div>
+<!-- Main Canvas Container -->
+<main class="flex-1 px-margin py-space-xl max-w-[1560px] w-full mx-auto space-y-space-lg">
+<!-- Page Header & Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<!-- Breadcrumbs -->
+<nav class="flex items-center space-x-1.5 text-meta font-meta text-muted mb-1">
+<a class="hover:text-ink transition-colors" href="#">Control Room</a>
+<span class="text-border">></span>
+<a class="hover:text-ink transition-colors" href="#">Operations</a>
+<span class="text-border">></span>
+<span class="text-ink font-semibold">Monitor</span>
+</nav>
+<!-- Page Title & Meta -->
+<div class="flex items-center space-x-3">
+<div class="relative flex items-center justify-center">
+<span class="w-2.5 h-2.5 rounded-full bg-success"></span>
+<span class="absolute w-4 h-4 rounded-full bg-success opacity-40 animate-ping"></span>
+</div>
+<h1 class="font-display text-display text-ink tracking-tight">Operations Monitor</h1>
+<div class="px-2 py-0.5 rounded bg-success-tint border border-status-available-border text-status-available font-label text-label uppercase tracking-wide">
+            Live Telemetry
+          </div>
+</div>
+<p class="font-body text-body text-muted mt-0.5">Real-time facility task feed, automated turnover queue, and critical incident escalations.</p>
+</div>
+<!-- Quick Actions -->
+<div class="flex items-center space-x-space-sm">
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border-strong bg-surface hover:bg-surface-subtle text-ink-secondary font-button text-button shadow-sm transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px] text-muted">sync</span>
+<span>Refresh feed</span>
+<span class="font-meta text-meta text-faint ml-1 font-normal">Synced 12s ago</span>
+</button>
+<button class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-primary text-on-primary font-button text-button shadow-[0_1px_2px_rgba(79,70,229,.35)] hover:bg-opacity-95 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Quick Task +</span>
+</button>
+</div>
+</div>
+<!-- Operational Telemetry KPI Row (4 compact cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- KPI 1 -->
+<div class="bg-surface rounded-xl border border-border p-3.5 shadow-sm hover:border-border-strong transition-colors relative overflow-hidden">
+<div class="flex items-center justify-between text-muted mb-1.5">
+<span class="font-label text-label uppercase tracking-wider text-muted">Active shift throughput</span>
+<span class="material-symbols-outlined text-[18px] text-muted">fact_check</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="font-kpi-value text-kpi-value text-ink tabular-nums tracking-tight">12 / 14</span>
+<span class="font-body text-body text-muted">Tasks</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-divider">
+<span class="font-meta text-meta text-muted">85.7% on-time pace</span>
+<span class="inline-flex items-center text-status-available font-meta text-meta font-semibold bg-success-tint px-1.5 py-0.2 rounded border border-status-available-border">
+            +4% vs morning avg
+          </span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface rounded-xl border border-border p-3.5 shadow-sm hover:border-border-strong transition-colors relative overflow-hidden">
+<div class="flex items-center justify-between text-muted mb-1.5">
+<span class="font-label text-label uppercase tracking-wider text-muted">Units in turnover buffer</span>
+<span class="inline-block w-2 h-2 rounded-full bg-status-buffer-bar"></span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="font-kpi-value text-kpi-value text-ink tabular-nums tracking-tight">2 Units</span>
+<span class="font-code-sm text-code-sm text-muted bg-surface-muted px-1.5 py-0.5 rounded border border-border">M-2, S-1</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-divider">
+<span class="font-meta text-meta text-muted">Ready window 17:30 – 18:10 ICT</span>
+<span class="w-1.5 h-1.5 rounded-full bg-status-buffer-bar"></span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface rounded-xl border border-border p-3.5 shadow-sm hover:border-border-strong transition-colors relative overflow-hidden">
+<div class="flex items-center justify-between text-muted mb-1.5">
+<span class="font-label text-label uppercase tracking-wider text-muted">Turnover queue SLA</span>
+<span class="inline-block w-2 h-2 rounded-full bg-success"></span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="font-kpi-value text-kpi-value text-ink tabular-nums tracking-tight">98.2%</span>
+<span class="font-meta text-meta text-status-available font-semibold">Target ≥95%</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-divider">
+<span class="font-meta text-meta text-muted">0 breaches today</span>
+<span class="font-meta text-meta text-muted">1 pending inspection</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface rounded-xl border border-border p-3.5 shadow-sm hover:border-border-strong transition-colors relative overflow-hidden">
+<div class="flex items-center justify-between text-muted mb-1.5">
+<span class="font-label text-label uppercase tracking-wider text-muted">Active escalations</span>
+<span class="material-symbols-outlined text-[18px] text-error">warning</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="font-kpi-value text-kpi-value text-error tabular-nums tracking-tight">1 Critical</span>
+<span class="px-1.5 py-0.2 rounded bg-error-tint border border-error-border text-error font-label text-label uppercase">Action req</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-divider">
+<span class="font-meta text-meta text-muted font-code-sm">SR-0035 · Unit M-2 Flooding</span>
+<span class="inline-block w-2 h-2 rounded-full bg-error animate-pulse"></span>
+</div>
+</div>
+</div>
+<!-- Two-Column Main Section (60% / 40% split) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Column 1: Today's Tasks (60% ~ 7 cols in 12 grid) -->
+<div class="lg:col-span-7 bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+<!-- Card Header -->
+<div class="px-space-md py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 bg-surface-subtle/50">
+<div class="flex items-center space-x-2.5">
+<h2 class="font-headline text-headline text-ink">Today's tasks</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-muted text-ink-secondary border border-border font-label text-label">
+              7 active / queued
+            </span>
+</div>
+<div class="flex items-center space-x-3">
+<!-- Filter Tabs -->
+<div class="flex items-center p-0.5 bg-surface-muted rounded-lg border border-border">
+<button class="px-2.5 py-1 text-meta font-meta font-semibold rounded bg-surface text-ink shadow-xs">All</button>
+<button class="px-2.5 py-1 text-meta font-meta text-muted hover:text-ink transition-colors">Check-in</button>
+<button class="px-2.5 py-1 text-meta font-meta text-muted hover:text-ink transition-colors">Checkout</button>
+<button class="px-2.5 py-1 text-meta font-meta text-muted hover:text-ink transition-colors">Cleaning</button>
+</div>
+<a class="font-button text-button text-primary hover:text-primary-container inline-flex items-center space-x-1" href="#">
+<span>View board</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Feed Rows Container -->
+<div class="divide-y divide-divider">
+<!-- Row 1 -->
+<div class="p-3.5 hover:bg-surface-subtle transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center space-x-3 min-w-0">
+<div class="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" title="In Progress"></div>
+<div class="min-w-0">
+<div class="flex items-center space-x-2">
+<span class="font-body-strong text-body-strong text-ink truncate">Check-in BK-1042</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">Minh</span>
+<span class="text-faint">·</span>
+<span class="font-label text-label px-1.5 py-0.2 rounded bg-primary-tint text-primary border border-primary-border">in progress</span>
+</div>
+<div class="flex items-center space-x-3 mt-1 text-meta font-meta text-muted">
+<span class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">nest_doorbell_visitor</span>
+<span>Start: 09:00</span>
+</span>
+<span>·</span>
+<span>Customer transit ETA confirmed</span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-3 flex-shrink-0">
+<span class="font-code text-code px-2 py-0.5 bg-surface-muted rounded border border-border text-ink-secondary">S-3</span>
+<button class="px-2.5 py-1 rounded-lg border border-border hover:bg-surface text-ink-secondary font-button text-button transition-colors active:scale-[0.98]">
+                View details
+              </button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-3.5 hover:bg-surface-subtle transition-colors flex items-center justify-between gap-4 bg-status-preparing-tint/20">
+<div class="flex items-center space-x-3 min-w-0">
+<div class="w-2.5 h-2.5 rounded-full bg-status-preparing flex-shrink-0" title="Checkout"></div>
+<div class="min-w-0">
+<div class="flex items-center space-x-2">
+<span class="font-body-strong text-body-strong text-ink truncate">Checkout RT-0871</span>
+<span class="text-faint">·</span>
+<span class="font-label text-label px-1.5 py-0.2 rounded bg-warning-tint text-warning border border-status-buffer-border">unassigned</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">14:00</span>
+</div>
+<div class="flex items-center space-x-3 mt-1 text-meta font-meta text-muted">
+<span class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">event_busy</span>
+<span>Due: 14:00 ICT (Scheduled afternoon handover)</span>
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-3 flex-shrink-0">
+<span class="font-code text-code px-2 py-0.5 bg-surface-muted rounded border border-border text-ink-secondary">M-2</span>
+<button class="px-2.5 py-1 rounded-lg border border-primary-outline-border bg-primary-tint text-primary hover:bg-primary-border font-button text-button transition-colors active:scale-[0.98]">
+                Assign staff
+              </button>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="p-3.5 hover:bg-surface-subtle transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center space-x-3 min-w-0">
+<div class="w-2.5 h-2.5 rounded-full bg-status-buffer-bar flex-shrink-0" title="Queued Cleaning"></div>
+<div class="min-w-0">
+<div class="flex items-center space-x-2">
+<span class="font-body-strong text-body-strong text-ink truncate">Cleaning S-1</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">queued</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">16:00</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-ink-secondary">Assigned: Minh</span>
+</div>
+<div class="flex items-center space-x-2 mt-1">
+<span class="font-label text-label px-1.5 py-0.2 rounded bg-status-buffer-tint border border-status-buffer-border text-status-buffer">
+                    Turnover sanitization
+                  </span>
+<span class="font-meta text-meta text-muted">Pre-allocation ready</span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-3 flex-shrink-0">
+<span class="font-code text-code px-2 py-0.5 bg-surface-muted rounded border border-border text-ink-secondary">S-1</span>
+<button class="px-3 py-1 rounded-lg bg-primary text-on-primary font-button text-button shadow-xs hover:bg-opacity-95 transition-colors active:scale-[0.98]">
+                Start
+              </button>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="p-3.5 hover:bg-surface-subtle transition-colors flex items-center justify-between gap-4 opacity-80">
+<div class="flex items-center space-x-3 min-w-0">
+<div class="w-2.5 h-2.5 rounded-full bg-status-rented flex-shrink-0" title="Completed"></div>
+<div class="min-w-0">
+<div class="flex items-center space-x-2">
+<span class="font-body-strong text-body-strong text-ink truncate">Routine latch inspection</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">Mai Trần</span>
+<span class="text-faint">·</span>
+<span class="font-meta text-meta text-muted">completed</span>
+</div>
+<div class="flex items-center space-x-3 mt-1 text-meta font-meta text-muted">
+<span>Time: 11:30 ICT</span>
+<span>·</span>
+<span>Photo verification verified by sensor gateway</span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-3 flex-shrink-0">
+<span class="font-code text-code px-2 py-0.5 bg-surface-muted rounded border border-border text-ink-secondary">S-2</span>
+<span class="font-label text-label px-2 py-1 rounded bg-surface-muted border border-border text-muted inline-flex items-center space-x-1">
+<span class="material-symbols-outlined text-[13px] text-success">check</span>
+<span>Cleared</span>
+</span>
+</div>
+</div>
+</div>
+<div class="px-4 py-2.5 bg-surface-subtle border-t border-divider flex items-center justify-between text-meta font-meta text-muted">
+<span>Displaying 4 priority shift tasks</span>
+<span class="font-code-sm text-code-sm text-ink-secondary">All actions logged automatically to audit feed</span>
+</div>
+</div>
+<!-- Column 2: Turnover Buffer Queue (40% ~ 5 cols in 12 grid) -->
+<div class="lg:col-span-5 bg-surface rounded-xl border border-border shadow-sm overflow-hidden flex flex-col justify-between">
+<div>
+<!-- Card Header -->
+<div class="px-space-md py-3 border-b border-border flex items-center justify-between bg-surface-subtle/50">
+<div>
+<div class="flex items-center space-x-2">
+<h2 class="font-headline text-headline text-ink">Turnover buffer queue</h2>
+<span class="px-2 py-0.5 rounded-full bg-status-buffer-tint border border-status-buffer-border text-status-buffer font-label text-label">
+                  2 in buffer
+                </span>
+</div>
+<p class="font-meta text-meta text-muted mt-0.5">Cleaning buffer applied automatically upon checkout</p>
+</div>
+<span class="material-symbols-outlined text-status-buffer text-[20px]">timelapse</span>
+</div>
+<!-- Turnover Buffer Items -->
+<div class="divide-y divide-divider">
+<!-- Row 1: M-2 -->
+<div class="p-3.5 border-l-[3px] border-l-status-buffer-bar hover:bg-surface-subtle transition-colors space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="font-code text-code px-2 py-0.5 rounded bg-surface-muted border border-border text-ink font-bold">M-2</span>
+<span class="font-body-strong text-body-strong text-ink">Outdoor Direct Drive-up</span>
+<span class="font-meta text-meta text-muted">(8 m²)</span>
+</div>
+<div class="flex items-center space-x-1 text-status-buffer font-meta text-meta font-semibold">
+<span class="material-symbols-outlined text-[15px] animate-spin">progress_activity</span>
+<span>cleaning</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-meta font-meta">
+<div class="flex items-center space-x-1.5 text-muted">
+<span class="material-symbols-outlined text-[15px] text-muted">timer</span>
+<span>Estimated availability:</span>
+<span class="font-body-strong text-body-strong text-ink font-code-sm">ready ~17:30 ICT</span>
+</div>
+<span class="font-label text-label px-2 py-0.5 rounded bg-warning-tint border border-status-buffer-border text-warning">
+                  not bookable until done
+                </span>
+</div>
+</div>
+<!-- Row 2: S-1 -->
+<div class="p-3.5 border-l-[3px] border-l-status-buffer-bar hover:bg-surface-subtle transition-colors space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="font-code text-code px-2 py-0.5 rounded bg-surface-muted border border-border text-ink font-bold">S-1</span>
+<span class="font-body-strong text-body-strong text-ink">Indoor Standard</span>
+<span class="font-meta text-meta text-muted">(5 m²)</span>
+</div>
+<div class="flex items-center space-x-1 text-muted font-meta text-meta font-semibold">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+<span>queue pending</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-meta font-meta">
+<div class="flex items-center space-x-1.5 text-muted">
+<span class="material-symbols-outlined text-[15px] text-muted">timer</span>
+<span>Estimated availability:</span>
+<span class="font-body-strong text-body-strong text-ink font-code-sm">ready ~18:10 ICT</span>
+</div>
+<span class="font-label text-label px-2 py-0.5 rounded bg-warning-tint border border-status-buffer-border text-warning">
+                  not bookable until done
+                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Explanatory Note -->
+<div class="p-3 bg-surface-subtle border-t border-divider m-3 rounded-lg border border-border flex items-start space-x-2">
+<span class="material-symbols-outlined text-muted text-[16px] mt-0.5 flex-shrink-0">verified_user</span>
+<p class="font-meta text-meta text-muted leading-tight">
+<span class="font-body-strong text-body-strong text-ink-secondary">Buffer policy v3:</span> 2-hour minimum sanitization lock enforces contactless handover compliance and automated ozone cycle before keycard re-issuance.
+          </p>
+</div>
+</div>
+</div>
+<!-- Full-Width Escalations Section -->
+<div class="w-full bg-surface rounded-xl border border-border border-l-[3px] border-l-error shadow-sm overflow-hidden">
+<!-- Card Header with Soft Red Tint -->
+<div class="px-space-md py-3 bg-error-tint/70 border-b border-error-border flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center space-x-2.5">
+<div class="relative flex items-center justify-center">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<span class="absolute w-4 h-4 rounded-full bg-error opacity-40 animate-ping"></span>
+</div>
+<span class="material-symbols-outlined text-error text-[20px]">warning</span>
+<h2 class="font-headline text-headline text-ink">Escalations · Incident Dispatch</h2>
+</div>
+<div class="flex items-center space-x-2">
+<span class="px-2.5 py-0.5 rounded-full bg-error text-on-error font-label text-label tracking-wide uppercase">
+            1 Action Required
+          </span>
+</div>
+</div>
+<!-- Incident Main Content Card -->
+<div class="p-space-md bg-surface flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-code text-code px-2 py-0.5 bg-error-tint border border-error-border text-error rounded font-bold">
+              SR-0035
+            </span>
+<span class="font-headline text-headline text-ink">Flooding</span>
+<span class="px-2 py-0.5 rounded bg-surface-muted text-ink-secondary border border-border font-label text-label">
+              High Priority / Environmental Telemetry
+            </span>
+<span class="text-faint">·</span>
+<div class="flex items-center space-x-1 font-body-strong text-body-strong text-ink">
+<span class="material-symbols-outlined text-muted text-[16px]">location_on</span>
+<span>Unit M-2 (Ground Floor Corridor B1)</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-3 text-meta font-meta text-muted">
+<div class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[15px]">person</span>
+<span>Escalated by <strong class="text-ink-secondary font-body-strong text-body-strong">Minh (Facility Staff)</strong></span>
+</div>
+<span>·</span>
+<div class="flex items-center space-x-1 font-code-sm text-code-sm text-ink-secondary">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+<span>14:02 ICT</span>
+</div>
+<span>·</span>
+<span class="text-status-maintenance font-semibold flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-maintenance"></span>
+<span>Awaiting severity assessment & facility manager sign-off</span>
+</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-subtle border border-border text-ink-secondary font-body text-body text-[12.5px] max-w-4xl flex items-start space-x-2">
+<span class="material-symbols-outlined text-muted text-[16px] mt-0.5 flex-shrink-0">sensor_occupied</span>
+<p>
+              Sensor water telemetry tripped at base drain channel near rollup threshold. Vacuum extraction and inspection requested prior to allowing new tenant check-in sequence.
+            </p>
+</div>
+</div>
+<!-- Right Side Action Dispatch Buttons -->
+<div class="flex items-center space-x-3 flex-shrink-0">
+<button class="px-3 py-2 rounded-xl bg-surface border border-border-strong text-ink-secondary hover:bg-surface-subtle font-button text-button shadow-sm transition-colors active:scale-[0.98]">
+            Open in inbox
+          </button>
+<button class="px-4 py-2 rounded-xl bg-status-maintenance text-on-error hover:bg-opacity-95 font-button text-button shadow-[0_1px_2px_rgba(194,65,12,.35)] flex items-center space-x-1.5 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span>
+<span>Dispatch Maintenance</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Global Footer Bar -->
+<footer class="w-full bg-surface border-t border-border px-margin py-2.5 mt-space-xl flex flex-col md:flex-row items-center justify-between text-meta font-meta text-muted">
+<div class="flex items-center space-x-2 font-code-sm text-code-sm">
+<span class="font-body-strong text-body-strong text-ink">StorageHub Control Room v2.4</span>
+<span class="text-border">·</span>
+<span>Facility ID: VN-SGN-01 (Tân Bình Gateway)</span>
+<span class="text-border">·</span>
+<span class="text-success inline-flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span>Systems Nominal</span>
+</span>
+<span class="text-border">·</span>
+<span>Gate Automation Online</span>
+</div>
+<div class="flex items-center space-x-3 mt-2 md:mt-0 font-code-sm text-code-sm">
+<span>Logged as <span class="text-ink font-semibold">Tuấn (Facility Manager)</span></span>
+<span class="text-border">·</span>
+<span class="text-ink-secondary">2026-10-12 14:12 ICT</span>
+</div>
+</footer>
+<!-- Real-time Clock Micro-script -->
+<script>
+    function updateClock() {
+      const now = new Date();
+      // Emulate ICT 14:12 time string or keep dynamic synchronization
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const el = document.getElementById('telemetry-clock');
+      if (el) {
+        el.innerText = `${hours}:${minutes}:${seconds} ICT (UTC+07)`;
+      }
+    }
+    // Subtle heartbeat every second
+    setInterval(updateClock, 1000);
+  </script>
+</body></html>

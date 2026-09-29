@@ -1,0 +1,27 @@
+%% StorageHub — State chart: vòng đời Contract gốc (CT-) — V3 2026-09-18
+%% Phụ lục tách sang bảng riêng — xem state chart Addendum
+stateDiagram-v2
+    direction LR
+    [*] --> Draft : auto-draft [ngay khi deposit thành công, khóa policy version]
+
+    Draft --> Printed : staff in tại quầy
+    Printed --> Printed : in lại [giấy mất / KH chưa ký]
+    Printed --> Signed : KH ký + staff chụp ảnh attach
+    Signed --> Active : check-in hoàn tất (reservation CHECKED_IN)
+    Active --> Closed : settlement tham chiếu số hợp đồng
+    Active --> Superseded : addendum thay ngày kết thúc
+
+    Draft --> Closed : booking huỷ / quá hạn check-in [hoàn cọc theo policy]
+    Printed --> Closed : booking huỷ / quá hạn check-in
+
+    Closed --> [*]
+    Superseded --> [*]
+
+    note right of Printed
+        Printed chặn cấp access code
+        đến khi có ảnh bản ký.
+        Hợp đồng không ai sửa được —
+        chỉnh = draft lại; thay đổi
+        ngày kết thúc đi qua phụ lục
+        (state chart Addendum riêng).
+    end note

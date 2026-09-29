@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StorageHub - Customer Registration</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-highest": "#e4e1ee",
+            "surface": "#FFFFFF",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-preparing-border": "#E0F2FE",
+            "on-tertiary-container": "#ffd2be",
+            "on-secondary-fixed-variant": "#3a485c",
+            "inverse-on-surface": "#f3effc",
+            "on-primary-fixed-variant": "#3323cc",
+            "surface-container-high": "#eae6f4",
+            "on-error": "#ffffff",
+            "success-tint": "#ECFDF5",
+            "status-available": "#059669",
+            "on-surface": "#1b1b24",
+            "status-buffer": "#B45309",
+            "muted": "#64748B",
+            "border-strong": "#CBD5E1",
+            "divider": "#F1F5F9",
+            "outline-variant": "#c7c4d8",
+            "status-retired-border": "#E2E8F0",
+            "status-available-border": "#D1FAE5",
+            "on-background": "#1b1b24",
+            "tertiary": "#7e3000",
+            "surface-container-low": "#f5f2ff",
+            "status-rented-border": "#E2E8F0",
+            "border": "#E2E8F0",
+            "on-primary-container": "#dad7ff",
+            "error-tint": "#FEF2F2",
+            "status-preparing-tint": "#F0F9FF",
+            "on-secondary-fixed": "#0d1c2f",
+            "status-maintenance-border": "#FFEDD5",
+            "status-maintenance-tint": "#FFF7ED",
+            "error": "#DC2626",
+            "warning-bar": "#F59E0B",
+            "error-border": "#FECACA",
+            "status-reserved": "#4F46E5",
+            "primary-fixed-dim": "#c3c0ff",
+            "background": "#fcf8ff",
+            "surface-bright": "#fcf8ff",
+            "tertiary-fixed": "#ffdbcc",
+            "surface-dim": "#dcd8e5",
+            "faint": "#94A3B8",
+            "status-buffer-bar": "#F59E0B",
+            "app-bg": "#F4F6F9",
+            "ink-secondary": "#334155",
+            "surface-container": "#f0ecf9",
+            "secondary-fixed": "#d5e3fd",
+            "on-secondary-container": "#57657b",
+            "inverse-surface": "#302f39",
+            "tertiary-container": "#a44100",
+            "status-preparing": "#0284C7",
+            "surface-tint": "#4d44e3",
+            "status-retired-tint": "#F8FAFC",
+            "status-reserved-border": "#E0E7FF",
+            "status-available-tint": "#ECFDF5",
+            "primary": "#4F46E5",
+            "status-retired": "#94A3B8",
+            "success": "#059669",
+            "status-buffer-tint": "#FFFBEB",
+            "on-surface-variant": "#464555",
+            "status-rented-tint": "#F1F5F9",
+            "secondary-fixed-dim": "#b9c7e0",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "warning": "#B45309",
+            "status-maintenance": "#C2410C",
+            "primary-fixed": "#e2dfff",
+            "outline": "#777587",
+            "primary-border": "#E0E7FF",
+            "on-tertiary-fixed": "#351000",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "ink": "#0F172A",
+            "error-container": "#ffdad6",
+            "warning-tint": "#FFFBEB",
+            "secondary": "#515f74",
+            "on-tertiary": "#ffffff",
+            "status-rented": "#334155",
+            "status-buffer-border": "#FDE68A",
+            "on-primary-fixed": "#0f0069",
+            "on-error-container": "#93000a",
+            "on-primary": "#ffffff",
+            "status-reserved-tint": "#EEF2FF",
+            "surface-muted": "#F1F5F9",
+            "primary-tint": "#EEF2FF",
+            "surface-subtle": "#F8FAFC",
+            "secondary-container": "#d5e3fd",
+            "primary-outline-border": "#C7D2FE",
+            "inverse-primary": "#c3c0ff",
+            "surface-variant": "#e4e1ee",
+            "primary-container": "#4f46e5"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem"
+          },
+          spacing: {
+            "space-xs": "4px",
+            "space-3xl": "48px",
+            "space-xl": "24px",
+            "space-2xl": "32px",
+            "margin": "24px",
+            "gutter": "14px",
+            "space-sm": "8px",
+            "space-md": "12px",
+            "space-lg": "16px"
+          },
+          fontFamily: {
+            nav: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            meta: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            display: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            label: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            body: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            headline: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            code: ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            button: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            price: ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""]
+          },
+          fontSize: {
+            nav: ["13px", { fontWeight: "500" }],
+            "code-sm": ["11px", { fontWeight: "600" }],
+            meta: ["11.5px", { lineHeight: "1.45", fontWeight: "500" }],
+            display: ["21px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "price-lg": ["19px", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600" }],
+            label: ["10.5px", { lineHeight: "1.4", fontWeight: "600" }],
+            "kpi-value": ["24px", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600" }],
+            body: ["13px", { lineHeight: "1.5", fontWeight: "400" }],
+            headline: ["18px", { lineHeight: "1.35", fontWeight: "600" }],
+            "body-strong": ["13px", { lineHeight: "1.5", fontWeight: "600" }],
+            code: ["13px", { fontWeight: "600" }],
+            button: ["13px", { fontWeight: "600" }],
+            price: ["15px", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-app-bg min-h-screen text-ink flex flex-col justify-between antialiased selection:bg-primary-tint selection:text-primary">
+<!-- Top Minimal Operational Header -->
+<header class="w-full h-[54px] bg-surface px-margin flex items-center justify-between border-b border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] sticky top-0 z-30">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-surface shadow-[0_1px_2px_rgba(79,70,229,0.35)]">
+<span class="material-symbols-outlined text-[18px]" data-icon="warehouse">warehouse</span>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="font-headline text-headline text-ink font-semibold tracking-tight">StorageHub</span>
+<span class="font-code-sm text-code-sm text-muted">Control Room</span>
+</div>
+</div>
+<div class="h-4 w-[1px] bg-border hidden sm:block"></div>
+<span class="font-meta text-meta text-muted hidden sm:inline-block">Automated Facility IAM</span>
+</div>
+<!-- Gateway Systems Nominal Badge -->
+<div class="flex items-center gap-2 px-2.5 py-1 bg-surface-subtle border border-border rounded-full">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-available opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-status-available"></span>
+</span>
+<span class="font-code-sm text-code-sm text-ink-secondary tracking-tight">VN-SGN-01 Gateway · Systems Nominal</span>
+</div>
+</header>
+<!-- Main Canvas Container -->
+<main class="flex-grow flex flex-col items-center justify-center px-4 py-8 sm:py-10">
+<div class="w-full max-w-[500px] flex flex-col items-center">
+<!-- Eyebrow Pill -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface border border-border shadow-[0_1px_2px_rgba(15,23,42,0.04)] mb-3">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="lock">lock</span>
+<span class="font-code-sm text-code-sm text-ink-secondary tracking-wider">ENCRYPTED IAM GATEWAY</span>
+</div>
+<!-- Main Headline Section -->
+<h1 class="font-display text-display text-ink text-center mb-1">Storage Infrastructure Access</h1>
+<p class="font-body text-body text-muted text-center max-w-md mb-6 leading-relaxed">
+        Create a customer account to reserve units, issue digital access PINs, and manage automated billing.
+      </p>
+<!-- Centered Registration Card -->
+<div class="w-full bg-surface border border-border rounded-xl shadow-[0_1px_2px_rgba(15,23,42,0.05)] relative overflow-hidden">
+<!-- 3px Left Status Bar in Indigo #4F46E5 -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary"></div>
+<div class="p-6 sm:p-7 pl-7 sm:pl-8">
+<!-- Card Internal Header -->
+<div class="flex items-start justify-between gap-2 pb-4 mb-4 border-b border-divider">
+<div>
+<h2 class="font-headline text-headline text-ink mb-0.5">Create customer account</h2>
+<p class="font-meta text-meta text-muted">Instant verification for automated storage unit leasing.</p>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-status-available-tint border border-status-available-border text-status-available font-label text-label shrink-0">
+              Customer Onboarding
+            </span>
+</div>
+<!-- Registration Form -->
+<form class="space-y-3.5" onsubmit="event.preventDefault();">
+<!-- Full Name Field -->
+<div>
+<label class="block font-label text-label text-muted mb-1 tracking-wide" for="fullName">FULL NAME</label>
+<div class="relative">
+<input class="w-full h-[38px] px-3 font-body text-body text-ink bg-surface border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-faint transition-colors" id="fullName" name="fullName" placeholder="e.g. Lan Nguyen" type="text"/>
+<span class="material-symbols-outlined text-[16px] text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="badge">badge</span>
+</div>
+</div>
+<!-- Phone Number Field -->
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="block font-label text-label text-muted tracking-wide" for="phone">PHONE NUMBER</label>
+<span class="font-meta text-meta text-primary font-medium">Gate SMS 2FA</span>
+</div>
+<div class="relative">
+<input class="w-full h-[38px] px-3 font-code text-code text-ink bg-surface border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-faint transition-colors" id="phone" name="phone" placeholder="+84 (0) 90 123 4567" type="tel"/>
+<span class="material-symbols-outlined text-[16px] text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="dialpad">dialpad</span>
+</div>
+<p class="font-meta text-meta text-muted mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-muted" data-icon="info">info</span>
+                Used for 2FA gate PIN SMS and delivery notifications.
+              </p>
+</div>
+<!-- Email Address Field -->
+<div>
+<label class="block font-label text-label text-muted mb-1 tracking-wide" for="email">WORK OR PERSONAL EMAIL</label>
+<div class="relative">
+<input class="w-full h-[38px] px-3 font-body text-body text-ink bg-surface border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-faint transition-colors" id="email" name="email" placeholder="lan.nguyen@example.com" type="email"/>
+<span class="material-symbols-outlined text-[16px] text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="mail">mail</span>
+</div>
+</div>
+<!-- Password Field -->
+<div>
+<label class="block font-label text-label text-muted mb-1 tracking-wide" for="password">PASSWORD</label>
+<div class="relative">
+<input class="w-full h-[38px] px-3 font-body text-body text-ink bg-surface border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-faint transition-colors" id="password" name="password" placeholder="••••••••••••" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[17px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+<p class="font-meta text-meta text-muted mt-1">Minimum 8 characters with at least 1 number.</p>
+</div>
+<!-- Confirm Password Field -->
+<div>
+<label class="block font-label text-label text-muted mb-1 tracking-wide" for="confirmPassword">CONFIRM PASSWORD</label>
+<div class="relative">
+<input class="w-full h-[38px] px-3 font-body text-body text-ink bg-surface border border-border rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-faint transition-colors" id="confirmPassword" name="confirmPassword" placeholder="••••••••••••" type="password"/>
+<span class="material-symbols-outlined text-[16px] text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="lock_clock">lock_clock</span>
+</div>
+</div>
+<!-- Agreement Checkbox -->
+<div class="pt-1">
+<label class="flex items-start gap-2.5 cursor-pointer">
+<input checked="" class="mt-0.5 h-4 w-4 rounded text-primary border-border focus:ring-primary focus:ring-offset-0 transition" type="checkbox"/>
+<span class="font-body text-body text-ink-secondary select-none">
+                  I agree to the <a class="text-primary hover:underline font-body-strong" href="#">Terms of Service</a>, <a class="text-primary hover:underline font-body-strong" href="#">Privacy Policy</a>, and <a class="text-primary hover:underline font-body-strong" href="#">Automated Unit Access Agreement</a>.
+                </span>
+</label>
+</div>
+<!-- Submit Primary Action Button -->
+<div class="pt-2">
+<button class="w-full h-10 rounded-xl bg-primary text-surface font-button text-button flex items-center justify-center gap-1.5 shadow-[0_1px_2px_rgba(79,70,229,0.35)] hover:bg-primary/95 active:scale-[0.99] transition-all duration-150" type="submit">
+<span>Create account</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Meta Note below button -->
+<div class="flex items-start gap-2 p-2.5 rounded-lg bg-surface-subtle border border-border mt-3">
+<span class="material-symbols-outlined text-[15px] text-faint shrink-0 mt-0.5" data-icon="shield">shield</span>
+<p class="font-meta text-meta text-muted leading-tight">
+                Self-registration is for customers. Storage staff and managers receive accounts from administration.
+              </p>
+</div>
+<!-- Card Bottom Navigation / Sign In link -->
+<div class="pt-4 border-t border-divider flex flex-col sm:flex-row items-center justify-between gap-2">
+<span class="font-body text-body text-muted">
+                Already have an account? 
+                <a class="text-primary font-body-strong text-body-strong hover:underline ml-1" href="#">Sign in</a>
+</span>
+<div class="flex items-center gap-1.5 font-code-sm text-code-sm text-faint">
+<span class="material-symbols-outlined text-[14px]" data-icon="key">key</span>
+<span>SSO / Enterprise ready</span>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- Auxiliary Support Link -->
+<div class="mt-4 text-center">
+<a class="inline-flex items-center gap-1 font-body text-body text-ink-secondary hover:text-primary transition-colors" href="#">
+<span>Need immediate facility unit lock override or staff assistance?</span>
+<span class="font-body-strong text-body-strong text-primary flex items-center">
+            Contact 24/7 Operations
+            <span class="material-symbols-outlined text-[14px] ml-0.5" data-icon="north_east">north_east</span>
+</span>
+</a>
+</div>
+</div>
+</main>
+<!-- Persistent System Status Footer -->
+<footer class="w-full bg-surface border-t border-border py-2.5 px-margin shrink-0">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-code-sm text-code-sm text-muted">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-available"></span>
+<span>StorageHub Control Room v2.4</span>
+<span>•</span>
+<span>Facility ID: <span class="text-ink font-semibold">VN-SGN-01</span></span>
+<span>•</span>
+<span class="text-status-available font-semibold">Systems Nominal</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-primary" data-icon="sensors">sensors</span>
+<span>Gate Automation Online</span>
+</span>
+<span>•</span>
+<span>Node: <span class="text-ink-secondary">sgn-edge-04a</span></span>
+</div>
+</div>
+</footer>
+</body></html>

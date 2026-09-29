@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Activity Log — StorageHub</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#a44100",
+            "on-primary-fixed-variant": "#3323cc",
+            "tertiary": "#7e3000",
+            "status-retired-border": "#E2E8F0",
+            "on-secondary": "#ffffff",
+            "faint": "#94A3B8",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f5f2ff",
+            "on-secondary-fixed-variant": "#3a485c",
+            "status-rented-border": "#E2E8F0",
+            "status-rented": "#334155",
+            "status-reserved": "#4F46E5",
+            "surface-subtle": "#F8FAFC",
+            "success-tint": "#ECFDF5",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#0f0069",
+            "primary-border": "#E0E7FF",
+            "warning-bar": "#F59E0B",
+            "surface-container-high": "#eae6f4",
+            "muted": "#64748B",
+            "success": "#059669",
+            "error-border": "#FECACA",
+            "inverse-on-surface": "#f3effc",
+            "status-rented-tint": "#F1F5F9",
+            "surface-variant": "#e4e1ee",
+            "ink": "#0F172A",
+            "status-buffer-tint": "#FFFBEB",
+            "status-maintenance-border": "#FFEDD5",
+            "surface-muted": "#F1F5F9",
+            "primary": "#4F46E5",
+            "on-tertiary-fixed": "#351000",
+            "ink-secondary": "#334155",
+            "border-strong": "#CBD5E1",
+            "inverse-primary": "#c3c0ff",
+            "status-buffer-border": "#FDE68A",
+            "status-available": "#059669",
+            "surface-bright": "#fcf8ff",
+            "secondary": "#515f74",
+            "on-secondary-fixed": "#0d1c2f",
+            "tertiary-fixed": "#ffdbcc",
+            "on-error-container": "#93000a",
+            "status-preparing-border": "#E0F2FE",
+            "warning": "#B45309",
+            "error": "#DC2626",
+            "border": "#E2E8F0",
+            "divider": "#F1F5F9",
+            "surface-dim": "#dcd8e5",
+            "on-primary-container": "#dad7ff",
+            "app-bg": "#F4F6F9",
+            "on-tertiary": "#ffffff",
+            "status-maintenance-tint": "#FFF7ED",
+            "outline": "#777587",
+            "primary-fixed-dim": "#c3c0ff",
+            "status-retired": "#94A3B8",
+            "on-surface": "#1b1b24",
+            "secondary-fixed": "#d5e3fd",
+            "outline-variant": "#c7c4d8",
+            "on-surface-variant": "#464555",
+            "secondary-fixed-dim": "#b9c7e0",
+            "primary-tint": "#EEF2FF",
+            "surface-container": "#f0ecf9",
+            "status-reserved-tint": "#EEF2FF",
+            "status-available-tint": "#ECFDF5",
+            "surface-container-lowest": "#ffffff",
+            "background": "#fcf8ff",
+            "surface-container-highest": "#e4e1ee",
+            "status-retired-tint": "#F8FAFC",
+            "on-tertiary-container": "#ffd2be",
+            "error-tint": "#FEF2F2",
+            "status-reserved-border": "#E0E7FF",
+            "status-buffer": "#B45309",
+            "status-available-border": "#D1FAE5",
+            "primary-outline-border": "#C7D2FE",
+            "on-background": "#1b1b24",
+            "error-container": "#ffdad6",
+            "surface": "#FFFFFF",
+            "status-preparing-tint": "#F0F9FF",
+            "on-secondary-container": "#57657b",
+            "primary-container": "#4f46e5",
+            "status-maintenance": "#C2410C",
+            "tertiary-fixed-dim": "#ffb695",
+            "status-buffer-bar": "#F59E0B",
+            "inverse-surface": "#302f39",
+            "status-preparing": "#0284C7",
+            "secondary-container": "#d5e3fd",
+            "warning-tint": "#FFFBEB",
+            "primary-fixed": "#e2dfff",
+            "surface-tint": "#4d44e3"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "space-2xl": "32px",
+            "margin": "24px",
+            "gutter": "14px",
+            "space-xl": "24px",
+            "space-md": "12px",
+            "space-xs": "4px",
+            "space-3xl": "48px"
+          },
+          "fontFamily": {
+            "display": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "body-strong": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "price-lg": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "body": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "nav": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "code": [
+              "\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""
+            ],
+            "kpi-value": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "button": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "headline": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "label": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "code-sm": [
+              "\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""
+            ],
+            "price": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "meta": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ]
+          },
+          "fontSize": {
+            "display": [
+              "21px",
+              {
+                "lineHeight": "1.3",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "body-strong": [
+              "13px",
+              {
+                "lineHeight": "1.5",
+                "fontWeight": "600"
+              }
+            ],
+            "price-lg": [
+              "19px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "body": [
+              "13px",
+              {
+                "lineHeight": "1.5",
+                "fontWeight": "400"
+              }
+            ],
+            "nav": [
+              "13px",
+              {
+                "fontWeight": "500"
+              }
+            ],
+            "code": [
+              "13px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "kpi-value": [
+              "24px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "button": [
+              "13px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "headline": [
+              "18px",
+              {
+                "lineHeight": "1.35",
+                "fontWeight": "600"
+              }
+            ],
+            "label": [
+              "10.5px",
+              {
+                "lineHeight": "1.4",
+                "fontWeight": "600"
+              }
+            ],
+            "code-sm": [
+              "11px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "price": [
+              "15px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "meta": [
+              "11.5px",
+              {
+                "lineHeight": "1.45",
+                "fontWeight": "500"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col font-body text-body antialiased selection:bg-primary-tint selection:text-primary">
+<!-- TOP APP BAR (Shared Components JSON Anchor) -->
+<header class="h-[54px] w-full px-6 flex items-center justify-between border-b border-border bg-surface z-40 sticky top-0 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<!-- Brand & Navigation Cluster -->
+<div class="flex items-center space-x-6 h-full">
+<div class="flex items-center space-x-2.5">
+<div class="w-7 h-7 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-[0_1px_2px_rgba(79,70,229,0.35)]">
+<span class="material-symbols-outlined text-[17px]">inventory_2</span>
+</div>
+<span class="font-headline text-headline font-semibold text-ink tracking-tight">StorageHub</span>
+</div>
+<!-- Navigation Links from JSON (Exact Casing & Mapping) -->
+<nav class="hidden md:flex items-center space-x-1 h-full pt-[2px]">
+<a class="text-muted hover:text-ink font-nav text-nav py-4 px-3 transition-colors duration-150" href="#">Overview</a>
+<a class="text-muted hover:text-ink font-nav text-nav py-4 px-3 transition-colors duration-150" href="#">Units</a>
+<a class="text-muted hover:text-ink font-nav text-nav py-4 px-3 transition-colors duration-150" href="#">Staff &amp; Shifts</a>
+<a class="text-muted hover:text-ink font-nav text-nav py-4 px-3 transition-colors duration-150" href="#">Operations</a>
+<!-- ACTIVE MATCH: Activity Log -->
+<a class="border-b-2 border-primary text-primary font-nav text-nav py-4 px-3 transition-colors duration-150 flex items-center gap-1.5 font-semibold" href="#">
+          Activity Log
+        </a>
+<a class="text-muted hover:text-ink font-nav text-nav py-4 px-3 transition-colors duration-150" href="#">Escalations</a>
+</nav>
+</div>
+<!-- Right Trailing Cluster -->
+<div class="flex items-center space-x-3">
+<!-- Depot Selector Dropdown -->
+<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-surface-subtle border border-border text-ink font-nav text-nav cursor-pointer hover:border-border-strong transition-colors">
+<span class="material-symbols-outlined text-muted text-[16px]">warehouse</span>
+<span>VN-SGN-01 (Tân Bình)</span>
+<span class="material-symbols-outlined text-muted text-[16px]">expand_more</span>
+</div>
+<!-- Role Badge -->
+<div class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-tint border border-primary-outline-border text-primary font-label text-label">
+        Facility Manager
+      </div>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center space-x-1 pl-1 border-l border-border">
+<button class="relative p-1.5 rounded-xl text-muted hover:text-ink hover:bg-surface-subtle transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-primary" title="Notifications">
+<span class="material-symbols-outlined text-[19px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full"></span>
+</button>
+<button class="p-1.5 rounded-xl text-muted hover:text-ink hover:bg-surface-subtle transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-primary" title="Help">
+<span class="material-symbols-outlined text-[19px]">help</span>
+</button>
+</div>
+<!-- User Avatar / Profile -->
+<div class="flex items-center gap-2 pl-1.5">
+<div class="w-7 h-7 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-body-strong text-body-strong border border-primary-outline-border" title="Avatar of Tuấn, Facility Manager">
+          T
+        </div>
+</div>
+</div>
+</header>
+<!-- TELEMETRY OPERATIONAL SUB-BAR -->
+<div class="w-full bg-surface border-b border-border px-6 py-2 flex flex-wrap items-center justify-between text-meta font-meta text-muted">
+<div class="flex items-center space-x-4">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[15px]">domain</span>
+<span class="font-body-strong text-ink">VN-SGN-01 (Tân Bình Gateway)</span>
+</div>
+<span class="text-border-strong">•</span>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="text-ink-secondary">Systems Nominal</span>
+</div>
+<span class="text-border-strong">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-success text-[15px]">sensor_door</span>
+<span class="text-ink-secondary">Gate Automation Online</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-muted text-[15px]">schedule</span>
+<span>Shift Window: <strong class="text-ink font-body-strong">Morning (07:00 – 15:00)</strong></span>
+</div>
+<span class="text-border-strong">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-muted text-[15px]">public</span>
+<span>Current ICT: <span class="tabular-nums font-code text-ink font-semibold" id="ict-clock">14:38:09 ICT</span></span>
+</div>
+</div>
+</div>
+<!-- MAIN CANVAS -->
+<main class="flex-1 max-w-[1440px] w-full mx-auto px-6 py-5 space-y-4">
+<!-- Breadcrumb & Title Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<nav class="flex items-center space-x-1.5 font-meta text-meta text-muted mb-1">
+<span>Control Room</span>
+<span class="material-symbols-outlined text-[13px]">chevron_right</span>
+<span class="text-ink font-body-strong">Activity Log</span>
+</nav>
+<h1 class="font-display text-display text-ink font-semibold tracking-tight">Activity Log</h1>
+<p class="font-meta text-meta text-muted mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[14px]">lock</span>
+          Append-only. Every status change carries an actor and a reason.
+        </p>
+</div>
+<!-- Controls: Search, Date Range, Export -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Search Input -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-muted text-[17px]">search</span>
+<input class="w-full pl-8 pr-3 py-1.5 bg-surface text-ink placeholder:text-muted rounded-xl border border-border font-body text-body focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-150" placeholder="Filter log entries or entity..." type="text"/>
+</div>
+<!-- Date Range Filter -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface rounded-xl border border-border text-ink hover:border-border-strong font-button text-button transition-colors">
+<span class="material-symbols-outlined text-muted text-[16px]">calendar_today</span>
+<span>Last 24 hours</span>
+<span class="material-symbols-outlined text-muted text-[16px]">expand_more</span>
+</button>
+<!-- Secondary Action Button (Export) -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface rounded-xl border border-border text-ink hover:border-border-strong font-button text-button transition-colors focus:ring-1 focus:ring-primary shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<span class="material-symbols-outlined text-muted text-[16px]">download</span>
+<span>Export Audit Log (CSV)</span>
+</button>
+</div>
+</div>
+<!-- Entity Filter Chips Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Active Chip: All (214) -->
+<button class="px-3 py-1 rounded-xl bg-primary-tint text-primary border border-primary-outline-border font-button text-button shadow-sm">
+          All (214)
+        </button>
+<!-- Inactive Chips -->
+<button class="px-3 py-1 rounded-xl bg-surface text-muted border border-border hover:border-border-strong hover:text-ink font-button text-button transition-colors">
+          Units (98)
+        </button>
+<button class="px-3 py-1 rounded-xl bg-surface text-muted border border-border hover:border-border-strong hover:text-ink font-button text-button transition-colors">
+          Rentals (64)
+        </button>
+<button class="px-3 py-1 rounded-xl bg-surface text-muted border border-border hover:border-border-strong hover:text-ink font-button text-button transition-colors">
+          Staff (32)
+        </button>
+<button class="px-3 py-1 rounded-xl bg-surface text-muted border border-border hover:border-border-strong hover:text-ink font-button text-button transition-colors">
+          Policy (20)
+        </button>
+</div>
+<!-- Ledger Integrity Verification -->
+<div class="flex items-center gap-1.5 font-code-sm text-code-sm text-muted bg-surface px-2.5 py-1 rounded-xl border border-border">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+<span class="text-ink-secondary">Verified immutable ledger</span>
+<span class="text-faint">•</span>
+<span class="font-code text-muted">sha256:8f2a49b07c...</span>
+</div>
+</div>
+<!-- AUDIT & ACTIVITY LOG TABLE CONTAINER -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<!-- Table Header -->
+<thead>
+<tr class="bg-surface-subtle border-b border-border sticky top-0">
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold w-[140px]" scope="col">Time</th>
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold w-[170px]" scope="col">Actor</th>
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold w-[130px]" scope="col">Entity</th>
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold w-[140px]" scope="col">Action</th>
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold min-w-[280px]" scope="col">Change</th>
+<th class="py-2.5 px-4 font-label text-label uppercase tracking-wider text-muted font-semibold" scope="col">Reason</th>
+</tr>
+</thead>
+<!-- Table Body -->
+<tbody class="divide-y divide-divider font-body text-body">
+<!-- ROW 1 (Exact specification) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Oct 1 · 14:22
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-primary-tint text-primary text-[10px] font-bold flex items-center justify-center border border-primary-outline-border">T</span>
+<span class="font-body-strong text-ink">Tuấn</span>
+<span class="text-muted font-meta text-meta">(Manager)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  M-2
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Status</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<!-- Rented: Slate badge -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-rented-tint border border-status-rented-border text-status-rented font-label text-label font-medium">
+                    Rented
+                  </span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<!-- Preparing: Sky badge -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-preparing-tint border border-status-preparing-border text-status-preparing font-label text-label font-medium">
+                    Preparing
+                  </span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary max-w-md truncate">
+                Customer moved out Oct 1; status not updated at desk.
+              </td>
+</tr>
+<!-- ROW 2 (Exact specification) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Oct 1 · 09:05
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-secondary-fixed text-ink text-[10px] font-bold flex items-center justify-center border border-border">M</span>
+<span class="font-body-strong text-ink">Minh</span>
+<span class="text-muted font-meta text-meta">(Staff)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  BK-1042
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Check-in</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<!-- Reserved: Indigo badge -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-reserved-tint border border-status-reserved-border text-status-reserved font-label text-label font-medium">
+                    Reserved
+                  </span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<!-- Rented: Slate badge -->
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-rented-tint border border-status-rented-border text-status-rented font-label text-label font-medium">
+                    Rented
+                  </span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-faint">
+                —
+              </td>
+</tr>
+<!-- ROW 3 (Exact specification) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Sep 30 · 16:40
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-primary-tint text-primary text-[10px] font-bold flex items-center justify-center border border-primary-outline-border">T</span>
+<span class="font-body-strong text-ink">Tuấn</span>
+<span class="text-muted font-meta text-meta">(Manager)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  S-1 + S-2
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Merge</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2 font-code text-code">
+<span class="px-2 py-0.5 rounded-lg bg-surface-subtle border border-border text-muted">
+                    2 units
+                  </span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<span class="px-2 py-0.5 rounded-lg bg-primary-tint border border-primary-outline-border text-primary font-semibold">
+                    M-6 (8 m²)
+                  </span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary">
+                Restructure zone A
+              </td>
+</tr>
+<!-- ROW 4 (Additional dense record) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Sep 30 · 11:15
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-status-buffer-tint text-warning text-[10px] font-bold flex items-center justify-center border border-status-buffer-border">H</span>
+<span class="font-body-strong text-ink">Hằng</span>
+<span class="text-muted font-meta text-meta">(Business Ops)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  Policy v3
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Rate Update</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2 font-code text-code">
+<span class="text-muted">345.000 ₫</span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<span class="text-ink font-semibold">380.000 ₫</span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary">
+                Annual base rate inflation adjustment
+              </td>
+</tr>
+<!-- ROW 5 (Additional dense record) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Sep 30 · 08:30
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-secondary-fixed text-ink text-[10px] font-bold flex items-center justify-center border border-border">M</span>
+<span class="font-body-strong text-ink">Minh</span>
+<span class="text-muted font-meta text-meta">(Staff)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  S-4
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Maintenance</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-available-tint border border-status-available-border text-status-available font-label text-label font-medium">
+                    Operational
+                  </span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-maintenance-tint border border-status-maintenance-border text-status-maintenance font-label text-label font-medium">
+                    Maintenance
+                  </span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary">
+                Roller latch jammed; scheduled technician
+              </td>
+</tr>
+<!-- ROW 6 (Additional dense record) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Sep 29 · 18:00
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-surface-muted text-muted text-[10px] font-bold flex items-center justify-center border border-border">S</span>
+<span class="font-body-strong text-ink">System</span>
+<span class="text-muted font-meta text-meta">(Daemon)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  S-3
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Auto-reserve</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-available-tint border border-status-available-border text-status-available font-label text-label font-medium">
+                    Available
+                  </span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-status-reserved-tint border border-status-reserved-border text-status-reserved font-label text-label font-medium">
+                    Reserved
+                  </span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary">
+                Online reservation deposit confirmed (103.500 ₫)
+              </td>
+</tr>
+<!-- ROW 7 (Additional dense record) -->
+<tr class="hover:bg-surface-subtle transition-colors duration-100">
+<td class="py-2.5 px-4 whitespace-nowrap font-code text-code text-muted tabular-nums">
+                Sep 29 · 14:10
+              </td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-primary-tint text-primary text-[10px] font-bold flex items-center justify-center border border-primary-outline-border">T</span>
+<span class="font-body-strong text-ink">Tuấn</span>
+<span class="text-muted font-meta text-meta">(Manager)</span>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-lg bg-surface-muted border border-border font-code text-code text-ink font-semibold">
+                  M-1
+                </span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="font-body-strong text-ink">Keycard Re-issue</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2 font-code text-code">
+<span class="text-muted">PIN #8842</span>
+<span class="material-symbols-outlined text-muted text-[15px]">arrow_forward</span>
+<span class="text-ink font-semibold">PIN #9102</span>
+</div>
+</td>
+<td class="py-2.5 px-4 text-ink-secondary">
+                Customer reported lost physical card
+              </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-4 py-3 bg-surface border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-meta font-meta text-muted">
+<div class="flex items-center gap-2">
+<span>Showing <strong class="text-ink font-body-strong">1–25</strong> of <strong class="text-ink font-body-strong">214</strong> activity events</span>
+</div>
+<div class="flex items-center space-x-1">
+<!-- Previous Button (Disabled) -->
+<button class="px-2.5 py-1 rounded-lg border border-border text-faint bg-surface-subtle cursor-not-allowed flex items-center gap-0.5" disabled="">
+<span class="material-symbols-outlined text-[15px]">chevron_left</span>
+<span>Prev</span>
+</button>
+<!-- Pages -->
+<button class="w-7 h-7 rounded-lg bg-primary text-on-primary font-button text-button flex items-center justify-center shadow-sm">
+            1
+          </button>
+<button class="w-7 h-7 rounded-lg border border-border text-ink hover:bg-surface-subtle font-button text-button flex items-center justify-center transition-colors">
+            2
+          </button>
+<button class="w-7 h-7 rounded-lg border border-border text-ink hover:bg-surface-subtle font-button text-button flex items-center justify-center transition-colors">
+            3
+          </button>
+<span class="px-1 text-muted">...</span>
+<button class="w-7 h-7 rounded-lg border border-border text-ink hover:bg-surface-subtle font-button text-button flex items-center justify-center transition-colors">
+            9
+          </button>
+<!-- Next Button -->
+<button class="px-2.5 py-1 rounded-lg border border-border text-ink hover:border-border-strong hover:bg-surface-subtle flex items-center gap-0.5 transition-colors">
+<span>Next</span>
+<span class="material-symbols-outlined text-[15px]">chevron_right</span>
+</button>
+</div>
+<!-- Rows Per Page -->
+<div class="flex items-center gap-1.5">
+<span>Rows:</span>
+<select class="bg-surface text-ink border border-border rounded-lg text-meta font-meta py-0.5 pl-2 pr-6 focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer">
+<option selected="">25 rows / page</option>
+<option>50 rows / page</option>
+<option>100 rows / page</option>
+</select>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER BAR (Control Room Status) -->
+<footer class="w-full bg-surface border-t border-border px-6 py-2.5 text-meta font-meta text-muted mt-auto">
+<div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center space-x-3">
+<span class="font-body-strong text-ink">StorageHub Control Room v2.4</span>
+<span class="text-border-strong">•</span>
+<span>Facility ID: <strong class="text-ink font-body-strong">VN-SGN-01 (Tân Bình Gateway)</strong></span>
+<span class="text-border-strong">•</span>
+<span class="inline-flex items-center gap-1 text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> Systems Nominal
+        </span>
+<span class="text-border-strong">•</span>
+<span class="text-ink-secondary">Gate Automation Online</span>
+</div>
+<div class="flex items-center space-x-3">
+<span>Logged as <strong class="text-ink font-body-strong">Tuấn (Facility Manager)</strong></span>
+<span class="text-border-strong">•</span>
+<span class="font-code text-muted">Node: sgn-edge-01.storagehub.internal</span>
+</div>
+</div>
+</footer>
+<!-- Micro-interaction script for clock -->
+<script>
+    function updateICTClock() {
+      const now = new Date();
+      // UTC + 7 hours for ICT
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const ictDate = new Date(utc + (3600000 * 7));
+      const hours = String(ictDate.getHours()).padStart(2, '0');
+      const minutes = String(ictDate.getMinutes()).padStart(2, '0');
+      const seconds = String(ictDate.getSeconds()).padStart(2, '0');
+      const el = document.getElementById('ict-clock');
+      if (el) {
+        el.textContent = `${hours}:${minutes}:${seconds} ICT`;
+      }
+    }
+    setInterval(updateICTClock, 1000);
+  </script>
+</body></html>

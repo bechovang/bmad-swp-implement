@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Escalations — StorageHub</title>
+<!-- Material Symbols Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration Script -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline": "#777587",
+            "success-tint": "#ECFDF5",
+            "secondary": "#515f74",
+            "status-retired-tint": "#F8FAFC",
+            "on-primary-fixed": "#0f0069",
+            "status-buffer-bar": "#F59E0B",
+            "divider": "#F1F5F9",
+            "primary-fixed": "#e2dfff",
+            "inverse-primary": "#c3c0ff",
+            "surface-container-highest": "#e4e1ee",
+            "on-primary": "#ffffff",
+            "status-preparing-border": "#E0F2FE",
+            "surface-subtle": "#F8FAFC",
+            "secondary-container": "#d5e3fd",
+            "primary-border": "#E0E7FF",
+            "on-secondary": "#ffffff",
+            "surface-variant": "#e4e1ee",
+            "primary-container": "#4f46e5",
+            "status-buffer-border": "#FDE68A",
+            "status-buffer": "#B45309",
+            "on-background": "#1b1b24",
+            "on-surface-variant": "#464555",
+            "surface-container-lowest": "#ffffff",
+            "faint": "#94A3B8",
+            "surface-container-low": "#f5f2ff",
+            "surface": "#FFFFFF",
+            "surface-container": "#f0ecf9",
+            "status-retired-border": "#E2E8F0",
+            "status-available": "#059669",
+            "warning-bar": "#F59E0B",
+            "status-rented-border": "#E2E8F0",
+            "secondary-fixed-dim": "#b9c7e0",
+            "tertiary-fixed-dim": "#ffb695",
+            "surface-container-high": "#eae6f4",
+            "status-reserved": "#4F46E5",
+            "primary-fixed-dim": "#c3c0ff",
+            "surface-bright": "#fcf8ff",
+            "error-border": "#FECACA",
+            "status-maintenance": "#C2410C",
+            "tertiary-fixed": "#ffdbcc",
+            "ink": "#0F172A",
+            "muted": "#64748B",
+            "on-primary-fixed-variant": "#3323cc",
+            "surface-muted": "#F1F5F9",
+            "on-secondary-container": "#57657b",
+            "status-maintenance-border": "#FFEDD5",
+            "status-available-border": "#D1FAE5",
+            "ink-secondary": "#334155",
+            "border-strong": "#CBD5E1",
+            "status-preparing-tint": "#F0F9FF",
+            "tertiary-container": "#a44100",
+            "primary-outline-border": "#C7D2FE",
+            "primary-tint": "#EEF2FF",
+            "on-tertiary-fixed": "#351000",
+            "status-reserved-border": "#E0E7FF",
+            "status-retired": "#94A3B8",
+            "on-tertiary-container": "#ffd2be",
+            "inverse-surface": "#302f39",
+            "on-surface": "#1b1b24",
+            "error-container": "#ffdad6",
+            "border": "#E2E8F0",
+            "app-bg": "#F4F6F9",
+            "outline-variant": "#c7c4d8",
+            "error": "#DC2626",
+            "secondary-fixed": "#d5e3fd",
+            "inverse-on-surface": "#f3effc",
+            "status-maintenance-tint": "#FFF7ED",
+            "on-primary-container": "#dad7ff",
+            "tertiary": "#7e3000",
+            "status-preparing": "#0284C7",
+            "success": "#059669",
+            "status-buffer-tint": "#FFFBEB",
+            "surface-tint": "#4d44e3",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "warning-tint": "#FFFBEB",
+            "status-rented-tint": "#F1F5F9",
+            "on-error": "#ffffff",
+            "surface-dim": "#dcd8e5",
+            "on-tertiary": "#ffffff",
+            "warning": "#B45309",
+            "status-available-tint": "#ECFDF5",
+            "primary": "#4F46E5",
+            "background": "#fcf8ff",
+            "status-rented": "#334155",
+            "error-tint": "#FEF2F2",
+            "on-secondary-fixed-variant": "#3a485c",
+            "status-reserved-tint": "#EEF2FF",
+            "on-secondary-fixed": "#0d1c2f",
+            "on-error-container": "#93000a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-2xl": "32px",
+            "space-xs": "4px",
+            "space-md": "12px",
+            "space-xl": "24px",
+            "margin": "24px",
+            "gutter": "14px",
+            "space-3xl": "48px",
+            "space-sm": "8px",
+            "space-lg": "16px"
+          },
+          "fontFamily": {
+            "price-lg": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "body": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "headline": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "code": [
+              "\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""
+            ],
+            "display": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "nav": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "kpi-value": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "button": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "price": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "code-sm": [
+              "\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""
+            ],
+            "label": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "body-strong": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ],
+            "meta": [
+              "\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""
+            ]
+          },
+          "fontSize": {
+            "price-lg": [
+              "19px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "body": [
+              "13px",
+              {
+                "lineHeight": "1.5",
+                "fontWeight": "400"
+              }
+            ],
+            "headline": [
+              "18px",
+              {
+                "lineHeight": "1.35",
+                "fontWeight": "600"
+              }
+            ],
+            "code": [
+              "13px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "display": [
+              "21px",
+              {
+                "lineHeight": "1.3",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "nav": [
+              "13px",
+              {
+                "fontWeight": "500"
+              }
+            ],
+            "kpi-value": [
+              "24px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "button": [
+              "13px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "price": [
+              "15px",
+              {
+                "lineHeight": "1.2",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "code-sm": [
+              "11px",
+              {
+                "fontWeight": "600"
+              }
+            ],
+            "label": [
+              "10.5px",
+              {
+                "lineHeight": "1.4",
+                "fontWeight": "600"
+              }
+            ],
+            "body-strong": [
+              "13px",
+              {
+                "lineHeight": "1.5",
+                "fontWeight": "600"
+              }
+            ],
+            "meta": [
+              "11.5px",
+              {
+                "lineHeight": "1.45",
+                "fontWeight": "500"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-ink">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-margin h-[54px] bg-surface border-b border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<!-- Brand Logo, Role Badge & Facility Context -->
+<div class="flex items-center space-x-space-md">
+<div class="flex items-center space-x-space-xs">
+<span class="material-symbols-outlined text-primary" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-headline text-headline text-ink tracking-tight font-semibold">StorageHub</span>
+</div>
+<span class="text-border">|</span>
+<span class="bg-primary-tint text-primary font-label text-label px-space-xs py-[2px] rounded-lg border border-primary-border">Facility Manager</span>
+<div class="hidden xl:flex items-center space-x-space-xs text-muted font-meta text-meta bg-surface-subtle px-space-sm py-[3px] rounded-lg border border-border">
+<span class="w-1.5 h-1.5 rounded-full bg-success inline-block"></span>
+<span class="font-code-sm text-code-sm text-ink-secondary">VN-SGN-01 (Tân Bình)</span>
+<span>·</span>
+<span>Systems Nominal</span>
+<span>·</span>
+<span>Gate Automation Online</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center h-full space-x-space-sm">
+<a class="border-b-2 border-transparent text-muted hover:text-ink font-nav text-nav h-full flex items-center px-space-sm transition-colors duration-150" href="#">Overview</a>
+<a class="border-b-2 border-transparent text-muted hover:text-ink font-nav text-nav h-full flex items-center px-space-sm transition-colors duration-150" href="#">Units</a>
+<a class="border-b-2 border-transparent text-muted hover:text-ink font-nav text-nav h-full flex items-center px-space-sm transition-colors duration-150" href="#">Staff &amp; Shifts</a>
+<a class="border-b-2 border-transparent text-muted hover:text-ink font-nav text-nav h-full flex items-center px-space-sm transition-colors duration-150" href="#">Operations</a>
+<!-- Escalations Active Link -->
+<a class="border-b-2 border-primary text-primary font-body-strong text-body h-full flex items-center px-space-sm" href="#">Escalations</a>
+<a class="border-b-2 border-transparent text-muted hover:text-ink font-nav text-nav h-full flex items-center px-space-sm transition-colors duration-150" href="#">Activity Log</a>
+</nav>
+<!-- Trailing Actions & Profile Avatar -->
+<div class="flex items-center space-x-space-md">
+<button aria-label="Notifications" class="relative p-1.5 text-muted hover:text-ink hover:bg-surface-subtle rounded-lg transition-colors duration-150">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 flex items-center justify-center w-3.5 h-3.5 bg-error text-white font-code-sm text-[9px] font-bold rounded-full">1</span>
+</button>
+<button aria-label="Help &amp; Documentation" class="p-1.5 text-muted hover:text-ink hover:bg-surface-subtle rounded-lg transition-colors duration-150">
+<span class="material-symbols-outlined text-[20px]" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-4 w-px bg-border"></div>
+<div class="flex items-center space-x-space-xs cursor-pointer group">
+<div class="relative w-7 h-7 rounded-full overflow-hidden border border-border group-hover:border-border-strong transition-colors">
+<img class="w-full h-full object-cover" data-alt="Close up professional headshot of Tuấn, a Vietnamese facility manager wearing a clean dark navy collared shirt against an industrial warehouse control room background with soft neutral lighting and precise modern styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWsJyXDlbfbu3svobh1aqi8lwzbsIMTE6miQ3bNphdFhvTe0W2QBOKZHTRUbJUJjGRSWOQSBmfCFmmxDqgl3GQcIH6DcciY7ZAXZ5Xid9xQud8qP53dtZJ01ui19wt0LfRpGQow2Y8PUJk1WUkS-aThSBKL2XymaJxw4yqaFT8yjFd408N8sA6uSV3bRfsIRjkWJsgFtrf4DVcE1l4UzWjrQxj7_GLZxTB0P9m7Ii3DB38EidRPC_P2SwaAKpDxrHOEre9X-gCaKw"/>
+</div>
+<div class="hidden lg:flex flex-col text-left">
+<span class="font-body-strong text-body leading-none text-ink">Tuấn</span>
+<span class="font-meta text-meta text-muted leading-none mt-0.5">Duty Lead</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-Header & Breadcrumb Bar -->
+<div class="mt-[54px] bg-surface border-b border-border px-margin py-space-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<!-- Breadcrumbs & Headline -->
+<div class="flex flex-col space-y-0.5">
+<div class="flex items-center space-x-space-xs font-meta text-meta text-muted">
+<span>Control Room</span>
+<span class="text-faint">/</span>
+<span>Escalations</span>
+<span class="text-faint">/</span>
+<span class="font-code-sm text-ink-secondary">SR-0035</span>
+</div>
+<div class="flex items-center space-x-space-md">
+<h1 class="font-headline text-headline text-ink tracking-tight font-semibold">Escalations &amp; Critical Incidents</h1>
+<!-- SLA Banner Badge -->
+<div class="flex items-center space-x-1.5 px-space-sm py-0.5 bg-error-tint border border-error-border rounded-lg text-error">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-body-strong text-body tabular-nums">Active Incident · Response SLA: 14 mins remaining</span>
+</div>
+</div>
+</div>
+<!-- Quick Actions / Mode Filter -->
+<div class="flex items-center space-x-space-xs">
+<button class="flex items-center space-x-1 px-space-sm py-1.5 bg-surface text-ink-secondary hover:bg-surface-subtle border border-border rounded-xl font-button text-button transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+<span>Filters</span>
+</button>
+<button class="flex items-center space-x-1 px-space-sm py-1.5 bg-surface text-ink-secondary hover:bg-surface-subtle border border-border rounded-xl font-button text-button transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="history">history</span>
+<span>Dispatched Logs</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Main Split Workspace Canvas (2-Column: 40% Left, 60% Right) -->
+<main class="flex-1 px-margin py-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN: Incident Queue (40% -> 5 cols on lg) -->
+<section class="lg:col-span-5 flex flex-col space-y-space-md">
+<!-- Queue Box Header -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] overflow-hidden">
+<div class="p-space-md border-b border-border bg-surface-subtle">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center space-x-space-sm">
+<button class="font-body-strong text-body text-primary pb-1 border-b-2 border-primary flex items-center space-x-1">
+<span>Open Escalations</span>
+<span class="bg-error-tint text-error px-1.5 py-0.2 rounded-full font-code-sm text-code-sm">1</span>
+</button>
+<button class="font-nav text-nav text-muted hover:text-ink pb-1 border-b-2 border-transparent transition-colors flex items-center space-x-1">
+<span>Resolved</span>
+<span class="text-faint font-code-sm text-code-sm">(14)</span>
+</button>
+</div>
+<span class="font-meta text-meta text-muted">Sorted by Urgency</span>
+</div>
+<!-- Queue Search & Filter Bar -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-muted text-[16px]" data-icon="search">search</span>
+<input class="w-full pl-8 pr-space-md py-1.5 bg-surface border border-border rounded-xl font-body text-body text-ink placeholder-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Search ticket #, bay code, tenant..." type="text"/>
+</div>
+</div>
+<!-- Queue List Items -->
+<div class="divide-y divide-border">
+<!-- Card 1: Selected & Critical Escalation -->
+<article class="relative p-space-md bg-surface-bright border-l-[3px] border-l-error transition-colors cursor-pointer ring-1 ring-inset ring-primary/10">
+<div class="flex items-start justify-between mb-1.5">
+<div class="flex items-center space-x-space-xs">
+<span class="font-code text-code text-ink font-semibold">SR-0035</span>
+<span class="text-muted">·</span>
+<span class="font-body-strong text-body text-ink">Water leak</span>
+<span class="text-muted">·</span>
+<span class="font-code text-code px-1.5 py-0.5 bg-error-tint text-error rounded border border-error-border">Unit M-2</span>
+</div>
+<span class="bg-error-tint text-error font-label text-label px-space-xs py-0.5 rounded border border-error-border">Critical Escalation</span>
+</div>
+<p class="font-body text-body text-ink-secondary mb-space-sm line-clamp-2">
+                Sensor water telemetry tripped at base drain channel near threshold. Unit entrance pooling.
+              </p>
+<div class="flex items-center justify-between pt-1 border-t border-divider font-meta text-meta text-muted">
+<div class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span>Escalated 09:12 ICT by Minh (Staff)</span>
+</div>
+<div class="flex items-center space-x-1 text-ink font-body-strong">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+<span>Assigned to Tuấn</span>
+</div>
+</div>
+</article>
+<!-- Card 2: Resolved Historical Incident -->
+<article class="p-space-md bg-surface opacity-75 hover:opacity-100 hover:bg-surface-subtle transition-colors cursor-pointer border-l-[3px] border-l-status-available">
+<div class="flex items-start justify-between mb-1">
+<div class="flex items-center space-x-space-xs">
+<span class="font-code text-code text-ink-secondary">SR-0029</span>
+<span class="text-muted">·</span>
+<span class="font-body text-body text-ink-secondary">Power fault</span>
+<span class="text-muted">·</span>
+<span class="font-code text-code px-1 py-0.2 bg-surface-muted text-ink-secondary rounded border border-border">Unit L-1</span>
+</div>
+<span class="bg-status-available-tint text-status-available font-label text-label px-space-xs py-0.5 rounded border border-status-available-border">Resolved</span>
+</div>
+<p class="font-body text-body text-muted mb-space-xs">
+                Keypad breaker circuit tripped after automated cycle. Breaker reset performed and confirmed operational.
+              </p>
+<div class="flex items-center justify-between font-meta text-meta text-muted">
+<div class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>Sep 30 · Resolved by Tuấn</span>
+</div>
+<span class="font-code-sm text-code-sm text-faint">Bay L-1 Cleared</span>
+</div>
+</article>
+<!-- Card 3: Historical Normal Turnover -->
+<article class="p-space-md bg-surface opacity-60 hover:opacity-90 hover:bg-surface-subtle transition-colors cursor-pointer border-l-[3px] border-l-border">
+<div class="flex items-start justify-between mb-1">
+<div class="flex items-center space-x-space-xs">
+<span class="font-code text-code text-muted">SR-0024</span>
+<span class="text-muted">·</span>
+<span class="font-body text-body text-muted">Hasp latch replacement</span>
+<span class="text-muted">·</span>
+<span class="font-code text-code px-1 py-0.2 bg-surface-muted text-muted rounded border border-border">Unit C-4</span>
+</div>
+<span class="bg-surface-muted text-muted font-label text-label px-space-xs py-0.5 rounded border border-border">Closed</span>
+</div>
+<div class="flex items-center justify-between font-meta text-meta text-muted">
+<span>Sep 28 · Hardware swapped</span>
+<span class="font-code-sm text-code-sm text-faint">Staff: Long</span>
+</div>
+</article>
+</div>
+<!-- Bottom Operational Helper Guardrail -->
+<div class="p-space-md bg-surface-subtle border-t border-border flex items-start space-x-space-sm">
+<span class="material-symbols-outlined text-warning text-[18px] shrink-0 mt-0.5" data-icon="shield">shield</span>
+<div class="space-y-0.5">
+<p class="font-body-strong text-body text-ink">Incident Safety Lock Active</p>
+<p class="font-meta text-meta text-muted">
+                1 critical incident pending sign-off. Escalations halt automatic renewal &amp; checkout for affected bays.
+              </p>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: Open Ticket Detail & Severity Centerpiece (60% -> 7 cols on lg) -->
+<section class="lg:col-span-7 flex flex-col space-y-space-md">
+<!-- Ticket Detail Header Card -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] p-space-lg">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm pb-space-md border-b border-divider">
+<div class="space-y-1">
+<div class="flex items-center space-x-space-xs">
+<span class="font-code text-code text-ink font-bold text-[15px]">SR-0035</span>
+<span class="text-faint">/</span>
+<span class="font-headline text-headline text-ink">Water leak · Unit M-2</span>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="bg-error-tint text-error font-label text-label px-2 py-0.5 rounded-full border border-error-border flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span>Action Required · High Severity</span>
+</span>
+<span class="bg-status-preparing-tint text-status-preparing font-code-sm text-code-sm px-2 py-0.5 rounded-full border border-status-preparing-border flex items-center space-x-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="sensors">sensors</span>
+<span>Telemetry alert #TL-9912 (Moisture &gt; 85%)</span>
+</span>
+</div>
+</div>
+<!-- Header Quick Context Actions -->
+<div class="flex items-center space-x-space-xs">
+<button class="px-2.5 py-1.5 bg-surface-subtle hover:bg-surface border border-border text-ink-secondary font-button text-button rounded-xl flex items-center space-x-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="monitoring">monitoring</span>
+<span>View Bay M-2 Telemetry</span>
+</button>
+<button class="px-2.5 py-1.5 bg-surface-subtle hover:bg-surface border border-border text-ink-secondary font-button text-button rounded-xl flex items-center space-x-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="call">call</span>
+<span>Call Staff Minh</span>
+</button>
+</div>
+</div>
+<!-- Incident Narrative Thread -->
+<div class="mt-space-md space-y-space-md">
+<h2 class="font-label text-label text-muted tracking-wider">INCIDENT LOG &amp; FIELD REPORTS</h2>
+<!-- Entry 1: Customer Tenant Message -->
+<div class="flex items-start space-x-space-md p-space-md bg-surface-subtle rounded-xl border border-divider">
+<div class="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0 text-primary font-bold font-code-sm">
+                LN
+              </div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-space-xs">
+<span class="font-body-strong text-body text-ink">Lan Nguyen</span>
+<span class="bg-surface border border-border font-label text-label text-muted px-1.5 py-0.2 rounded">Tenant · SGN-8842 · Unit M-2</span>
+</div>
+<span class="font-meta text-meta text-muted tabular-nums">09:05 ICT</span>
+</div>
+<p class="font-body text-body text-ink-secondary">
+                  "Water pooling at the unit entrance after rain. Worried about cardboard boxes inside."
+                </p>
+</div>
+</div>
+<!-- Entry 2: Shift Staff On-Site Field Assessment -->
+<div class="flex items-start space-x-space-md p-space-md bg-status-preparing-tint/40 rounded-xl border border-status-preparing-border">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-secondary flex items-center justify-center shrink-0 font-bold font-code-sm">
+                M
+              </div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-space-xs">
+<span class="font-body-strong text-body text-ink">Minh</span>
+<span class="bg-surface border border-status-preparing-border font-label text-label text-status-preparing px-1.5 py-0.2 rounded">Shift Staff · Desk 02</span>
+</div>
+<span class="font-meta text-meta text-muted tabular-nums">09:12 ICT</span>
+</div>
+<p class="font-body text-body text-ink-secondary">"Sump pump failed; beyond on-site repair. Customer needs a unit."</p>
+</div>
+</div>
+</div>
+</div>
+<!-- CENTERPIECE: Facility Manager Severity Sign-off & Resolution Path -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] overflow-hidden">
+<!-- Section Title -->
+<div class="p-space-lg border-b border-border bg-gradient-to-r from-surface to-surface-subtle">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline text-headline text-ink font-semibold">Facility Manager Severity Sign-off &amp; Resolution Path</h2>
+<p class="font-body text-body text-muted mt-0.5">Choose the operational protocol to dispatch immediately.</p>
+</div>
+<span class="bg-primary-tint text-primary font-code-sm text-code-sm px-2.5 py-1 rounded-full border border-primary-border">Level-2 Authorization</span>
+</div>
+</div>
+<!-- Protocol Selection Options -->
+<div class="p-space-lg grid grid-cols-1 md:grid-cols-2 gap-space-md items-stretch"><!-- Left Card: Selected & Recommended --><div class="p-space-md rounded-xl border-2 border-error bg-error-tint/20 relative cursor-pointer shadow-sm flex flex-col justify-between h-full"><div class="space-y-space-sm"><div class="flex items-start justify-between gap-space-xs"><div class="flex items-center space-x-2"><div class="flex items-center justify-center w-5 h-5 rounded-full border-2 border-error bg-white shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-error"></div></div><span class="font-body-strong text-body text-error font-bold leading-snug">Mark severe — move M-2 to Maintenance and relocate the customer to M-5.</span></div><span class="bg-error text-white font-label text-label px-2 py-0.5 rounded shrink-0 uppercase">RECOMMENDED</span></div><!-- Checklist --><div class="bg-surface rounded-lg p-space-sm border border-error-border/60 space-y-1.5 mt-2"><div class="font-label text-label text-ink uppercase tracking-wider font-semibold mb-1">Automated Dispatch Sequence:</div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-status-maintenance text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><div><span>Unit <span class="font-code font-bold text-ink">M-2</span> status → </span><span class="px-1 py-0.2 rounded bg-status-maintenance-tint text-status-maintenance font-code-sm font-semibold border border-status-maintenance-border">Maintenance (#C2410C)</span><span class="text-muted"> (Locks automated gate, dispatches facilities contractor)</span></div></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-success text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><div><span>Relocation offer generated: <strong class="font-code font-bold text-ink">M-5</strong> · 8 m² · Climate Controlled </span><span class="text-muted">(Same tier, zero surcharge adjustment, price locked at </span><span class="font-body-strong text-ink tabular-nums font-semibold">720.000 ₫/mo</span><span class="text-muted">)</span></div></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-primary text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><span>Emergency repair work order created for depot maintenance contractor</span></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-primary text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><span>Auto-SMS &amp; In-App push notification prepared for Lan Nguyen</span></div></div></div></div><!-- Right Card: Unselected / Guidance --><div class="p-space-md rounded-xl border border-border bg-white hover:border-border-strong transition-colors cursor-pointer flex flex-col justify-between h-full"><div class="space-y-space-sm flex-1 flex flex-col"><div class="flex items-start space-x-2"><div class="mt-0.5 flex items-center justify-center w-5 h-5 rounded-full border border-border-strong bg-white shrink-0"></div><div><h3 class="font-body-strong text-body text-ink font-semibold leading-snug">Return to staff with guidance</h3><p class="font-body text-body text-muted text-[12px] mt-0.5">Keep M-2 in service and instruct station staff on secondary mitigation steps.</p></div></div><div class="space-y-1 flex-1 flex flex-col mt-2"><label class="block font-label text-label text-muted uppercase" for="guidance-text">Operational Directives</label><textarea class="w-full flex-1 min-h-[110px] p-space-sm font-body text-body text-ink border border-border rounded-xl placeholder-muted bg-surface-subtle focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]" id="guidance-text" placeholder="e.g., Deploy industrial wet vac and place sandbags at threshold Bay B1..."></textarea></div></div></div></div>
+<!-- Decision Panel Footer / Action CTAs -->
+<div class="p-space-lg grid grid-cols-1 md:grid-cols-2 gap-space-md items-stretch"><!-- Left Card: Selected & Recommended --><div class="p-space-md rounded-xl border-2 border-error bg-error-tint/20 relative cursor-pointer shadow-sm flex flex-col justify-between h-full"><div class="space-y-space-sm"><div class="flex items-start justify-between gap-space-xs"><div class="flex items-center space-x-2"><div class="flex items-center justify-center w-5 h-5 rounded-full border-2 border-error bg-white shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-error"></div></div><span class="font-body-strong text-body text-error font-bold leading-snug">Mark severe — move M-2 to Maintenance and relocate the customer to M-5.</span></div><span class="bg-error text-white font-label text-label px-2 py-0.5 rounded shrink-0 uppercase">RECOMMENDED</span></div><!-- Checklist --><div class="bg-surface rounded-lg p-space-sm border border-error-border/60 space-y-1.5 mt-2"><div class="font-label text-label text-ink uppercase tracking-wider font-semibold mb-1">Automated Dispatch Sequence:</div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-status-maintenance text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><div><span>Unit <span class="font-code font-bold text-ink">M-2</span> status → </span><span class="px-1 py-0.2 rounded bg-status-maintenance-tint text-status-maintenance font-code-sm font-semibold border border-status-maintenance-border">Maintenance (#C2410C)</span><span class="text-muted"> (Locks automated gate, dispatches facilities contractor)</span></div></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-success text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><div><span>Relocation offer generated: <strong class="font-code font-bold text-ink">M-5</strong> · 8 m² · Climate Controlled </span><span class="text-muted">(Same tier, zero surcharge adjustment, price locked at </span><span class="font-body-strong text-ink tabular-nums font-semibold">720.000 ₫/mo</span><span class="text-muted">)</span></div></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-primary text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><span>Emergency repair work order created for depot maintenance contractor</span></div><div class="flex items-start space-x-1.5 font-body text-body text-ink-secondary text-[12px]"><span class="material-symbols-outlined text-primary text-[15px] shrink-0 mt-0.5" data-icon="check_circle">check_circle</span><span>Auto-SMS &amp; In-App push notification prepared for Lan Nguyen</span></div></div></div></div><!-- Right Card: Unselected / Guidance --><div class="p-space-md rounded-xl border border-border bg-white hover:border-border-strong transition-colors cursor-pointer flex flex-col justify-between h-full"><div class="space-y-space-sm flex-1 flex flex-col"><div class="flex items-start space-x-2"><div class="mt-0.5 flex items-center justify-center w-5 h-5 rounded-full border border-border-strong bg-white shrink-0"></div><div><h3 class="font-body-strong text-body text-ink font-semibold leading-snug">Return to staff with guidance</h3><p class="font-body text-body text-muted text-[12px] mt-0.5">Keep M-2 in service and instruct station staff on secondary mitigation steps.</p></div></div><div class="space-y-1 flex-1 flex flex-col mt-2"><label class="block font-label text-label text-muted uppercase" for="guidance-text">Operational Directives</label><textarea class="w-full flex-1 min-h-[110px] p-space-sm font-body text-body text-ink border border-border rounded-xl placeholder-muted bg-surface-subtle focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary text-[12px]" id="guidance-text" placeholder="e.g., Deploy industrial wet vac and place sandbags at threshold Bay B1..."></textarea></div></div></div></div>
+</div>
+</section>
+</div>
+</main>
+<!-- Sticky Bottom Meta Status Bar -->
+<footer class="bg-surface border-t border-border px-margin py-2 flex items-center justify-between text-muted font-meta text-meta">
+<div class="flex items-center space-x-space-md">
+<div class="flex items-center space-x-1">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="font-body-strong text-ink">StorageHub Control Room v2.4</span>
+</div>
+<span>·</span>
+<span>Facility VN-SGN-01</span>
+<span>·</span>
+<span>Telemetry Cluster: Green</span>
+</div>
+<div class="flex items-center space-x-space-sm tabular-nums">
+<span>Logged in as Tuấn (Staff ID #VN-0942)</span>
+<span>·</span>
+<span>Session Key: SEC-8891-ICT</span>
+</div>
+</footer>
+</body></html>

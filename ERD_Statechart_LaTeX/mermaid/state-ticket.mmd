@@ -1,0 +1,18 @@
+%% StorageHub — State chart: vòng đời Support Ticket (SR-)
+stateDiagram-v2
+    [*] --> Open : KH gửi support request
+
+    Open --> InProgress : route tới staff trực ca [theo unit + shift]
+    InProgress --> Resolved : staff xử lý xong + note
+    InProgress --> Escalated : staff escalate [bắt buộc có note]
+
+    Escalated --> Resolved : manager đánh giá severe [unit → Maintenance + tái định vị KH]
+    Escalated --> InProgress : manager trả về staff [kèm guidance]
+
+    Resolved --> [*]
+
+    note right of Escalated
+        Ticket severe không bị bỏ rơi:
+        quyết định ghi vào Activity Log,
+        KH nhận notification từng bước.
+    end note

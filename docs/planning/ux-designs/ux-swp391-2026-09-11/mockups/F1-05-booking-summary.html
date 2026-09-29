@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StorageHub - Booking Summary</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=-apple-system,+BlinkMacSystemFont,+'Segoe+UI',+Roboto,+sans-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-dim": "#dcd8e5",
+            "status-available": "#059669",
+            "success-tint": "#ECFDF5",
+            "on-primary-container": "#dad7ff",
+            "secondary-container": "#d5e3fd",
+            "secondary-fixed": "#d5e3fd",
+            "border-strong": "#CBD5E1",
+            "warning": "#B45309",
+            "on-surface": "#1b1b24",
+            "error-border": "#FECACA",
+            "surface-subtle": "#F8FAFC",
+            "faint": "#94A3B8",
+            "status-buffer-border": "#FDE68A",
+            "status-retired": "#94A3B8",
+            "status-buffer-tint": "#FFFBEB",
+            "ink": "#0F172A",
+            "status-preparing": "#0284C7",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "primary-outline-border": "#C7D2FE",
+            "status-retired-border": "#E2E8F0",
+            "status-reserved-border": "#E0E7FF",
+            "status-preparing-tint": "#F0F9FF",
+            "status-reserved-tint": "#EEF2FF",
+            "surface-muted": "#F1F5F9",
+            "status-retired-tint": "#F8FAFC",
+            "on-background": "#1b1b24",
+            "primary-tint": "#EEF2FF",
+            "primary": "#4F46E5",
+            "on-primary-fixed-variant": "#3323cc",
+            "primary-border": "#E0E7FF",
+            "status-rented": "#334155",
+            "on-tertiary-fixed": "#351000",
+            "success": "#059669",
+            "status-available-border": "#D1FAE5",
+            "primary-fixed": "#e2dfff",
+            "warning-tint": "#FFFBEB",
+            "status-buffer-bar": "#F59E0B",
+            "secondary": "#515f74",
+            "status-rented-tint": "#F1F5F9",
+            "status-rented-border": "#E2E8F0",
+            "tertiary-fixed-dim": "#ffb695",
+            "on-tertiary-container": "#ffd2be",
+            "background": "#fcf8ff",
+            "surface-tint": "#4d44e3",
+            "primary-fixed-dim": "#c3c0ff",
+            "surface-container-low": "#f5f2ff",
+            "surface-bright": "#fcf8ff",
+            "outline": "#777587",
+            "on-primary-fixed": "#0f0069",
+            "on-error-container": "#93000a",
+            "inverse-primary": "#c3c0ff",
+            "surface-variant": "#e4e1ee",
+            "surface-container": "#f0ecf9",
+            "status-available-tint": "#ECFDF5",
+            "status-buffer": "#B45309",
+            "primary-container": "#4f46e5",
+            "status-preparing-border": "#E0F2FE",
+            "on-secondary-fixed": "#0d1c2f",
+            "tertiary-container": "#a44100",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#3a485c",
+            "status-maintenance": "#C2410C",
+            "surface": "#FFFFFF",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "border": "#E2E8F0",
+            "status-reserved": "#4F46E5",
+            "app-bg": "#F4F6F9",
+            "surface-container-high": "#eae6f4",
+            "tertiary-fixed": "#ffdbcc",
+            "on-surface-variant": "#464555",
+            "on-primary": "#ffffff",
+            "status-maintenance-border": "#FFEDD5",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#f3effc",
+            "on-secondary-container": "#57657b",
+            "on-secondary": "#ffffff",
+            "error": "#DC2626",
+            "outline-variant": "#c7c4d8",
+            "status-maintenance-tint": "#FFF7ED",
+            "divider": "#F1F5F9",
+            "surface-container-highest": "#e4e1ee",
+            "secondary-fixed-dim": "#b9c7e0",
+            "inverse-surface": "#302f39",
+            "ink-secondary": "#334155",
+            "error-tint": "#FEF2F2",
+            "muted": "#64748B",
+            "warning-bar": "#F59E0B",
+            "tertiary": "#7e3000"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "12px",
+            "gutter": "14px",
+            "margin": "24px",
+            "space-2xl": "32px",
+            "space-xs": "4px",
+            "space-sm": "8px",
+            "space-lg": "16px",
+            "space-xl": "24px",
+            "space-3xl": "48px"
+          },
+          "fontFamily": {
+            "nav": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "meta": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "kpi-value": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "headline": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "label": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "price-lg": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""],
+            "button": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "body-strong": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "display": ["\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\""],
+            "code-sm": ["\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""]
+          },
+          "fontSize": {
+            "nav": ["13px", { "fontWeight": "500" }],
+            "price": ["15px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "meta": ["11.5px", { "lineHeight": "1.45", "fontWeight": "500" }],
+            "kpi-value": ["24px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline": ["18px", { "lineHeight": "1.35", "fontWeight": "600" }],
+            "label": ["10.5px", { "lineHeight": "1.4", "fontWeight": "600" }],
+            "price-lg": ["19px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code": ["13px", { "fontWeight": "600" }],
+            "button": ["13px", { "fontWeight": "600" }],
+            "body": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+            "body-strong": ["13px", { "lineHeight": "1.5", "fontWeight": "600" }],
+            "display": ["21px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "code-sm": ["11px", { "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-app-bg text-ink font-body text-body antialiased min-h-screen flex flex-col selection:bg-primary-tint selection:text-primary">
+<!-- TopNavBar (Derived verbatim from JSON execution requirements) -->
+<header class="bg-surface docked full-width top-0 h-[54px] border-b border-border shadow-[0_1px_2px_rgba(15,23,42,0.05)] sticky z-50">
+<div class="w-full h-[54px] px-margin flex items-center justify-between mx-auto max-w-[1440px]">
+<!-- Brand Logo & Context Anchor -->
+<div class="flex items-center gap-space-md">
+<a class="flex items-center gap-space-sm font-headline text-headline text-ink font-semibold tracking-tight hover:opacity-95 transition-opacity" href="#">
+<span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="warehouse" style="font-size: 18px;">warehouse</span>
+</span>
+<span>StorageHub</span>
+</a>
+<!-- Role Chip -->
+<span class="bg-primary-tint border border-primary-border text-primary font-label text-label px-2 py-0.5 rounded-full inline-flex items-center">
+          Customer
+        </span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 h-[54px]">
+<!-- Primary Action flow belongs under 'Browse Units' active state -->
+<a class="text-primary font-body-strong text-body-strong border-b-2 border-primary py-3.5 flex items-center gap-1.5" href="#">
+<span>Browse Units</span>
+</a>
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">
+<span>My Rentals</span>
+</a>
+<a class="text-ink-secondary font-nav text-nav hover:text-ink py-3.5 transition-colors" href="#">
+<span>Support</span>
+</a>
+</nav>
+<!-- Trailing Profile & Actions -->
+<div class="flex items-center gap-space-md">
+<button aria-label="Notifications" class="relative p-1.5 text-ink-secondary hover:bg-surface-subtle rounded-lg transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-surface"></span>
+</button>
+<div class="h-4 w-px bg-border"></div>
+<div class="flex items-center gap-2 pl-1">
+<div class="w-7 h-7 rounded-full bg-primary-tint border border-primary-outline-border flex items-center justify-center text-primary font-body-strong text-meta">
+            LN
+          </div>
+<div class="flex flex-col text-left">
+<span class="font-body-strong text-meta text-ink leading-none">Lan</span>
+<span class="font-code-sm text-code-sm text-muted leading-tight">SGN-8842</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-margin py-6">
+<!-- Breadcrumbs / Back Link -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2 font-meta text-meta text-muted">
+<a class="hover:text-primary transition-colors" href="#">Browse Units</a>
+<span>/</span>
+<a class="hover:text-primary transition-colors" href="#">Unit S-3</a>
+<span>/</span>
+<span class="text-ink font-body-strong">Booking Summary</span>
+</div>
+<a class="inline-flex items-center gap-1 text-primary font-body-strong text-meta hover:underline" href="#">
+<span class="material-symbols-outlined" data-icon="arrow_back" style="font-size: 16px;">arrow_back</span>
+        Back to Unit S-3
+      </a>
+</div>
+<!-- Header & Depot Verification Strip -->
+<div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-5">
+<div>
+<h1 class="font-display text-display text-ink tracking-tight">Review your booking</h1>
+<p class="font-body text-body text-muted mt-0.5">Please verify your reservation details and deposit breakdown before proceeding to payment.</p>
+</div>
+<!-- Facility Security Assurance Tag -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-surface border border-border rounded-xl shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<span class="w-2 h-2 rounded-full bg-status-available"></span>
+<span class="font-body text-meta text-ink-secondary">
+          Depot: <span class="font-body-strong text-ink">Tân Bình Gateway</span>
+<span class="font-code-sm text-code-sm text-muted bg-surface-muted px-1.5 py-0.5 rounded ml-0.5">VN-SGN-01</span>
+<span class="mx-1 text-border-strong">·</span>
+<span class="font-body-strong text-ink">24/7 PIN Keyless Access</span>
+</span>
+</div>
+</div>
+<!-- 2-Column Responsive Layout (60% / 40%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Core Booking Spec & Breakdown (Approx 60% -> 7 cols of 12) -->
+<div class="lg:col-span-7 space-y-gutter">
+<!-- Booking Recap Card with Signature 3px Left Accent -->
+<section class="relative bg-surface border border-border rounded-xl shadow-[0_1px_2px_rgba(15,23,42,0.05)] overflow-hidden">
+<!-- 3px Left Status Bar (Active/Available green) -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-status-available"></div>
+<div class="p-5 pl-6">
+<!-- Header Row -->
+<div class="flex items-start justify-between pb-4 border-b border-divider">
+<div class="flex items-center gap-3">
+<span class="font-code text-price text-ink bg-surface-muted border border-border px-2.5 py-1 rounded-lg">
+                  S-3
+                </span>
+<div>
+<h2 class="font-headline text-headline text-ink">5 m² · Indoor Unit</h2>
+<p class="font-meta text-meta text-muted">Tân Bình depot, Sector A (Ground Level)</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 bg-status-available-tint border border-status-available-border text-status-available font-label text-label px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-size: 14px;">check_circle</span>
+                Reserved for 15:00 min
+              </span>
+</div>
+<!-- Facility Specifications Attributes -->
+<div class="py-3.5 border-b border-divider grid grid-cols-2 sm:grid-cols-4 gap-2 text-meta">
+<div class="flex items-center gap-1.5 text-ink-secondary">
+<span class="material-symbols-outlined text-muted" data-icon="layers">layers</span>
+<span>Ground Floor</span>
+</div>
+<div class="flex items-center gap-1.5 text-ink-secondary">
+<span class="material-symbols-outlined text-muted" data-icon="garage">garage</span>
+<span>Roll-up Door</span>
+</div>
+<div class="flex items-center gap-1.5 text-ink-secondary">
+<span class="material-symbols-outlined text-muted" data-icon="ac_unit">ac_unit</span>
+<span>Climate 22°C</span>
+</div>
+<div class="flex items-center gap-1.5 text-ink-secondary">
+<span class="material-symbols-outlined text-muted" data-icon="pin">pin</span>
+<span>24/7 Digital PIN</span>
+</div>
+</div>
+<!-- Lease Period & Timing Context -->
+<div class="py-4 border-b border-divider flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-subtle -mx-6 px-6">
+<div class="space-y-0.5">
+<span class="font-label text-label text-muted uppercase tracking-wider block">Lease Duration</span>
+<p class="font-body-strong text-body text-ink">
+                  Oct 3, 2026 → Jan 3, 2027 <span class="text-muted font-body font-normal">(3 months commitment)</span>
+</p>
+</div>
+<div class="sm:text-right space-y-0.5">
+<span class="font-label text-label text-muted uppercase tracking-wider block">Access Initiation</span>
+<p class="font-body-strong text-body text-ink flex items-center sm:justify-end gap-1.5">
+<span class="material-symbols-outlined text-primary" data-icon="event_available">event_available</span>
+                  Check-in: 08:00 AM Oct 3
+                </p>
+</div>
+</div>
+<!-- Line-Item Financial Breakdown Table -->
+<div class="pt-4">
+<span class="font-label text-label text-muted uppercase tracking-wider block mb-2.5">Financial & Contract Breakdown</span>
+<table class="w-full text-body">
+<tbody class="divide-y divide-divider font-body">
+<tr>
+<td class="py-2.5 text-ink-secondary">
+                      Base Monthly Rent <span class="text-muted font-meta">(345.000 ₫/mo × 3 mos)</span>
+</td>
+<td class="py-2.5 text-right font-body-strong text-ink tabular-nums">
+                      1.035.000 ₫
+                    </td>
+</tr>
+<tr>
+<td class="py-2.5 text-ink-secondary flex items-center gap-1.5">
+                      Facility Service & Standard Insurance
+                      <span class="font-label text-label bg-surface-muted text-muted px-1.5 rounded">Standard Policy</span>
+</td>
+<td class="py-2.5 text-right text-status-available font-body-strong tabular-nums">
+                      Included (0 ₫)
+                    </td>
+</tr>
+<tr>
+<td class="py-2.5 text-ink-secondary">
+                      Digital Keyless PIN Setup Fee
+                    </td>
+<td class="py-2.5 text-right font-body text-muted tabular-nums">
+<span class="line-through mr-1">50.000 ₫</span> 0 ₫ <span class="text-status-available font-body-strong">(Waived)</span>
+</td>
+</tr>
+<tr class="border-t-2 border-border font-body-strong text-ink">
+<td class="py-3 text-body">Total Contract Value</td>
+<td class="py-3 text-right text-price tabular-nums">1.035.000 ₫</td>
+</tr>
+</tbody>
+</table>
+<!-- Dedicated Deposit Row -->
+<div class="mt-3 p-3.5 bg-status-available-tint border border-status-available-border rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-available" data-icon="lock_clock">lock_clock</span>
+<div>
+<span class="font-body-strong text-body text-ink block">Deposit due now (10% Security)</span>
+<span class="font-meta text-meta text-muted">Secures unit & generates dynamic entrance PIN</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-price text-price text-status-available tabular-nums block">103.500 ₫</span>
+<span class="inline-block font-label text-label text-status-available bg-surface px-1.5 py-0.5 rounded border border-status-available-border">
+                    Refundable upon checkout
+                  </span>
+</div>
+</div>
+</div>
+<!-- Tenant / Lessee Verification Details -->
+<div class="mt-5 pt-4 border-t border-border">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label text-label text-muted uppercase tracking-wider">Lessee Identity & PIN Routing</span>
+<a class="font-meta text-meta text-primary hover:underline" href="#">Edit Profile</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-subtle p-3 rounded-lg border border-border">
+<div>
+<span class="font-meta text-meta text-muted block">Full Name</span>
+<span class="font-body-strong text-body text-ink">Lan Nguyen</span>
+</div>
+<div>
+<span class="font-meta text-meta text-muted block">SMS 2FA & PIN Mobile</span>
+<span class="font-code text-body text-ink tabular-nums">+84 (0) 90 123 4567</span>
+</div>
+<div>
+<span class="font-meta text-meta text-muted block">Contract Email</span>
+<span class="font-body text-body text-ink truncate block">lan.nguyen@example.com</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Terms & Cancellation Policy Card -->
+<section class="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="verified_user">verified_user</span>
+<h3 class="font-headline text-body-strong text-ink">Cancellation Policy & Check-in Protocol</h3>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-3 bg-surface-subtle border border-border rounded-lg space-y-1">
+<span class="font-body-strong text-body text-ink flex items-center gap-1.5">
+<span class="material-symbols-outlined text-status-available" data-icon="assignment_return">assignment_return</span>
+                Full Deposit Refund
+              </span>
+<p class="font-meta text-meta text-muted leading-relaxed">
+                Free cancellation up to 24 hours prior to Oct 3, 2026, 08:00 AM. 100% of the 103.500 ₫ deposit will be returned to your original payment method immediately.
+              </p>
+</div>
+<div class="p-3 bg-surface-subtle border border-border rounded-lg space-y-1">
+<span class="font-body-strong text-body text-ink flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary" data-icon="key">key</span>
+                Self Check-in & PIN Delivery
+              </span>
+<p class="font-meta text-meta text-muted leading-relaxed">
+                Your rolling digital security PIN will be dispatched via SMS & in-app vault immediately upon successful payment of today's deposit.
+              </p>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Sticky Payment Breakdown (Approx 40% -> 5 cols of 12) -->
+<div class="lg:col-span-5 lg:sticky lg:top-[74px] space-y-gutter">
+<div class="bg-surface border border-border rounded-xl p-6 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-4 border-b border-divider">
+<h2 class="font-headline text-headline text-ink">Payment Summary</h2>
+<span class="font-code-sm text-code-sm text-muted bg-surface-muted px-2 py-0.5 rounded">
+              REF: RSV-2026-S3
+            </span>
+</div>
+<!-- Cost Breakdown List -->
+<div class="py-4 space-y-3 font-body">
+<div class="flex justify-between items-center text-ink-secondary">
+<span>Total Lease Value</span>
+<span class="font-body-strong text-ink tabular-nums">1.035.000 ₫</span>
+</div>
+<div class="flex justify-between items-center text-ink-secondary">
+<span class="flex items-center gap-1 text-muted">
+                Remaining due at check-in
+                <span class="material-symbols-outlined text-muted cursor-pointer hover:text-ink" data-icon="info" style="font-size: 15px;" title="Remaining 90% is scheduled on move-in day">info</span>
+</span>
+<span class="font-body text-muted tabular-nums">931.500 ₫</span>
+</div>
+<div class="border-t border-border pt-3 mt-3">
+<div class="flex justify-between items-baseline mb-1">
+<div class="flex flex-col">
+<span class="font-body-strong text-body text-ink">Due Now (Deposit)</span>
+<span class="font-meta text-meta text-status-available font-medium">Secures Unit S-3 instantly</span>
+</div>
+<div class="text-right">
+<span class="font-price-lg text-price-lg text-ink font-semibold tabular-nums">103.500 ₫</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Refundable Badge Indicator -->
+<div class="mb-5 flex items-center justify-between p-2.5 bg-status-available-tint border border-status-available-border rounded-lg">
+<div class="flex items-center gap-1.5 text-status-available">
+<span class="material-symbols-outlined" data-icon="shield" style="font-size: 16px;">shield</span>
+<span class="font-body-strong text-meta">100% Refundable Deposit</span>
+</div>
+<span class="font-label text-label text-status-available bg-surface px-1.5 py-0.5 rounded">Clause 4.2</span>
+</div>
+<!-- Primary CTA Button -->
+<button class="w-full h-[44px] bg-primary hover:bg-[#4338CA] active:scale-[0.98] text-on-primary font-button text-button rounded-xl shadow-[0_1px_2px_rgba(79,70,229,0.35)] flex items-center justify-center gap-2 transition-all" type="button">
+<span>Pay deposit 103.500 ₫</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward" style="font-size: 18px;">arrow_forward</span>
+</button>
+<!-- Meta Footnote -->
+<p class="font-meta text-meta text-muted text-center mt-3">
+            You will pay the remaining rent (931.500 ₫) at check-in on Oct 3, 2026.
+          </p>
+<!-- Trust & Compliance Indicators -->
+<div class="mt-6 pt-5 border-t border-divider space-y-2">
+<div class="flex items-center justify-center gap-2 text-meta text-muted">
+<span class="material-symbols-outlined text-muted" data-icon="lock" style="font-size: 14px;">lock</span>
+<span>256-bit TLS Encrypted</span>
+<span>·</span>
+<span>Instant Gate PIN Delivery</span>
+</div>
+<div class="flex items-center justify-center gap-3 pt-2 opacity-60">
+<span class="font-code-sm text-code-sm text-ink-secondary bg-surface-muted px-2 py-0.5 rounded">VNPay QR</span>
+<span class="font-code-sm text-code-sm text-ink-secondary bg-surface-muted px-2 py-0.5 rounded">MoMo</span>
+<span class="font-code-sm text-code-sm text-ink-secondary bg-surface-muted px-2 py-0.5 rounded">Visa/Mastercard</span>
+<span class="font-code-sm text-code-sm text-ink-secondary bg-surface-muted px-2 py-0.5 rounded">Napas</span>
+</div>
+</div>
+</div>
+<!-- Mini Help Desk Card -->
+<div class="bg-surface border border-border rounded-xl p-4 flex items-center justify-between text-meta">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-muted">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</div>
+<div>
+<span class="font-body-strong text-ink block">Need depot assistance?</span>
+<span class="text-muted">Direct line: +84 28 3822 9999</span>
+</div>
+</div>
+<a class="text-primary font-body-strong hover:underline" href="#">Contact</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Minimal Footer -->
+<footer class="mt-auto border-t border-border bg-surface py-4 text-center font-meta text-meta text-muted">
+<div class="max-w-[1440px] mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="font-body-strong text-ink">StorageHub Logistics Corp.</span>
+<span>·</span>
+<span>Operational Depot SGN-01 (Tân Bình)</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="hover:text-ink transition-colors" href="#">Privacy Terms</a>
+<a class="hover:text-ink transition-colors" href="#">Depot Access Rules</a>
+<a class="hover:text-ink transition-colors" href="#">System Status: Operational</a>
+</div>
+</div>
+</footer>
+</body></html>
