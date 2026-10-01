@@ -1,0 +1,58 @@
+# StorageHub backend - base configuration (all profiles).
+# Secrets (DB / JWT / PayOS) come from env vars only, never committed (AD-5/AD-9).
+# A missing env var makes startup fail fast on the placeholder name.
+
+spring:
+  application:
+    name: storagehub
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      data-source-properties:
+        # Timestamps are UTC by convention: pin the session timezone so
+        # DEFAULT CURRENT_TIMESTAMP writes UTC regardless of server locale,
+        # matching the UTC literals in the dev seed.
+        connectionTimeZone: UTC
+        forceConnectionTimeZoneToSession: true
+
+  jpa:
+    hibernate:
+      # Schema is owned by Flyway (AD-6): no DDL from Hibernate, validate only.
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    # Base location only. Profile dev adds the seed location (V2__seed_demo).
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+# springdoc renders docs ONLY (AD-2) - contracts/openapi.yaml stays the single truth.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+app:
+  jwt:
+    # Consumed from story 1.3 (JWT Bearer, 24h TTL per AD-5).
+    secret: ${JWT_SECRET}
+    ttl-hours: 24
+  payos:
+    # Consumed from epic 2 (AD-9). PayOS credentials via env vars.
+    client-id: ${PAYOS_CLIENT_ID}
+    api-key: ${PAYOS_API_KEY}
+    checksum-key: ${PAYOS_CHECKSUM_KEY}

@@ -1,0 +1,5 @@
+# Non-dev profile: migration location only, stated explicitly so the demo seed
+# can never run outside dev even if base config changes later.
+spring:
+  flyway:
+    locations: classpath:db/migration

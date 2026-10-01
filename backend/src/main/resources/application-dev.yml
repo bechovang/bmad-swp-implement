@@ -1,0 +1,13 @@
+# Dev profile: the ONLY profile that runs the demo seed.
+# Mechanism (Design Notes, story 1.1): Flyway locations - no Java code involved.
+#   classpath:db/migration      -> V1__init_schema (all profiles)
+#   classpath:db/seed/dev       -> V2__seed_demo   (dev only)
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed/dev
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug

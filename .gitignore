@@ -15,3 +15,15 @@ docs/planning/ux-designs/*/.working/regen3.json
 
 # Office lock files
 ~$*
+
+# StorageHub monorepo - build artifacts, runtime uploads, secrets
+backend/storage/
+target/
+node_modules/
+dist/
+.env*
+*.env
+!.env.example
+
+# BMAD skill runtime output (rendered step files, machine-specific paths)
+_bmad/render/

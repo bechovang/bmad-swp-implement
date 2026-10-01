@@ -1,0 +1,131 @@
+# =============================================================================
+# StorageHub API contract - the single source of truth for the API surface (AD-2).
+#
+# Rules of engagement:
+#   - Frozen at sprint start; want a change? PR into this file FIRST, code after.
+#   - The FE generates types and MSW mocks from this file; BE endpoints must match.
+#   - springdoc (backend) renders docs only - generated docs are never the contract.
+#
+# Conventions (AD-7 / AD-8):
+#   - Money: JSON number, whole VND, never float on either side.
+#   - Timestamps: ISO-8601 with offset (stored UTC, displayed Asia/Ho_Chi_Minh).
+#   - Enums: UPPER_SNAKE strings. JSON fields: camelCase. Filter/sort params: kebab-case.
+#   - Lists: ListEnvelope with 1-based page, default pageSize 25.
+#   - Every error - including security layer 401/403 - uses the Error envelope.
+#
+# Story 1.1 ships the skeleton (info + Error + ListEnvelope). Paths land here
+# sprint by sprint; the first ones are the epic 1 auth endpoints.
+# =============================================================================
+openapi: 3.1.0
+info:
+  title: StorageHub API
+  version: 1.0.0
+  description: >
+    REST API of the StorageHub self-service storage management system.
+    All endpoints live under the `/api/v1` prefix. Everything except the
+    explicitly public endpoints requires a JWT Bearer token (AD-5).
+
+servers:
+  - url: /api/v1
+    description: Same-origin (Vite dev proxy / SPA-served deployment)
+
+# Default security: JWT everywhere. Public endpoints (e.g. POST /auth/login)
+# override this with `security: []` when they are added.
+security:
+  - bearerAuth: []
+
+paths: {}
+  # Example of the shape each sprint PR adds (epic 1 will add):
+  #   /auth/login          POST  public
+  #   /auth/register       POST  public, customer-only, accepts no role field
+  #   /auth/forgot-password POST public, generic response (P2)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT with role claim, 24h TTL, no refresh token (AD-5). Logout is the
+        client dropping the token.
+
+  schemas:
+    # ------------------------------------------------------------------ error
+    Error:
+      type: object
+      description: >
+        The one error envelope for every non-2xx response, including security
+        (401/403) and business-rule blocks (409). The FE renders toasts from
+        this data and never parses the human message.
+      required:
+        - code
+        - message
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: Machine-readable, stable, UPPER_SNAKE.
+          pattern: '^[A-Z][A-Z0-9_]*$'
+          examples:
+            - VALIDATION_FAILED
+            - UNIT_UNAVAILABLE
+            - BLOCKED_TRANSITION
+        message:
+          type: string
+          description: Human-readable one-liner (what happened + consequence + next step).
+        fieldErrors:
+          type: array
+          description: Present for validation failures; empty or absent otherwise.
+          items:
+            $ref: '#/components/schemas/FieldError'
+        # Blocked-transition payloads (FR-22 snap-back) add the violated guard
+        # and the missing closing step as structured data when that endpoint
+        # lands - the FE renders the toast from these fields, not the message.
+
+    FieldError:
+      type: object
+      required:
+        - field
+        - message
+      additionalProperties: false
+      properties:
+        field:
+          type: string
+          description: camelCase JSON path of the offending field.
+        message:
+          type: string
+
+    # ------------------------------------------------------------------- list
+    ListEnvelope:
+      type: object
+      description: >
+        Offset pagination envelope for every list endpoint. `page` is 1-based;
+        `pageSize` defaults to 25 (FR-26/28/31). Per-resource usages refine
+        `items` (e.g. ListOfUnits) but never change these four fields.
+      required:
+        - items
+        - page
+        - pageSize
+        - total
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          description: The page's rows. Item schema is refined per endpoint.
+          items: {}
+        page:
+          type: integer
+          minimum: 1
+          description: Current page, 1-based.
+          examples:
+            - 1
+        pageSize:
+          type: integer
+          minimum: 1
+          default: 25
+          description: Rows per page.
+        total:
+          type: integer
+          minimum: 0
+          description: Total rows matching the filter.

@@ -1,0 +1,72 @@
+# =============================================================================
+# StorageHub FE route table - skeleton (story 1.1).
+#
+# Who reads this file:
+#   - FE: the router is generated/checked against this table.
+#   - BE: NOTIFICATIONS.DeepLink values must be relative paths that resolve
+#     here (AD-6) - the FE route owns the path shape.
+#
+# Conventions:
+#   - Paths are FE-relative (no origin, no /api prefix).
+#   - Placeholders in {braces} are path params.
+#   - `landing` is where login drops each role (epic 1 context).
+#
+# Status legend: placeholder = path reserved by story 1.1, screen arrives later.
+# =============================================================================
+
+# Public (no auth) - the only reachable screens without a JWT (AD-5).
+public:
+  - { id: login,           path: /login,           screen: Login,                     status: placeholder }
+  - { id: register,        path: /register,        screen: Register (customer-only),  status: placeholder }
+  - { id: forgot-password, path: /forgot-password, screen: Forgot password (generic), status: placeholder }
+
+# Role landings + nav after login (five-role adaptive shell, epic 1).
+roles:
+  CUSTOMER:
+    landing: /units
+    nav:
+      - { id: units,   path: /units,   screen: Browse Units }
+      - { id: rentals, path: /rentals, screen: My Rentals }
+      - { id: support, path: /support, screen: Support }
+  STAFF:
+    landing: /tasks
+    nav:
+      - { id: tasks,   path: /tasks,   screen: Task Board }
+      - { id: support, path: /support, screen: Support }
+  FACILITY_MANAGER:
+    landing: /overview
+    nav:
+      - { id: overview,    path: /overview,     screen: Facility Overview }
+      - { id: units,       path: /units,        screen: Units }
+      - { id: staffing,    path: /staffing,     screen: Staff & Shifts }
+      - { id: operations,  path: /operations,   screen: Operations }
+      - { id: activity,    path: /activity-log, screen: Activity Log }
+      - { id: escalations, path: /escalations,  screen: Escalations }
+  BUSINESS_OPS:
+    landing: /business-overview
+    nav:
+      - { id: business-overview, path: /business-overview, screen: Business Overview }
+      - { id: policy,            path: /policy,            screen: Policy }
+      - { id: reports,           path: /reports,           screen: Reports }
+  SYSTEM_ADMINISTRATOR:
+    landing: /users
+    nav:
+      - { id: users,          path: /users,          screen: User Management }
+      - { id: login-history,  path: /login-history,  screen: Login History }
+
+# Detail / nested routes. DeepLink targets used by NOTIFICATIONS must appear
+# here (current demo set: /rentals/1, /support/1, /tasks/3, /escalations/1).
+routes:
+  # Cross-role surfaces (every logged-in role) - reserved now, screens land in epic 1
+  # (Notification Center = story 1.6; Profile = avatar menu, story 1.5).
+  - { id: notifications, path: /notifications, screen: Notification Center, roles: [CUSTOMER, STAFF, FACILITY_MANAGER, BUSINESS_OPS, SYSTEM_ADMINISTRATOR], status: placeholder }
+  - { id: profile,       path: /profile,       screen: Profile,               roles: [CUSTOMER, STAFF, FACILITY_MANAGER, BUSINESS_OPS, SYSTEM_ADMINISTRATOR], status: placeholder }
+  # Catalog
+  - { id: unit-detail,     path: /units/{code},        screen: Unit Detail,      roles: [CUSTOMER],            status: placeholder }
+  # Rentals & operations
+  - { id: rental-detail,   path: /rentals/{id},        screen: Rental Detail,    roles: [CUSTOMER],            status: placeholder }
+  - { id: task-detail,     path: /tasks/{id},          screen: Task Detail,      roles: [STAFF],               status: placeholder }
+  - { id: ticket-detail,   path: /support/{id},        screen: Support Ticket,   roles: [CUSTOMER, STAFF],     status: placeholder }
+  - { id: escalation-inbox, path: /escalations/{id},   screen: Escalation Detail, roles: [FACILITY_MANAGER],   status: placeholder }
+  # Admin surfaces
+  - { id: policy-editor,   path: /policy/{version},    screen: Policy Editor,    roles: [BUSINESS_OPS],        status: placeholder }
