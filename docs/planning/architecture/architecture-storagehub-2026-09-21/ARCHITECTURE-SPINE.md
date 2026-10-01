@@ -7,7 +7,7 @@ paradigm: 'Layer-first layered monolith behind a versioned REST contract, consum
 scope: 'StorageHub web app — React SPA + Spring Boot REST tách riêng (PRD §7.1), 5 role, 29 màn, data model V3 (22 entity, 7 state chart), mock payment gateway'
 status: final               # draft · final
 created: '2026-09-21'
-updated: '2026-09-22'
+updated: '2026-09-29'
 binds: [FR-1…FR-41, NFR-1…NFR-8]   # toàn bộ PRD final 2026-09-17 + addendum 2026-09-21 (kể cả NFR-8)
 sources:
   - docs/planning/prds/prd-storagehub-2026-09-17/prd.md
@@ -58,7 +58,7 @@ companions: [reviews/review-adversarial.md, reviews/review-reconcile-prd.md, rev
 
 - **Binds:** FR-1…3, FR-37; NFR-4
 - **Prevents:** trust-the-client; FE tự enforce quyền thật
-- **Rule:** JWT Bearer, role trong claim, TTL 24h, không refresh token, logout = client drop token. Permission matrix Role × Permission cố định, enforce **server-side từng endpoint**; FE chỉ dùng role để render (ẩn/hiện menu). Password hash at rest (BCrypt). LOGIN/LOGIN_FAILED ghi Activity Log (FR-38). **Mỗi request qua filter kiểm tra `users.Status` còn active (cache ngắn) — token của tài khoản bị deactivate/lock/đổi role hết hiệu lực ngay, không đợi hết TTL.** **Đúng 3 endpoint public không cần JWT: `POST /auth/login`, `POST /auth/register`, `POST /auth/forgot-password` (stub trả message generic, không email — FR-3).** **Giá trị nhạy cảm (Access Code) không nằm trong response danh sách; chỉ qua endpoint reveal có permission (cơ chế SensitiveValue, NFR-4).**
+- **Rule:** JWT Bearer, role trong claim, TTL 24h, không refresh token, logout = client drop token. Permission matrix Role × Permission cố định, enforce **server-side từng endpoint**; FE chỉ dùng role để render (ẩn/hiện menu). Password hash at rest (BCrypt). LOGIN/LOGIN_FAILED ghi Activity Log (FR-38). **Mỗi request qua filter kiểm tra `users.Status` còn active (cache ngắn) — token của tài khoản bị deactivate/lock/đổi role hết hiệu lực ngay, không đợi hết TTL.** **Đúng 4 endpoint public không cần JWT: `POST /auth/login`, `POST /auth/register`, `POST /auth/forgot-password` (stub trả message generic, không email — FR-3), và `POST /api/v1/payments/webhook` PayOS (xác thực bằng checksum PayOS qua SDK, không JWT — AD-9; *(sửa 2026-09-29)*).** **Giá trị nhạy cảm (Access Code) không nằm trong response danh sách; chỉ qua endpoint reveal có permission (cơ chế SensitiveValue, NFR-4).**
 
 ### AD-6 — Schema & data ownership
 
@@ -107,11 +107,11 @@ ActivityLog append-only: chỉ INSERT, không tồn tại đường write update
 - **Prevents:** FE parse lỗi/list mỗi endpoint một kiểu
 - **Rule:** Mọi lỗi HTTP theo một envelope duy nhất định nghĩa trong openapi.yaml (machine code + message human + field errors khi validation). Danh sách: offset pagination `{items, page, pageSize, total}`, **`page` 1-based**, mặc định 25 rows (FR-26/28/31). Enum vận chuyển dạng UPPER_SNAKE string; JSON field camelCase. **Envelope áp dụng cho CẢ lỗi tầng security — cài `AuthenticationEntryPoint` / `AccessDeniedHandler` trả đúng envelope (401/403 không lọt body mặc định của Spring). Mọi operation trong openapi.yaml liệt kê đầy đủ response 4xx kèm machine code; business-rule block (FR-5 unit bị chiếm, FR-27 conflict) = 409 + envelope; filter/sort param kebab-case, định nghĩa trong contract.** Blocked-transition (snap-back FR-22) có payload cấu trúc: guard nào vi phạm + tên closing step còn thiếu — FE render toast từ dữ liệu này, không parse message người đọc. **Ngoại lệ duy nhất khỏi JSON: download CSV (FR-31, P2) trả `text/csv` + UTF-8 BOM cho Excel, sinh on-request, không lưu file.**
 
-### AD-9 — Payment gateway sau interface
+### AD-9 — Payment gateway PayOS sau interface *(sửa 2026-09-29 — PayOS thật thay mock)*
 
 - **Binds:** FR-8, FR-9; NFR-5
-- **Prevents:** logic mock payment rải vào controller/UI; khó thay gateway
-- **Rule:** Thanh toán đi qua interface `PaymentGateway` với đúng một impl `MockPaymentGateway` deterministic (kết quả quyết bởi tham số test). FE không bao giờ tự quyết kết quả payment — chỉ hiển thị trạng thái từ API. **Trạng thái Payment là state machine của `PaymentService` duy nhất; đủ 5 trạng thái theo state chart được persist. Tham số outcome là cấu hình server-side của `MockPaymentGateway` (profile dev) — không bao giờ là field trong API request. Mọi mốc thời gian (QR expiry ~5 phút, processing timeout) do BE quyết định on-read — FE chỉ hiển thị đồng hồ đếm từ giá trị server trả; spinner local của modal Processing được phép và không coi là "quyết kết quả". Processing cố định ~1,5–2s cho demo ổn định (NFR-5).**
+- **Prevents:** logic PayOS rải vào controller/UI; khó thay gateway; FE tự quyết kết quả thanh toán
+- **Rule:** Thanh toán đi qua interface `PaymentGateway` với đúng một impl `PayOsPaymentGateway` (SDK `vn.payos:payos-java` 2.0.1; credentials `PAYOS_CLIENT_ID` / `PAYOS_API_KEY` / `PAYOS_CHECKSUM_KEY` qua env vars — team đã có tài khoản my.payos.vn). FE không bao giờ tự quyết kết quả payment — chỉ render QR từ `checkoutUrl` BE trả + poll trạng thái. **Nguồn sự thật xác nhận thanh toán: (1) webhook PayOS — verify checksum qua SDK, endpoint public riêng (AD-5), (2) status query `paymentRequests().get(orderCode)`, (3) Cash — endpoint staff "cash-received" (permission staff, chỉ touchpoint tại quầy). `orderCode` sinh từ PaymentID — idempotent; confirm đến hai lần chỉ một bản ghi thắng (unique constraint). Trạng thái Payment là state machine của `PaymentService` duy nhất; đủ 5 trạng thái theo state chart được persist. Link hết hạn / Cancel → payment FAIL/EXPIRED, không side-effect nghiệp vụ; link expiry do BE trả về — FE chỉ hiển thị đồng hồ đếm. Không dùng Payouts API (hoàn tiền thật out of scope).**
 
 ### AD-10 — File storage & serving (ảnh bản ký) `[ADOPTED 2026-09-22]`
 
@@ -133,7 +133,7 @@ flowchart LR
   CTL --> SVC["service/"]
   SVC --> REPO["repository/"]
   SVC --> GW["«interface» PaymentGateway"]
-  GW -.-> MOCK["MockPaymentGateway"]
+  GW -.-> PAYOS["PayOsPaymentGateway<br/>(vn.payos SDK)"]
   REPO --> DB[("MySQL 8.4.11<br/>Flyway-owned")]
   SVC --> AL["ActivityLog<br/>(append-only)"]
 ```
@@ -152,7 +152,7 @@ Không ai bỏ tầng: SPA không gọi service/repository; controller không g�
 | A11y floor (NFR-2) | Mọi input có label; focus visible; thao tác chính chạy bằng keyboard (kanban có Move ngoài drag); status không chỉ phân biệt bằng màu; target ≥ 40px; focus trap trong modal/drawer; mỗi màn P1 pass một lượt keyboard trước demo |
 | Notification 2 kênh (FR-33/34) | Mutation thành công trả kèm `notification` object trong response → FE bắn toast từ response; bell/unread-count qua query polling riêng (TanStack `refetchInterval`), có endpoint nhẹ unread-count tách khỏi list full; Operations Monitor (P2, nếu build) polling 10–15s theo contract |
 | Deep link | FE sở hữu route table — artifact trong `contracts/` ; BE chỉ ghi `NOTIFICATIONS.DeepLink` theo route đã chốt, relative path (`/rentals/{id}`); KPI drill-down (FR-31/32) encode filter/tab/period vào query params URL |
-| Sensitive & secrets | JWT secret + DB credentials qua env vars, không commit; Access Code reveal theo AD-5; temp password (SYS-01) trả trong response đúng 1 lần — chấp nhận cho demo |
+| Sensitive & secrets | JWT secret + DB credentials + PayOS keys (client/api/checksum) qua env vars, không commit; Access Code reveal theo AD-5; temp password (SYS-01) trả trong response đúng 1 lần — chấp nhận cho demo |
 | Log boundary | Log kỹ thuật (level/format/stacktrace) = SLF4J/logback thường; ActivityLog nghiệp vụ chỉ qua `LogService` (AD-6) — không trộn |
 | Contract print | Nút Print (FR-11/12) render từ `ContentSnapshot` bằng print view FE — không xây PDF service |
 
@@ -167,6 +167,7 @@ Không ai bỏ tầng: SPA không gọi service/repository; controller không g�
 | springdoc-openapi-starter-webmvc-ui | 3.1.1 — docs-only, cấm sinh contract (AD-2); nếu hỏng thì serve Swagger UI trực tiếp từ `contracts/openapi.yaml` |
 | MySQL (+ `flyway-mysql` — bắt buộc từ Flyway 10+) | 8.4.11 LTS |
 | React | 19.3.0 |
+| payos-java (`vn.payos`) | 2.0.1 — SDK PayOS (AD-9); demo chính thức chạy Boot 3.1.4/Java 17 — verify compat Boot 4.1 khi init; ref code: `payos ref code/payos-demo-java-spring` |
 | Vite | 8.3.0 |
 | TypeScript | theo create-vite template hiện hành (~6.0.x) — quyết TS/JS tuần 1 (Deferred) |
 | TanStack Query + Axios | current |
@@ -184,7 +185,7 @@ storagehub/
     src/main/java/com/storagehub/
       controller/   service/   repository/   entity/   dto/
       security/     config/    payment/PaymentGateway.java
-                              payment/MockPaymentGateway.java
+                              payment/PayOsPaymentGateway.java
     src/main/resources/db/migration/      # Flyway — V1 = model V3 (22 entity) · V2__seed_demo
     src/main/resources/application.yml    # profile dev/prod · secrets qua env vars
     storage/                              # Ảnh bản ký runtime (AD-10, gitignore)
@@ -222,7 +223,7 @@ Môi trường dev: Vite devserver proxy `/api` → Boot `:8080`; MySQL local. M
 
 ## Deferred
 
-- **OQ-2 deploy demo** — (a) 1 jar Boot nhúng `frontend/dist` vào `static/` vs (b) docker-compose (mysql + api + nginx). Cả hai nhánh đều same-origin (không CORS) và đều cần **SPA fallback `/* → index.html`**; router (history mode) chốt cùng lúc. Chốt tuần 6–8; không đổi AD nào.
+- **OQ-2 deploy demo** — (a) 1 jar Boot nhúng `frontend/dist` vào `static/` vs (b) docker-compose (mysql + api + nginx). Cả hai nhánh đều same-origin (không CORS) và đều cần **SPA fallback `/* → index.html`**; router (history mode) chốt cùng lúc. **Cả hai nhánh đều cần URL public cho webhook PayOS (AD-9)** — dev local qua ngrok; khi deploy demo cần host public. Chốt tuần 6–8; không đổi AD nào.
 - **FE libs (component + dnd + chart)** — AntD / MUI / Tailwind+shadcn + dnd-kit + thư viện chart: chốt **tuần 1** theo 27 mockup; không chạm contract. Không story FE nào dựng shared component trước lúc chốt.
 - **TypeScript cho FE** — quyết **tuần 1, cùng buổi với component library** (tránh trộn .ts/.jsx); seed theo template create-vite (~6.0.x); nếu 2 FE chưa học TS → JS, contract và các AD không đổi.
 - **Realtime notifications** (websocket/SSE) — pull-based đủ demo (Conventions); nâng cấp chỉ khi còn dư thời gian.

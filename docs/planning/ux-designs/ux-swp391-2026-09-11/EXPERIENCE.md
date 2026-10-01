@@ -2,7 +2,7 @@
 name: StorageHub
 description: Experience spine for StorageHub — one adaptive web shell serving Customer, Staff, Facility Manager, Business Ops, and System Administrator roles across booking, check-in, checkout, extension, operations, policy, support, and administration.
 status: final
-updated: 2026-09-21
+updated: 2026-09-29
 ---
 
 # StorageHub — Experience Spine
@@ -18,7 +18,7 @@ Non-negotiables inherited from planning:
 - **Light mode only.** There is no theme switch to design for.
 - **English UI, VND money.** All microcopy in English; every amount full-precision VND (`1.150.000 ₫`) with tabular numerals per `DESIGN.md` → Typography.
 - **Toast + notification bell.** Immediate results toast; durable events land in the Notification Center. No email, ever.
-- **Mock payment gateway in-app.** A modal (Card / MoMo / VNPay QR) at four touchpoints: 10% deposit at booking, 100% rent at check-in, extension fee, and the extra fee when settlement charges exceed the deposit. Success/fail is explicit; fail always retries.
+- **Real payment via PayOS + desk cash.** A modal at four touchpoints: 10% deposit at booking (QR only — no cash option in online booking), 100% rent at check-in, extension fee, and the extra fee when settlement charges exceed the deposit (QR or cash). QR = a real PayOS payment link rendered in the modal with live status polling; cash = collected at the desk and confirmed by staff ("Cash received"). Success/fail is explicit; fail always retries. *(Revised 2026-09-29 — replaces the mock Card/MoMo/VNPay gateway.)*
 - **Paper contracts at the desk.** Every contract is auto-drafted from the booking and the active policy version — nobody composes one by hand. At check-in the staff prints it, the customer signs, and the staff photographs the signed copy into the rental. Extensions repeat the ritual as a paper addendum. No rental runs without a signed contract on file.
 - **Kanban is the staff surface.** To do / In progress / Done for Check-in, Checkout, Cleaning, and Support work.
 - **Back-office is dashboard-first.** KPI cards + charts first, data tables after.
@@ -46,7 +46,7 @@ The top bar carries, left to right: logo mark + wordmark, role menu (links per r
 | Browse Units | Nav (default landing) | Flagship: filter bar (type / size / start date / duration) + unit card grid (photo, size, price, status). No calendar availability view, no floor map. |
 | Unit Detail | Browse card | Photos, spec rows (dimensions, floor, access, security), price breakdown (rent × duration, 10% deposit), Reserve CTA. |
 | Booking Summary | Unit Detail | Review before paying: unit, dates, line-item totals, deposit due now; a note states the contract is drafted from these exact terms and signed at check-in. Opens Payment Modal. |
-| Payment Modal | Booking Summary / Extend / Check-in Task | Mock gateway: Card / MoMo / VNPay QR; success/fail states; retry. |
+| Payment Modal | Booking Summary / Extend / Check-in Task / Checkout Task | PayOS QR rendered in the modal (live status polling) or cash confirmed by staff at the desk; success/fail states; retry. |
 | My Rentals | Nav | Active and past rentals as cards with status badges and next-action buttons. |
 | Rental Detail | My Rentals | One rental: unit, dates, payment history, deposit status, contract chain (original + addenda, signed copies viewable); actions — Check-in, Extend, Checkout Request, New Support. |
 | Check-in | Rental Detail | Customer-side arrival pass: reservation code (mono, large), desk instructions, what to bring — ID for signing the contract, payment for 100% of rent. |
@@ -163,7 +163,7 @@ Sample strings for key moments:
 - **Contract drafted (after deposit):** "Contract CT-1042 drafted from your booking and Rental Policy v3. You'll sign it at check-in."
 - **Contract signed (check-in):** "Contract CT-1042 signed and filed. Access code sent to your notifications."
 - **Addendum reminder (unsigned):** "Addendum CT-1042-A1 is still unsigned. Sign at the desk — the new checkout date Oct 18 already applies."
-- **Payment fail (any touchpoint):** "Payment failed. No money was taken. Retry with Card, or switch to MoMo / VNPay QR."
+- **Payment fail (any touchpoint):** "Payment failed. No money was taken. Retry the QR, or switch to cash at the desk."
 - **Extension blocked by conflict:** "Can't extend to Oct 20 — M-2 has a reservation starting Oct 19. Latest possible checkout is Oct 18. Pick another date."
 - **Shift conflict blocked:** "Minh is already assigned Morning shift, Zone B on Oct 12. Choose another staff member or another shift."
 - **Policy validation fail:** "Policy not saved. Late-checkout fee 15% exceeds the 10% cap in Rental Policy v3. Fix the value, or edit the cap first."
@@ -181,7 +181,7 @@ Behavioral. Visual specs live in `DESIGN.md` → Components.
 |---|---|---|
 | Filter bar | Browse, tables, Reports | Closed dropdowns (type / size / start date / duration on Browse) + Search button. Changing filters re-queries on Search, not per keystroke; the results-count chip ("6 units available · live") refreshes with each fetch. Active filters persist for the session and are echoed as removable chips in the empty state. |
 | Unit card | Browse grid | Photo + mono code chip, size/type chips, feature line, price, availability line with status dot, Book. The 3px left bar encodes status (available green / buffer amber). Buffer cards say "Available Oct 5 · cleaning buffer" and keep a secondary Book. Click anywhere except Book → Unit Detail. Cards re-query against the rental calendar + turnover buffer, so the displayed start dates are the promise. |
-| Payment modal | 3 touchpoints | See below. |
+| Payment modal | 4 touchpoints | See below. |
 | Contract step | Check-in Task, Contract-signature card | Read-only preview of the auto-drafted contract — mono code, parties, unit, dates, rent/deposit lines, and the policy version it locks — followed by Print, a signed-copy photo capture tile, and Attach. Nothing in a contract is editable anywhere in the UI; the flow's completing action (access-code handover, addendum completion) stays disabled until a signed photo is attached. |
 | Kanban board | Staff Task Board | Columns To do / In progress / Done; cards typed Check-in / Checkout / Cleaning / Support / Contract with type-colored left bar. Drag to move; keyboard alternative via per-card Move buttons. Click card → task screen. |
 | KPI cards | All dashboards | Row of 3–4 label + tabular value + delta chip. Click-through drills into the backing table filtered to the same slice (e.g. occupancy 87% → Unit Management filtered to Rented). |
@@ -196,7 +196,7 @@ Behavioral. Visual specs live in `DESIGN.md` → Components.
 
 **Dashboards (KPI drill-down).** All three manager-facing dashboards (Facility Overview, Business Overview, Operations Monitor) follow the same contract: a KPI row of 3–4 cards, a chart block, then the backing table — in that order. Every KPI is clickable and drills into its table pre-filtered to the same slice (occupancy 87% → Unit Management filtered to Rented; surcharges this quarter → Reports on the Surcharges tab for the same period). The dashboard never shows a number the user cannot reach the rows behind.
 
-**Payment modal (mock gateway).** Shared by all three touchpoints — 10% deposit (Booking Summary), 100% rent (Check-in Task), extension fee (Extend). Anatomy: header names what is being paid and the amount in `{typography.price-lg}`; method segmented control: **Card** (mock number/expiry/CVC form with inline validation), **MoMo** (phone + mock OTP step), **VNPay QR** (rendered QR). Pay button → simulated processing (~1.5–2s spinner state) → success (check tile, amount, consequence line) or fail (error tile, "No money was taken", Retry + Switch method). QR panels show a countdown (~5 min) after which the modal returns to method selection. Note: Method-step details and timings are confirmed at planning. Booking Confirmation is not a separate screen — the success state of this modal ends flow F1, and its "View rental" action deep-links to Rental Detail.
+**Payment modal (PayOS QR + desk cash).** Shared by all four touchpoints — 10% deposit (Booking Summary, QR only), 100% rent (Check-in Task), extension fee (Extend), extra fee (Checkout settlement). Anatomy: header names what is being paid and the amount in `{typography.price-lg}`; method segmented control: **PayOS QR** (backend creates a real payment link; the modal renders the QR and polls status until the PayOS webhook confirms — a countdown from the link's expiry, after which the modal returns to method selection with nothing charged) and **Cash at desk** (staff-present touchpoints only: rent at check-in, extension at the contract-signature desk, extra fee at settlement — selecting cash parks the payment as pending until staff presses "Cash received"; no booking/extension state moves until then). Pay/confirm → awaiting-confirmation state (polling spinner, no navigation away, explicit Cancel cancels the link and returns to method select) → success (check tile, amount, consequence line) or fail (error tile, "No money was taken", Retry + Switch method). Booking Confirmation is not a separate screen — the success state of this modal ends flow F1, and its "View rental" action deep-links to Rental Detail. *(Revised 2026-09-29.)*
 
 **Kanban card.** Unit code (mono), task type chip, customer name / time slot, due chip. Drag between columns updates task state; moving a Check-in/Checkout card into Done is blocked until the task screen's closing steps (payment / settlement) are complete — the card snaps back with a toast naming the missing step. Support cards carry the Escalate action. Done cards render muted. Note: The snap-back-on-incomplete rule is confirmed at planning.
 
@@ -233,11 +233,11 @@ Behavioral. Visual specs live in `DESIGN.md` → Components.
 
 | State | Treatment |
 |---|---|
-| Method select | Card form / MoMo phone+OTP / VNPay QR panel; amount + payee visible; Pay button with the exact amount on it. |
-| Processing | Spinner state ~1.5–2s; button disabled; no back navigation mid-charge. |
-| Success | Check tile, amount, consequence line ("Unit S-3 is reserved" / "Rental active" / "New checkout: Oct 18") → toast with amount → underlying screen state flips (card bar to Reserved, rental to active, date moves, receipt appended to Rental Detail). |
+| Method select | PayOS QR panel — amount + payee visible, Pay button with the exact amount on it; "Cash at desk" option on staff-present touchpoints only (never on Booking Summary). |
+| Awaiting confirmation | QR: modal polls payment status until the PayOS webhook confirms; Cash: payment parked pending until staff presses "Cash received". Button disabled; no back navigation mid-charge; explicit Cancel cancels the payment link and returns to method select. |
+| Success | Check tile, amount, consequence line ("Unit S-3 is reserved" / "Rental active" / "New checkout: Oct 18") → toast with amount → underlying screen state flips (card bar to Reserved, rental to active, date moves, receipt appended to Rental Detail). Receipt names the method (QR / Cash). |
 | Fail | Error tile, "No money was taken", Retry + Switch method; no state change anywhere; after two fails, switching method is suggested explicitly. |
-| QR expiry | Countdown ends → returns to method select with a note; nothing charged. |
+| Link expiry | Countdown ends → returns to method select with a note; the link is cancelled; nothing charged. |
 
 Never a dead end, never an ambiguous spinner.
 
@@ -279,7 +279,7 @@ Modest floor, per planning — no WCAG AA mandate, light mode only:
 
 1. Lan logs in and lands on Browse Units; she sets Indoor / 5 m² / Oct 3 / 3 months and searches.
 2. The grid returns 6 cards; she opens Unit Detail for S-3, sees the full breakdown (rent × 3 = 1.035.000 ₫, deposit 103.500 ₫ refundable).
-3. Booking Summary restates every line → Payment Modal → she pays the 10% deposit by MoMo; success state confirms "Unit S-3 is reserved."
+3. Booking Summary restates every line → Payment Modal → she pays the 10% deposit by PayOS QR; success state confirms "Unit S-3 is reserved."
 4. On move-in day she opens Rental Detail → Check-in, shows the reservation code at the desk; Minh validates it, she pays 100% of rent through the Payment Modal there, signs the printed contract CT-1042, Minh photographs the signed copy into the rental, and she receives her access code — the rental is active.
 5. Mid-term she files a support request (New Support: sticky door) about the unit; it routes to the on-shift staff by unit + shift and resolves; she sees the resolution in the Support List drawer and a bell notification.
 6. She tries to Extend to Oct 20 — **blocked**: the next reservation starts Oct 19; the screen shows the boundary and she picks Oct 18, pays the extension fee in the Payment Modal; the new checkout date lands on Rental Detail with a receipt, addendum CT-1042-A1 awaits her paper signature at the desk (due in 7 days), and she signs it on her next visit.

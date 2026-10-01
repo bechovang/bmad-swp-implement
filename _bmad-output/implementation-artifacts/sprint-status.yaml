@@ -1,0 +1,105 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-02-2026 01:21
+last_updated: 10-02-2026 01:21
+project: bmad swp
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-monorepo-starter-template-theo-structural-seed: backlog
+  1-2-be-foundations-error-list-envelope-logservice-append-only: backlog
+  1-3-auth-backend-jwt-permission-matrix-login-audit: backlog
+  1-4-fe-design-token-system-control-room-base-primitives: backlog
+  1-5-adaptive-shell-5-role-auth-screens-fe: backlog
+  1-6-toast-bell-notification-center: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-pricingengine-unit-detail-bảng-giá-minh-bạch: backlog
+  2-2-browse-units-availability-theo-turnover-buffer: backlog
+  2-3-reserve-re-check-booking-summary: backlog
+  2-4-payment-backend-payospaymentgateway: backlog
+  2-5-my-rentals-check-in-pass-rental-detail-cơ-bản: backlog
+  2-6-payment-modal-fe-qr-payos-tại-deposit-khép-flow-1: backlog
+  2-7-no-show-expired-exactly-once-lazy: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-auto-draft-contract-khi-deposit-thành-công: backlog
+  3-2-kanban-task-board: backlog
+  3-3-check-in-task-validate-reservation-thu-100-rent-qr-cash: backlog
+  3-4-contract-ritual-access-code-kích-hoạt-rental-contract-chain: backlog
+  3-5-snap-back-chống-done-ảo: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-màn-extend-conflict-boundary: backlog
+  4-2-extension-fee-top-up-cọc-payment-ngày-hiệu-lực: backlog
+  4-3-addendum-trail-7-ngày-đeo-bám-desk-ritual-chain: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-tạo-route-support-ticket: backlog
+  5-2-support-ticket-xử-lý-resolve-escalate: backlog
+  5-3-severity-decision-relocation: backlog
+  5-4-support-list-detail-drawer-khách: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-checkout-request: backlog
+  6-2-checkout-task-nhận-kho-inspection: backlog
+  6-3-settlement-charge-preview-extra-fee-đóng-rental: backlog
+  6-4-settlement-waiver-trong-trần-waiver_cap-p2: backlog
+  6-5-cleaning-hoàn-tất-từ-card-turnover-buffer: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-unit-management-edit-drawer: backlog
+  7-2-staff-shifts-conflict-detection: backlog
+  7-3-activity-log-append-only-view: backlog
+  7-4-facility-overview-kpi-drill-down: backlog
+  7-5-operations-monitor-live-view-p2: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-policy-management-validate-trước-khi-lưu: backlog
+  8-2-discount-theo-unit-type-p2: backlog
+  8-3-business-overview-reports-kpi-drill-down: backlog
+  8-4-export-csv-reports-p2: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-user-management-sys-01: backlog
+  9-2-login-activity-history-sys-02: backlog
+  9-3-permission-matrix-read-only-p2: backlog
+  epic-9-retrospective: optional

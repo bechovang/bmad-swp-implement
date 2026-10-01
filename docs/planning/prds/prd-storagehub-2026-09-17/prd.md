@@ -2,7 +2,7 @@
 title: StorageHub — Product Requirements Document
 status: final
 created: 2026-09-17
-updated: 2026-09-21
+updated: 2026-09-29
 ---
 
 # PRD: StorageHub
@@ -72,7 +72,7 @@ Thành công của dự án (capstone): demo trọn 5 user journeys chính khôn
 **UJ-1. Lan đặt kho, nhận kho, dùng và trả kho — vòng đời khách hàng trọn vẹn.** *(swimlane Flow 1 + 2 + 3 phần khách)*
 - **Persona + context:** Lan cần cất đồ 3 tháng, muốn tự xử như đặt khách sạn.
 - **Entry state:** đã đăng nhập, đứng ở Browse Units.
-- **Path:** lọc Indoor/5 m²/Oct 3/3 tháng → mở Unit Detail S-3 thấy đủ bảng giá → Booking Summary duyệt từng dòng → trả cọc 10% (103.500 ₫) qua MoMo → ngày nhận kho: mở Rental Detail → Check-in Pass mang mã đặt chỗ → tại quầy trả 100% tiền thuê, ký hợp đồng CT-1042, nhận access code → giữa kỳ gửi support (cửa kẹt) → gia hạn bị chặn Oct 19 (reservation kế) → chọn Oct 18, trả 690.000 ₫ + 69.000 ₫ top-up cọc (cọc giữ lên 172.500 ₫), ký phụ lục CT-1042-A1 → gửi Checkout Request.
+- **Path:** lọc Indoor/5 m²/Oct 3/3 tháng → mở Unit Detail S-3 thấy đủ bảng giá → Booking Summary duyệt từng dòng → trả cọc 10% (103.500 ₫) qua PayOS QR → ngày nhận kho: mở Rental Detail → Check-in Pass mang mã đặt chỗ → tại quầy trả 100% tiền thuê, ký hợp đồng CT-1042, nhận access code → giữa kỳ gửi support (cửa kẹt) → gia hạn bị chặn Oct 19 (reservation kế) → chọn Oct 18, trả 690.000 ₫ + 69.000 ₫ top-up cọc (cọc giữ lên 172.500 ₫), ký phụ lục CT-1042-A1 → gửi Checkout Request.
 - **Climax:** ngày trả, settlement receipt trên Rental Detail: "Refund 132.500 ₫ after damage fee 40.000 ₫" — lời hứa cọc lúc đặt được giữ đến đồng.
 - **Resolution:** rental đóng, receipt xem được mãi; notification xác nhận từng bước suốt hành trình.
 - **Edge case:** thanh toán fail — không đụng gì đến trạng thái, luôn có retry/đổi phương thức; unit bị giành giữa chừng → bounce về lưới + toast gợi ý unit tương tự.
@@ -136,7 +136,7 @@ Thành công của dự án (capstone): demo trọn 5 user journeys chính khôn
 - **Extension** — Yêu cầu gia hạn thuộc một Rental. Ngày checkout mới có hiệu lực **ngay sau khi thanh toán phí gia hạn**; sinh **Addendum** (phụ lục auto-draft sau thanh toán — không có đường "soạn nhầm"; Voided chỉ khi khách trả kho sớm trước khi ký, staff đóng hồ sơ, không soạn lại — 2026-09-22). Trạng thái: PENDING_PAYMENT → APPLIED (đóng modal chưa trả = không ghi nhận; không có CANCELLED trong v1). Cọc đang giữ được top-up lên mức mới khi gia hạn (FR-16, 2026-09-22).
 - **Contract** — Hợp đồng gốc auto-draft (từ Reservation + Rental Policy version), không ai soạn tay, không chỉnh sửa được. Mã `CT-`; trạng thái (6 giá trị): Draft → Printed → Signed → Active → Closed, kèm Superseded (bị thay bởi re-draft). AWAITING_SIGNATURE chuyển sang vòng đời riêng của **Addendum** (V3 2026-09-18).
 - **Addendum** — Bản ghi riêng (entity `CONTRACT_ADDENDUMS` — V3 2026-09-18) thuộc **Contract** (`CT-…-A1`), sinh từ Extension; ký giấy tại quầy trong 7 ngày; là giấy tờ thủ tục, **không hold Unit**. Trạng thái (4 giá trị, chốt 2026-09-18): AWAITING_SIGNATURE → Signed (khi có ảnh bản ký); hai lối đóng hồ sơ không ký: **Expired** (khách không đến ký — staff đóng sau khi hết nhắc) và **Voided** (staff huỷ chủ động: soạn nhầm → soạn lại bản ghi mới, hoặc khách trả kho sớm).
-- **Payment** — Giao dịch qua Payment Modal giả lập tại 4 touchpoint: Deposit (booking), 100% rent (check-in), Extension fee, và Extra fee (phần chênh khi Settlement Charge vượt Deposit — trả trước khi Rental đóng). Phương thức Card / MoMo / VNPay QR.
+- **Payment** — Giao dịch tại 4 touchpoint: Deposit (booking), 100% rent (check-in), Extension fee, và Extra fee (phần chênh khi Settlement Charge vượt Deposit — trả trước khi Rental đóng). Hai phương thức *(quyết định PayOS 2026-09-29 — thay mock 3 phương thức)*: **QR PayOS** — payment link thật (SDK `vn.payos:payos-java`), khách quét QR ngân hàng ngay trong modal, xác nhận qua webhook + checksum; **Cash** — thu tại quầy, staff bấm "Cash received" xác nhận. **Deposit (booking online) = QR only** — booking online không cho chọn Cash; Cash chỉ ở touchpoint có staff tại quầy (100% rent, Extension fee, Extra fee).
 - **Settlement** — Bảng tất toán lúc checkout: Deposit ± các **Settlement Charge** → hoàn / thu thêm. Settlement receipt là biên bản (khách không ký thêm gì).
 - **Settlement Charge** — Một khoản phí khấu trừ (vd damage fee) — **bắt buộc có reason**.
 - **Inspection** — Checklist tình trạng Unit lúc checkout (tường, cửa, sàn, vệ sinh).
@@ -201,14 +201,14 @@ Thành công của dự án (capstone): demo trọn 5 user journeys chính khôn
 
 ### 4.3 Payment — mock gateway *(realizes UJ-1, UJ-2)*
 
-**Description:** Một modal dùng chung 4 touchpoint (Deposit, 100% rent, Extension fee, Extra fee khi charge vượt Deposit), 3 phương thức VN, trạng thái tường minh, không bao giờ dead-end.
+**Description:** Một modal dùng chung 4 touchpoint (Deposit, 100% rent, Extension fee, Extra fee khi charge vượt Deposit), 2 phương thức (QR PayOS + Cash tại quầy), trạng thái tường minh, không bao giờ dead-end *(sửa PayOS 2026-09-29)*.
 
-#### FR-8: Payment Modal 3 phương thức × 5 trạng thái (P1)
-[User] thanh toán qua Card (form + validation inline) / MoMo (phone + OTP giả lập) / VNPay QR (QR + đếm ngược ~5 phút); processing ~1.5–2s; success hiển thị check tile + amount + consequence line; fail hiển thị "No money was taken" + Retry + Switch method.
-- **Consequences:** fail không đổi trạng thái gì anywhere; QR hết hạn → về method select, không tính tiền; sau 2 lần fail gợi ý đổi phương thức rõ ràng. Modal dùng chung cho cả touchpoint Extra fee khi Settlement Charge vượt Deposit (FR-18); trong trạng thái Processing, modal không đóng/điều hướng được (chống bỏ cuộc giữa charging).
+#### FR-8: Payment Modal — QR PayOS + Cash tại quầy (P1) *(sửa 2026-09-29 — thay mock 3 phương thức)*
+[User] thanh toán qua **QR PayOS** — BE tạo payment link thật, modal render QR từ `checkoutUrl` + poll trạng thái tới khi webhook xác nhận (verify checksum), đếm ngược theo expiry của link do BE trả; hoặc **Cash** — chỉ touchpoint có staff tại quầy (100% rent, Extension fee, Extra fee): chọn Cash tạo payment `PENDING_CASH`, staff bấm "Cash received" xác nhận nhận tiền. **Deposit (booking online) = QR only** — không có lựa chọn Cash ở Booking Summary. Success hiển thị check tile + amount + consequence line; fail/timeout hiển thị "No money was taken" + Retry + Switch method.
+- **Consequences:** fail/hết hạn link không đổi trạng thái gì anywhere (link bị cancel, không tính tiền); sau 2 lần fail gợi ý đổi phương thức rõ ràng. Cash `PENDING_CASH` — nghiệp vụ tương ứng (RESERVED / Rental active / EndDate mới / Settlement khép) chỉ tiến khi staff confirm. Modal dùng chung cho cả touchpoint Extra fee khi Settlement Charge vượt Deposit (FR-18); trong trạng thái awaiting confirmation, modal khóa điều hướng nhưng có nút Cancel tường minh (cancel link + về method select).
 
 #### FR-9: Payment success ghi sổ (P1)
-[Hệ thống] ghi Receipt vào Rental Detail + toast + bell entry; flip trạng thái tương ứng (Reservation confirmed, Rental active, ngày checkout mới).
+[Hệ thống] xác nhận thanh toán từ đúng một trong hai nguồn: webhook PayOS (đã verify checksum) hoặc staff cash-confirm; ghi Receipt (ghi rõ method QR/CASH) vào Rental Detail + toast + bell entry; flip trạng thái tương ứng (Reservation confirmed, Rental active, ngày checkout mới).
 - **Consequences:** mỗi payment thành công sinh đúng 1 receipt xem được vĩnh viễn.
 
 ### 4.4 Contracts — nghi thức giấy có vết *(realizes UJ-1, UJ-2)*
@@ -386,7 +386,7 @@ Password hash at rest; mọi route app yêu cầu đăng nhập; role enforcemen
 - **Nguồn:** entity model (SensitiveValue), EXPERIENCE.md.
 
 #### NFR-5: Hiệu năng (quy mô demo)
-Tính đúng của availability query ưu tiên hơn tốc độ; trang load < 2s trên môi trường demo với seed data; mock gateway deterministic (processing cố định ~1.5–2s để demo ổn định). [ASSUMPTION: số liệu quy mô demo cho capstone, không phải SLA production — cân lại khi biết môi trường deploy, xem §9 OQ-2]
+Tính đúng của availability query ưu tiên hơn tốc độ; trang load < 2s trên môi trường demo với seed data. Thanh toán qua PayOS thật (không còn mock gateway — sửa 2026-09-29): demo yêu cầu internet + credentials PayOS qua env vars + URL public cho webhook (xem §9 OQ-2). [ASSUMPTION: số liệu quy mô demo cho capstone, không phải SLA production — cân lại khi biết môi trường deploy, xem §9 OQ-2]
 - **Nguồn:** capstone stakes + OQ-2.
 
 #### NFR-6: Data integrity
@@ -403,7 +403,7 @@ Skeleton khớp layout (swap không layout shift); empty state factual + echo fi
 
 ## 6. Non-Goals (Explicit)
 
-- **Không** tích hợp thanh toán thật / hoàn tiền thật — Payment Modal là mock gateway deterministic; refund là receipt hiển thị + record, không có gateway hoàn tiền.
+- **Không** hoàn tiền thật — PayOS chỉ thu (payment link một chiều, không dùng Payouts); refund tại Settlement là receipt hiển thị + record, không có gateway hoàn tiền. *(Sửa 2026-09-29: thanh toán thật qua PayOS QR + Cash tại quầy giờ **có** trong scope — trước đây là mock gateway.)*
 - **Không** gửi email — phản hồi chỉ toast + bell.
 - **Không** dark mode, không mobile native — web responsive light-only.
 - **Không** calendar availability view / floor map — availability chỉ qua card grid + buffer dates (quyết định flagship).
@@ -415,7 +415,7 @@ Skeleton khớp layout (swap không layout shift); empty state factual + echo fi
 ## 7. MVP Scope
 
 ### 7.1 In Scope (P1)
-- 28/29 màn theo UX package ở mức P1 — Operations Monitor (F5-04) là P2 (§7.2); đủ chạy trọn 6 UJ: Identity (Login/Register), Discovery & Booking (gồm no-show expiry), Payment mock, Contracts (ritual + addendum), Check-in, Extension, Checkout & Settlement, Turnover (cleaning từ card), Task Board, Support & Escalation (kèm Relocation), Facility Management (unit guards, shifts conflict, activity log), Policy (gồm Buffer + Deposit %) + Business Overview + Reports, Customer surfaces (My Rentals / Check-in Pass / Support List), System Administration (SYS-01 User Management + SYS-02 Login & Activity History — FR-37/38), Toast + Bell + Notification feed.
+- 28/29 màn theo UX package ở mức P1 — Operations Monitor (F5-04) là P2 (§7.2); đủ chạy trọn 6 UJ: Identity (Login/Register), Discovery & Booking (gồm no-show expiry), Payment PayOS (QR thật) + Cash tại quầy, Contracts (ritual + addendum), Check-in, Extension, Checkout & Settlement, Turnover (cleaning từ card), Task Board, Support & Escalation (kèm Relocation), Facility Management (unit guards, shifts conflict, activity log), Policy (gồm Buffer + Deposit %) + Business Overview + Reports, Customer surfaces (My Rentals / Check-in Pass / Support List), System Administration (SYS-01 User Management + SYS-02 Login & Activity History — FR-37/38), Toast + Bell + Notification feed.
 - Backend REST thật cho toàn bộ nghiệp vụ trên (FE/BE tách riêng); dữ liệu demo theo mock-data chuẩn (Lan/Minh/Hằng/Tuấn; S-3, M-2, M-5; BK-1042, RT-0871, SR-0032, CT-1042, CT-1042-A1).
 
 ### 7.2 Out of Scope for MVP (P2 — cắt không phá flow)
@@ -486,3 +486,4 @@ Reconciliation với `ERD_Statechart_LaTeX` (2026-09-17/18) phát hiện các l�
 - §5 NFR-5 — ngưỡng hiệu năng là quy mô demo, cân lại khi chốt môi trường deploy (OQ-2).
 - §8 SM-3 — ngưỡng ">5 FR phải tự bịa" là heuristic để đo chất lượng PRD phục vụ hạ nguồn.
 - §2.2 — browse yêu cầu đăng nhập (Non-User "khách vãng lai") — suy ra từ thiết kế UX, không có màn public browse.
+- §4.3 FR-8/FR-9 — thanh toán thật PayOS QR + Cash tại quầy thay mock gateway (2026-09-29); team đã có tài khoản PayOS (my.payos.vn) — credentials qua env vars; webhook cần URL public khi deploy demo (OQ-2); booking online không cho chọn Cash (Deposit = QR only).
