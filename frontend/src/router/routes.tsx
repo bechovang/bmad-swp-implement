@@ -10,7 +10,6 @@ import { ForbiddenPage } from '../pages/error/ForbiddenPage'
 import { NotFoundPage } from '../pages/error/NotFoundPage'
 import {
   SupportPage,
-  TaskBoardPage,
   FacilityOverviewPage,
   StaffingPage,
   OperationsPage,
@@ -31,6 +30,7 @@ import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
 import { BookingSummaryPage } from '../pages/booking/BookingSummaryPage'
 import { MyRentalsPage } from '../pages/rentals/MyRentalsPage'
 import { RentalDetailPage } from '../pages/rentals/RentalDetailPage'
+import { TaskBoardPage } from '../pages/staff/TaskBoardPage'
 
 import { RootRedirect } from './RootRedirect'
 

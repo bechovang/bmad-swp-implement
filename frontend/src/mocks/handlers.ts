@@ -16,6 +16,11 @@ import type {
   PaymentStatus,
 } from '../types/payment'
 import type { ContractDto } from '../types/contract'
+import type {
+  TaskDto,
+  CreateTaskRequest,
+  UpdateTaskStatusRequest,
+} from '../types/task'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -624,7 +629,202 @@ export const handlers = [
 
     return HttpResponse.json(newContract, { status: 200 })
   }),
+
+  // ------------------------------------------------------------ Tasks (3.2)
+  http.get('/api/v1/tasks', ({ request }) => {
+    const url = new URL(request.url)
+    const workDate = url.searchParams.get('workDate')
+    const type = url.searchParams.get('type')
+    const status = url.searchParams.get('status')
+    const assignedStaffIdStr = url.searchParams.get('assignedStaffId')
+    const assignedStaffId = assignedStaffIdStr ? parseInt(assignedStaffIdStr, 10) : null
+
+    let result = [...mockTasksList]
+
+    if (workDate) {
+      result = result.filter((t) => t.workDate === workDate)
+    }
+    if (type) {
+      result = result.filter((t) => t.type === type)
+    }
+    if (status) {
+      result = result.filter((t) => t.status === status)
+    }
+    if (assignedStaffId) {
+      result = result.filter((t) => t.assignedStaffId === assignedStaffId)
+    }
+
+    return HttpResponse.json(result, { status: 200 })
+  }),
+
+  http.get('/api/v1/tasks/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const task = mockTasksList.find((t) => t.id === id)
+    if (!task) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Task ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(task, { status: 200 })
+  }),
+
+  http.patch('/api/v1/tasks/:id/status', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const task = mockTasksList.find((t) => t.id === id)
+    if (!task) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Task ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+
+    const body = (await request.json()) as UpdateTaskStatusRequest
+    if (!body || !body.status) {
+      return HttpResponse.json(
+        {
+          code: 'VALIDATION_FAILED',
+          message: 'Status is required',
+          fieldErrors: [{ field: 'status', message: 'Status must not be null' }],
+        },
+        { status: 400 }
+      )
+    }
+
+    task.status = body.status
+    return HttpResponse.json(task, { status: 200 })
+  }),
+
+  http.post('/api/v1/tasks', async ({ request }) => {
+    const body = (await request.json()) as CreateTaskRequest
+    const newId = Math.max(...mockTasksList.map((t) => t.id), 0) + 1
+
+    const newTask: TaskDto = {
+      id: newId,
+      type: body.type,
+      refCode: body.refCode || null,
+      assignedStaffId: body.assignedStaffId || 2,
+      assignedStaffName: 'Minh Tran',
+      workDate: body.workDate,
+      status: body.status || 'TODO',
+      unitCode: body.unitCode || null,
+      customerName: body.customerName || null,
+      dueDate: body.dueDate || body.workDate,
+      timeSlot: body.timeSlot || 'Morning',
+      title: body.title || `${body.type} Task`,
+      description: body.description || null,
+    }
+
+    mockTasksList.push(newTask)
+    return HttpResponse.json(newTask, { status: 201 })
+  }),
 ]
+
+export const INITIAL_TASKS: TaskDto[] = [
+  {
+    id: 1,
+    type: 'CHECK_IN',
+    refCode: 'BK-1042',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-03',
+    status: 'DONE',
+    unitCode: 'S-3',
+    customerName: 'Lan Nguyen',
+    dueDate: '2026-10-03',
+    timeSlot: 'Morning',
+    title: 'Check-in BK-1042',
+    description: 'Customer Lan Nguyen checking into Unit S-3',
+  },
+  {
+    id: 2,
+    type: 'CONTRACT',
+    refCode: 'CT-1042-A1',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-16',
+    status: 'DONE',
+    unitCode: 'S-3',
+    customerName: 'Lan Nguyen',
+    dueDate: '2026-10-16',
+    timeSlot: 'Morning',
+    title: 'Contract Signature CT-1042-A1',
+    description: 'Contract and addendum signing at front desk',
+  },
+  {
+    id: 3,
+    type: 'CHECKOUT',
+    refCode: 'RT-0871',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-18',
+    status: 'DONE',
+    unitCode: 'S-3',
+    customerName: 'Lan Nguyen',
+    dueDate: '2026-10-18',
+    timeSlot: 'Morning',
+    title: 'Checkout RT-0871',
+    description: 'Unit inspection and key return',
+  },
+  {
+    id: 4,
+    type: 'CLEANING',
+    refCode: 'S-3',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-19',
+    status: 'TODO',
+    unitCode: 'S-3',
+    customerName: null,
+    dueDate: '2026-10-19',
+    timeSlot: 'Morning',
+    title: 'Cleaning S-3',
+    description: 'Turnover buffer cleaning and inspection for unit S-3',
+  },
+  {
+    id: 5,
+    type: 'SUPPORT',
+    refCode: 'SR-0032',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-06',
+    status: 'DONE',
+    unitCode: 'S-3',
+    customerName: 'Lan Nguyen',
+    dueDate: '2026-10-06',
+    timeSlot: 'Morning',
+    title: 'Support Ticket SR-0032',
+    description: 'Door hinge inspection and repair',
+  },
+  {
+    id: 6,
+    type: 'SUPPORT',
+    refCode: 'SR-0033',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    workDate: '2026-10-18',
+    status: 'IN_PROGRESS',
+    unitCode: 'M-2',
+    customerName: 'Lan Nguyen',
+    dueDate: '2026-10-18',
+    timeSlot: 'Morning',
+    title: 'Support Ticket SR-0033',
+    description: 'Ceiling joint inspection for unit M-2',
+  },
+]
+
+let mockTasksList: TaskDto[] = JSON.parse(JSON.stringify(INITIAL_TASKS))
+
+export function resetMockTasks(custom?: TaskDto[]) {
+  mockTasksList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_TASKS))
+}
+
 
 export const INITIAL_CONTRACTS: ContractDto[] = [
   {

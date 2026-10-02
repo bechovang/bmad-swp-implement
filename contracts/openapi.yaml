@@ -654,6 +654,157 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ----------------------------------------------------------- tasks (3.2)
+  /tasks:
+    get:
+      operationId: getTasks
+      tags: [Tasks]
+      summary: List tasks for staff task board
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_SYSTEM_ADMINISTRATOR / ROLE_ADMIN.
+        Returns list of tasks filtered by workDate, task type, status, or assigned staff.
+      parameters:
+        - name: workDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Filter tasks by work date (YYYY-MM-DD).
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TaskType'
+          description: Filter by task type.
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+          description: Filter by task status.
+        - name: assignedStaffId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: Filter by assigned staff ID.
+      responses:
+        '200':
+          description: List of tasks matching the filter.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      operationId: createTask
+      tags: [Tasks]
+      summary: Create a new operational task
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_SYSTEM_ADMINISTRATOR / ROLE_ADMIN.
+        Creates a task in the central task registry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [Tasks]
+      summary: Get task details by ID
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_SYSTEM_ADMINISTRATOR / ROLE_ADMIN.
+        Returns details of a specific task.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Task ID.
+      responses:
+        '200':
+          description: Task details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tasks/{id}/status:
+    patch:
+      operationId: updateTaskStatus
+      tags: [Tasks]
+      summary: Transition task status on the Kanban board
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_SYSTEM_ADMINISTRATOR / ROLE_ADMIN.
+        Updates task status (TODO -> IN_PROGRESS -> DONE) and logs an audit record in activity_logs.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Task ID to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskStatusRequest'
+      responses:
+        '200':
+          description: Task status updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Blocked transition or missing prerequisite steps.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1821,6 +1972,142 @@ components:
         isLatest:
           type: integer
           example: 1
+
+    # ----------------------------------------------------------------- tasks (3.2)
+    TaskType:
+      type: string
+      enum:
+        - CHECK_IN
+        - CHECKOUT
+        - CLEANING
+        - SUPPORT
+        - CONTRACT
+      description: The 5 operational task types.
+
+    TaskStatus:
+      type: string
+      enum:
+        - TODO
+        - IN_PROGRESS
+        - DONE
+      description: Status of the task on the Kanban board.
+
+    TaskDto:
+      type: object
+      description: Representation of an operational task card on the Kanban board.
+      required:
+        - id
+        - type
+        - refCode
+        - assignedStaffId
+        - workDate
+        - status
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        type:
+          $ref: '#/components/schemas/TaskType'
+        refCode:
+          type: string
+          nullable: true
+          example: 'BK-1042'
+        assignedStaffId:
+          type: integer
+          format: int64
+          example: 2
+        assignedStaffName:
+          type: string
+          nullable: true
+          example: 'Minh Tran'
+        workDate:
+          type: string
+          format: date
+          example: '2026-10-03'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        unitCode:
+          type: string
+          nullable: true
+          example: 'S-3'
+        customerName:
+          type: string
+          nullable: true
+          example: 'Lan Nguyen'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-10-03'
+        timeSlot:
+          type: string
+          nullable: true
+          example: 'Morning'
+        title:
+          type: string
+          nullable: true
+          example: 'Check-in BK-1042'
+        description:
+          type: string
+          nullable: true
+          example: 'Customer Lan Nguyen checking into Unit S-3'
+
+    UpdateTaskStatusRequest:
+      type: object
+      required:
+        - status
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        reason:
+          type: string
+          nullable: true
+          description: Optional note or reason for the status transition.
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - type
+        - workDate
+      additionalProperties: false
+      properties:
+        type:
+          $ref: '#/components/schemas/TaskType'
+        refCode:
+          type: string
+          nullable: true
+        assignedStaffId:
+          type: integer
+          format: int64
+          nullable: true
+        workDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        unitCode:
+          type: string
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        timeSlot:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+
 
 
 

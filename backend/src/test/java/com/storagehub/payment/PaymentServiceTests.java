@@ -78,6 +78,8 @@ public class PaymentServiceTests {
     private NotificationService notificationService;
     @Mock
     private ContractService contractService;
+    @Mock
+    private com.storagehub.service.TaskService taskService;
 
     private PaymentService paymentService;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -99,6 +101,7 @@ public class PaymentServiceTests {
                 logService,
                 notificationService,
                 contractService,
+                taskService,
                 objectMapper
         );
 
@@ -218,6 +221,7 @@ public class PaymentServiceTests {
         verify(reservationRepository).save(reservation);
         verify(unitRepository).save(unit);
         verify(contractService).createDraftContract(reservation);
+        verify(taskService).createCheckInTask(reservation);
         verify(notificationService).send(anyLong(), anyString(), anyString(), anyString());
     }
 
@@ -257,6 +261,7 @@ public class PaymentServiceTests {
         // Should not re-save or double process
         verify(reservationRepository, never()).save(any(Reservation.class));
         verify(contractService, never()).createDraftContract(any(Reservation.class));
+        verify(taskService, never()).createCheckInTask(any(Reservation.class));
         verify(notificationService, never()).send(anyLong(), anyString(), anyString(), anyString());
     }
 
@@ -281,5 +286,6 @@ public class PaymentServiceTests {
         verify(reservationRepository).save(reservation);
         verify(unitRepository).save(unit);
         verify(contractService).createDraftContract(reservation);
+        verify(taskService).createCheckInTask(reservation);
     }
 }

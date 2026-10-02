@@ -53,6 +53,7 @@ public class PaymentService {
     private final LogService logService;
     private final NotificationService notificationService;
     private final ContractService contractService;
+    private final com.storagehub.service.TaskService taskService;
     private final ObjectMapper objectMapper;
 
     public PaymentService(PaymentRepository paymentRepository,
@@ -64,6 +65,7 @@ public class PaymentService {
                           LogService logService,
                           NotificationService notificationService,
                           ContractService contractService,
+                          com.storagehub.service.TaskService taskService,
                           ObjectMapper objectMapper) {
         this.paymentRepository = paymentRepository;
         this.reservationRepository = reservationRepository;
@@ -74,6 +76,7 @@ public class PaymentService {
         this.logService = logService;
         this.notificationService = notificationService;
         this.contractService = contractService;
+        this.taskService = taskService;
         this.objectMapper = objectMapper;
     }
 
@@ -258,6 +261,9 @@ public class PaymentService {
 
             // Story 3.1: Auto-draft contract within the same transaction
             contractService.createDraftContract(reservation);
+
+            // Story 3.2: Auto-generate check-in task within the same transaction
+            taskService.createCheckInTask(reservation);
 
             // Dispatch notification
             String notifTitle = "Deposit received - " + payment.getAmount() + " VND for unit " +
