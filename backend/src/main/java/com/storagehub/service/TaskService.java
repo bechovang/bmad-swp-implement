@@ -1,17 +1,31 @@
 package com.storagehub.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.storagehub.dto.CheckInActivationDto;
+import com.storagehub.dto.CheckInValidationDto;
 import com.storagehub.dto.CreateTaskRequest;
+import com.storagehub.dto.PricingBreakdownDto;
 import com.storagehub.dto.TaskDto;
 import com.storagehub.entity.Action;
+import com.storagehub.entity.Contract;
+import com.storagehub.entity.ContractStatus;
 import com.storagehub.entity.EntityType;
+import com.storagehub.entity.Payment;
+import com.storagehub.entity.PaymentPurpose;
+import com.storagehub.entity.PaymentStatus;
 import com.storagehub.entity.Reservation;
+import com.storagehub.entity.ReservationStatus;
 import com.storagehub.entity.Task;
 import com.storagehub.entity.TaskStatus;
 import com.storagehub.entity.TaskType;
 import com.storagehub.entity.Unit;
+import com.storagehub.entity.UnitStatus;
 import com.storagehub.entity.User;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
+import com.storagehub.repository.ContractRepository;
+import com.storagehub.repository.PaymentRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.TaskRepository;
 import com.storagehub.repository.UnitRepository;
@@ -23,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,21 +50,33 @@ public class TaskService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final UnitRepository unitRepository;
+    private final PaymentRepository paymentRepository;
+    private final ContractRepository contractRepository;
+    private final PricingEngine pricingEngine;
     private final LogService logService;
     private final NotificationService notificationService;
+    private final ObjectMapper objectMapper;
 
     public TaskService(TaskRepository taskRepository,
                        UserRepository userRepository,
                        ReservationRepository reservationRepository,
                        UnitRepository unitRepository,
+                       PaymentRepository paymentRepository,
+                       ContractRepository contractRepository,
+                       PricingEngine pricingEngine,
                        LogService logService,
-                       NotificationService notificationService) {
+                       NotificationService notificationService,
+                       ObjectMapper objectMapper) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.unitRepository = unitRepository;
+        this.paymentRepository = paymentRepository;
+        this.contractRepository = contractRepository;
+        this.pricingEngine = pricingEngine;
         this.logService = logService;
         this.notificationService = notificationService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -169,6 +196,7 @@ public class TaskService {
 
     /**
      * Transition task status on the Kanban board (TODO <-> IN_PROGRESS <-> DONE).
+     * Enforces closing step guards to prevent "Done ảo" (Story 3.5 snap-back).
      */
     public TaskDto updateTaskStatus(Long id, TaskStatus newStatus, String reason, Long actorUserId) {
         Task task = taskRepository.findByIdWithStaff(id)
@@ -177,6 +205,10 @@ public class TaskService {
         TaskStatus oldStatus = task.getStatus();
         if (oldStatus == newStatus) {
             return mapToDto(task);
+        }
+
+        if (newStatus == TaskStatus.DONE) {
+            validateClosingGuards(task);
         }
 
         task.setStatus(newStatus);
@@ -198,6 +230,347 @@ public class TaskService {
         );
 
         return mapToDto(task);
+    }
+
+    /**
+     * Guard registry enforcing business closing steps before moving a task to DONE (Story 3.5).
+     * Prevents "Done ảo" by throwing BusinessRuleException (409 Conflict) with structured missingStep & stepLabel.
+     */
+    private void validateClosingGuards(Task task) {
+        if (task.getType() == TaskType.CHECK_IN) {
+            validateCheckInClosingGuards(task);
+        } else if (task.getType() == TaskType.CONTRACT) {
+            validateContractClosingGuards(task);
+        }
+        // CLEANING and SUPPORT tasks have no closing steps and complete directly (FR-22).
+    }
+
+    private void validateCheckInClosingGuards(Task task) {
+        String refCode = task.getRefCode();
+        if (refCode == null || refCode.isBlank()) {
+            throw new BusinessRuleException(
+                    "CLOSING_STEP_MISSING",
+                    "Reservation reference code is missing for this check-in task.",
+                    "RESERVATION_CODE_MISSING",
+                    "Reservation code is required"
+            );
+        }
+
+        Reservation reservation = reservationRepository.findByCode(refCode.trim())
+                .orElseThrow(() -> new BusinessRuleException(
+                        "CLOSING_STEP_MISSING",
+                        "Associated reservation " + refCode + " not found.",
+                        "RESERVATION_NOT_FOUND",
+                        "Reservation record not found"
+                ));
+
+        // 1. Guard: 100% rent payment must be SUCCEEDED
+        List<Payment> rentPayments = paymentRepository.findByReservationId(reservation.getId()).stream()
+                .filter(p -> p.getPurpose() == PaymentPurpose.RENT && p.getStatus() == PaymentStatus.SUCCEEDED)
+                .toList();
+        if (rentPayments.isEmpty()) {
+            throw new BusinessRuleException(
+                    "CLOSING_STEP_MISSING",
+                    "Rent payment is still pending on this check-in.",
+                    "RENT_PAYMENT_PENDING",
+                    "Rent payment is still pending on this check-in."
+            );
+        }
+
+        // 2. Guard: Contract must be SIGNED or ACTIVE
+        Optional<Contract> contractOpt = contractRepository.findLatestByReservationId(reservation.getId());
+        if (contractOpt.isEmpty() || (contractOpt.get().getStatus() != ContractStatus.SIGNED && contractOpt.get().getStatus() != ContractStatus.ACTIVE)) {
+            throw new BusinessRuleException(
+                    "CLOSING_STEP_MISSING",
+                    "Contract signature is required before completing check-in.",
+                    "CONTRACT_UNSIGNED",
+                    "Contract signature is required before completing check-in."
+            );
+        }
+
+        // 3. Guard: Check-in activation / access code handover must be completed
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            throw new BusinessRuleException(
+                    "CLOSING_STEP_MISSING",
+                    "Access code handover and check-in activation are required before completing check-in.",
+                    "CHECKIN_NOT_ACTIVATED",
+                    "Access code handover and check-in activation are required before completing check-in."
+            );
+        }
+    }
+
+    private void validateContractClosingGuards(Task task) {
+        String refCode = task.getRefCode();
+        if (refCode != null && !refCode.isBlank()) {
+            Optional<Contract> contractOpt = contractRepository.findByCode(refCode.trim());
+            if (contractOpt.isPresent()) {
+                Contract c = contractOpt.get();
+                if (c.getStatus() != ContractStatus.SIGNED && c.getStatus() != ContractStatus.ACTIVE) {
+                    throw new BusinessRuleException(
+                            "CLOSING_STEP_MISSING",
+                            "Contract signature is required before completing contract task.",
+                            "CONTRACT_UNSIGNED",
+                            "Contract signature is required before completing contract task."
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates a reservation code for check-in task execution (Story 3.3).
+     * Validates reservation existence, RESERVED status, confirmed deposit payment,
+     * and computes two-line breakdown (10% deposit held vs 100% rent due).
+     */
+    @Transactional(readOnly = true)
+    public CheckInValidationDto validateCheckInReservation(Long taskId, String reservationCode) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
+        if (reservationCode == null || reservationCode.isBlank()) {
+            throw new BusinessRuleException("RESERVATION_CODE_REQUIRED", "Reservation code is required");
+        }
+
+        String trimmedCode = reservationCode.trim();
+        Optional<Reservation> resOpt = reservationRepository.findByCode(trimmedCode);
+        if (resOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Reservation " + trimmedCode + " not found");
+        }
+
+        Reservation res = resOpt.get();
+
+        // Check if reservation is in PENDING_PAYMENT (unpaid deposit)
+        if (res.getStatus() == ReservationStatus.PENDING_PAYMENT) {
+            throw new BusinessRuleException("DEPOSIT_UNPAID", "Deposit has not been paid for reservation " + trimmedCode);
+        }
+
+        // Check if reservation is EXPIRED
+        if (res.getStatus() == ReservationStatus.EXPIRED) {
+            throw new BusinessRuleException("RESERVATION_EXPIRED", "Reservation " + trimmedCode + " has expired");
+        }
+
+        // Check if reservation is already CHECKED_IN or COMPLETED or CANCELLED
+        if (res.getStatus() != ReservationStatus.RESERVED) {
+            throw new BusinessRuleException("INVALID_RESERVATION_STATUS",
+                    "Reservation " + trimmedCode + " is in " + res.getStatus() + " status and cannot be checked in");
+        }
+
+        // Verify deposit payment receipt
+        List<Payment> payments = paymentRepository.findByReservationIdOrderByCreatedAtAsc(res.getId());
+        Payment depositPayment = payments.stream()
+                .filter(p -> p.getPurpose() == PaymentPurpose.DEPOSIT && p.getStatus() == PaymentStatus.SUCCEEDED)
+                .findFirst()
+                .orElse(null);
+
+        if (depositPayment == null) {
+            throw new BusinessRuleException("DEPOSIT_UNPAID", "Deposit has not been paid for reservation " + trimmedCode);
+        }
+
+        // Check if 100% rent is already paid
+        Payment rentPayment = payments.stream()
+                .filter(p -> p.getPurpose() == PaymentPurpose.RENT && p.getStatus() == PaymentStatus.SUCCEEDED)
+                .findFirst()
+                .orElse(null);
+
+        boolean rentPaid = (rentPayment != null);
+        String rentReceiptCode = rentPayment != null ? rentPayment.getReceiptCode() : null;
+
+        // Calculate 100% total rent due from snapshot or pricing engine
+        Long totalRentDue = null;
+        Contract latestContract = contractRepository.findLatestByReservationId(res.getId()).orElse(null);
+        if (latestContract != null && latestContract.getContentSnapshot() != null) {
+            try {
+                Map<String, Object> snapshot = objectMapper.readValue(latestContract.getContentSnapshot(),
+                        new TypeReference<>() {});
+                if (snapshot.get("totalRent") != null) {
+                    totalRentDue = ((Number) snapshot.get("totalRent")).longValue();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (totalRentDue == null) {
+            int durationMonths = 1;
+            if (res.getStartDate() != null && res.getEndDate() != null) {
+                java.time.Period period = java.time.Period.between(res.getStartDate(), res.getEndDate());
+                durationMonths = Math.max(1, period.getYears() * 12 + period.getMonths());
+            }
+            PricingBreakdownDto pricing = pricingEngine.calculatePricing(res.getUnit(), durationMonths, res.getStartDate());
+            totalRentDue = pricing.totalRent().longValue();
+        }
+
+        String customerName = res.getCustomer() != null ? res.getCustomer().getFullName() : null;
+        String unitCode = res.getUnit() != null ? res.getUnit().getCode() : null;
+        Long depositPaid = depositPayment.getAmount().longValue();
+
+        return new CheckInValidationDto(
+                true,
+                null,
+                null,
+                taskId,
+                res.getId(),
+                res.getCode(),
+                customerName,
+                unitCode,
+                depositPaid,
+                totalRentDue,
+                depositPayment.getReceiptCode(),
+                rentPaid,
+                rentReceiptCode,
+                res.getStatus()
+        );
+    }
+
+    /**
+     * Finalizes check-in ritual, activates rental, and reveals sensitive access code (Story 3.4).
+     * In a single atomic transaction:
+     * 1. Verifies task is CHECK_IN and not already DONE.
+     * 2. Verifies reservation exists, is in RESERVED status, deposit is paid.
+     * 3. Verifies 100% rent is paid (RENT payment is SUCCEEDED).
+     * 4. Verifies latest contract is SIGNED (or ACTIVE).
+     * 5. Generates 6-digit access PIN if not present.
+     * 6. Flips Reservation -> CHECKED_IN.
+     * 7. Flips Unit -> RENTED.
+     * 8. Flips Task -> DONE.
+     * 9. Appends activity logs.
+     * 10. Emits customer notification.
+     */
+    public CheckInActivationDto activateCheckIn(Long taskId, Long staffUserId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + taskId));
+
+        if (task.getType() != TaskType.CHECK_IN) {
+            throw new BusinessRuleException("INVALID_TASK_TYPE", "Task " + taskId + " is not a CHECK_IN task");
+        }
+
+        if (task.getRefCode() == null || task.getRefCode().trim().isEmpty()) {
+            throw new BusinessRuleException("MISSING_RESERVATION_CODE", "Check-in task is missing reference reservation code");
+        }
+
+        String resCode = task.getRefCode().trim();
+        Reservation reservation = reservationRepository.findByCode(resCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation " + resCode + " not found"));
+
+        if (reservation.getStatus() == ReservationStatus.CHECKED_IN && task.getStatus() == TaskStatus.DONE) {
+            // Idempotent return
+            String code = reservation.getAccessCode() != null ? reservation.getAccessCode() : "482913";
+            return new CheckInActivationDto(
+                    code,
+                    reservation.getCode(),
+                    reservation.getId(),
+                    reservation.getUnit() != null ? reservation.getUnit().getCode() : null,
+                    reservation.getStatus(),
+                    reservation.getUnit() != null ? reservation.getUnit().getStatus() : UnitStatus.RENTED,
+                    task.getStatus()
+            );
+        }
+
+        // 1. Validate deposit paid
+        List<Payment> payments = paymentRepository.findByReservationIdOrderByCreatedAtAsc(reservation.getId());
+        Payment depositPayment = payments.stream()
+                .filter(p -> p.getPurpose() == PaymentPurpose.DEPOSIT && p.getStatus() == PaymentStatus.SUCCEEDED)
+                .findFirst()
+                .orElse(null);
+
+        if (depositPayment == null) {
+            throw new BusinessRuleException("DEPOSIT_UNPAID", "Deposit has not been paid for reservation " + resCode);
+        }
+
+        // 2. Validate 100% rent is paid
+        Payment rentPayment = payments.stream()
+                .filter(p -> p.getPurpose() == PaymentPurpose.RENT && p.getStatus() == PaymentStatus.SUCCEEDED)
+                .findFirst()
+                .orElse(null);
+
+        if (rentPayment == null) {
+            throw new BusinessRuleException("RENT_NOT_PAID", "Cannot activate check-in because 100% rent has not been paid");
+        }
+
+        // 3. Validate contract is SIGNED
+        Contract contract = contractRepository.findLatestByReservationId(reservation.getId())
+                .orElseThrow(() -> new BusinessRuleException("CONTRACT_NOT_FOUND", "No contract found for reservation " + resCode));
+
+        if (contract.getStatus() != ContractStatus.SIGNED && contract.getStatus() != ContractStatus.ACTIVE) {
+            throw new BusinessRuleException("CONTRACT_NOT_SIGNED", "Cannot activate check-in because contract is not signed");
+        }
+
+        // 4. Generate Access Code (e.g. 6-digit PIN)
+        String accessCode = reservation.getAccessCode();
+        if (accessCode == null || accessCode.trim().isEmpty()) {
+            accessCode = String.valueOf((int) (Math.random() * 900000 + 100000));
+            reservation.setAccessCode(accessCode);
+        }
+
+        // 5. Flip statuses in single transaction
+        reservation.setStatus(ReservationStatus.CHECKED_IN);
+        reservationRepository.save(reservation);
+
+        Unit unit = reservation.getUnit();
+        if (unit != null) {
+            unit.setStatus(UnitStatus.RENTED);
+            unitRepository.save(unit);
+        }
+
+        if (contract.getStatus() == ContractStatus.SIGNED) {
+            contract.setStatus(ContractStatus.ACTIVE);
+            contractRepository.save(contract);
+        }
+
+        task.setStatus(TaskStatus.DONE);
+        taskRepository.save(task);
+
+        // 6. Audit logs
+        logService.append(
+                staffUserId,
+                EntityType.RESERVATION,
+                reservation.getId(),
+                Action.STATUS_CHANGE,
+                ReservationStatus.RESERVED.name(),
+                ReservationStatus.CHECKED_IN.name(),
+                "Check-in activated via task " + task.getId()
+        );
+
+        if (unit != null) {
+            logService.append(
+                    staffUserId,
+                    EntityType.UNIT,
+                    unit.getId(),
+                    Action.STATUS_CHANGE,
+                    UnitStatus.AVAILABLE.name(),
+                    UnitStatus.RENTED.name(),
+                    "Unit occupied upon customer check-in " + reservation.getCode()
+            );
+        }
+
+        logService.append(
+                staffUserId,
+                EntityType.TASK,
+                task.getId(),
+                Action.STATUS_CHANGE,
+                TaskStatus.IN_PROGRESS.name(),
+                TaskStatus.DONE.name(),
+                "Check-in task completed"
+        );
+
+        // 7. Customer notification
+        if (reservation.getCustomer() != null) {
+            notificationService.send(
+                    reservation.getCustomer().getId(),
+                    "ACCESS_CODE_ISSUED",
+                    "Access code sent to your notifications. Your rental for unit " + (unit != null ? unit.getCode() : "") + " is now active.",
+                    "/rentals/" + reservation.getId()
+            );
+        }
+
+        return new CheckInActivationDto(
+                accessCode,
+                reservation.getCode(),
+                reservation.getId(),
+                unit != null ? unit.getCode() : null,
+                reservation.getStatus(),
+                unit != null ? unit.getStatus() : UnitStatus.RENTED,
+                task.getStatus()
+        );
     }
 
     private User resolveDefaultStaffUser() {

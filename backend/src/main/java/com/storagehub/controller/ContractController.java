@@ -44,6 +44,40 @@ public class ContractController {
         return ResponseEntity.ok(contractDto);
     }
 
+    @PostMapping("/{id}/print")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<ContractDto> printContract(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long staffUserId = getCurrentUserId(authentication);
+        ContractDto contractDto = contractService.markContractPrinted(id, staffUserId);
+        return ResponseEntity.ok(contractDto);
+    }
+
+    @PostMapping("/{id}/sign")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<ContractDto> signContract(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.storagehub.dto.SignContractRequest request,
+            Authentication authentication
+    ) {
+        Long staffUserId = getCurrentUserId(authentication);
+        ContractDto contractDto = contractService.signContract(id, request.signedPhotoUrl(), staffUserId);
+        return ResponseEntity.ok(contractDto);
+    }
+
+    @GetMapping("/reservation/{reservationId}/chain")
+    public ResponseEntity<java.util.List<ContractDto>> getContractChain(
+            @PathVariable Long reservationId,
+            Authentication authentication
+    ) {
+        Long currentUserId = getCurrentUserId(authentication);
+        boolean isStaffOrAdmin = isStaffOrAdmin(authentication);
+        java.util.List<ContractDto> chain = contractService.getContractChain(reservationId, currentUserId, isStaffOrAdmin);
+        return ResponseEntity.ok(chain);
+    }
+
     @PostMapping("/{id}/re-draft")
     @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
     public ResponseEntity<ContractDto> reDraftContract(

@@ -238,7 +238,7 @@ describe('Adaptive Shell & 5-Role Navigation', () => {
 
       renderWithRouter(['/tasks/5'])
 
-      expect(await screen.findByRole('heading', { level: 1, name: 'Task #5' })).toBeInTheDocument()
+      expect(await screen.findByTestId('task-detail-page')).toBeInTheDocument()
     })
   })
 

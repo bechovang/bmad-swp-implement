@@ -10,3 +10,16 @@ export async function getReservation(id: number): Promise<ReservationDto> {
   const response = await apiClient.get<ReservationDto>(`/reservations/${id}`)
   return response.data
 }
+
+export async function getMyReservations(): Promise<ReservationDto[]> {
+  const response = await apiClient.get<ReservationDto[]>('/reservations/my')
+  return response.data
+}
+
+export async function getReservationAccessCode(
+  id: number | string
+): Promise<import('../types/reservation').AccessCodeResponseDto> {
+  const response = await apiClient.get<import('../types/reservation').AccessCodeResponseDto>(`/reservations/${id}/access-code`)
+  return response.data
+}
+

@@ -251,6 +251,99 @@ public class ContractService {
         return mapToDto(newContract);
     }
 
+    /**
+     * Mark contract as printed (DRAFT -> PRINTED)
+     */
+    public ContractDto markContractPrinted(Long contractId, Long staffUserId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
+
+        if (contract.getStatus() == ContractStatus.DRAFT) {
+            contract.setStatus(ContractStatus.PRINTED);
+            contractRepository.save(contract);
+
+            logService.append(
+                    staffUserId,
+                    EntityType.CONTRACT,
+                    contract.getId(),
+                    Action.STATUS_CHANGE,
+                    ContractStatus.DRAFT.name(),
+                    ContractStatus.PRINTED.name(),
+                    "Contract marked as PRINTED for front-desk ritual"
+            );
+        }
+
+        return mapToDto(contract);
+    }
+
+    /**
+     * Attach signed contract photo and transition status to SIGNED (Story 3.4)
+     */
+    public ContractDto signContract(Long contractId, String signedPhotoUrl, Long staffUserId) {
+        if (signedPhotoUrl == null || signedPhotoUrl.trim().isEmpty()) {
+            throw new BusinessRuleException("PHOTO_REQUIRED", "Signed contract photo attachment is required");
+        }
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
+
+        if (contract.getStatus() == ContractStatus.SIGNED || contract.getStatus() == ContractStatus.ACTIVE) {
+            // Idempotent: if already signed with the same photo, return current state
+            return mapToDto(contract);
+        }
+
+        if (contract.getStatus() == ContractStatus.SUPERSEDED || contract.getStatus() == ContractStatus.CLOSED) {
+            throw new BusinessRuleException("INVALID_CONTRACT_STATUS",
+                    "Cannot sign a contract with status " + contract.getStatus());
+        }
+
+        String fromStatus = contract.getStatus().name();
+        contract.setSignedPhotoUrl(signedPhotoUrl.trim());
+        contract.setStatus(ContractStatus.SIGNED);
+        contract = contractRepository.save(contract);
+
+        // Audit log: CONTRACT_SIGNED
+        logService.append(
+                staffUserId,
+                EntityType.CONTRACT,
+                contract.getId(),
+                Action.STATUS_CHANGE,
+                fromStatus,
+                ContractStatus.SIGNED.name(),
+                "Contract signed with photo attachment " + signedPhotoUrl.trim()
+        );
+
+        // Notify customer
+        Reservation reservation = contract.getReservation();
+        if (reservation.getCustomer() != null) {
+            notificationService.send(
+                    reservation.getCustomer().getId(),
+                    "CONTRACT_SIGNED",
+                    "Contract " + contract.getCode() + " has been signed and recorded.",
+                    "/rentals/" + reservation.getId()
+            );
+        }
+
+        return mapToDto(contract);
+    }
+
+    /**
+     * Get full contract revision chain for a reservation (Story 3.4).
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<ContractDto> getContractChain(Long reservationId, Long currentUserId, boolean isStaffOrAdmin) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + reservationId));
+
+        validateAccess(reservation, currentUserId, isStaffOrAdmin);
+
+        java.util.List<Contract> contracts = contractRepository.findByReservation_Id(reservationId);
+        return contracts.stream()
+                .sorted(java.util.Comparator.comparing(Contract::getId))
+                .map(this::mapToDto)
+                .toList();
+    }
+
     private void validateAccess(Reservation reservation, Long currentUserId, boolean isStaffOrAdmin) {
         if (!isStaffOrAdmin && (reservation.getCustomer() == null || !reservation.getCustomer().getId().equals(currentUserId))) {
             throw new AccessDeniedException("Access denied to contract for reservation " + reservation.getId());

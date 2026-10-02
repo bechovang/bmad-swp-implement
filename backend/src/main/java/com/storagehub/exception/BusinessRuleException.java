@@ -17,17 +17,33 @@ public class BusinessRuleException extends RuntimeException {
     private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z][A-Z0-9_]*$");
 
     private final String code;
+    private final String missingStep;
+    private final String stepLabel;
 
     public BusinessRuleException(String code, String message) {
+        this(code, message, null, null);
+    }
+
+    public BusinessRuleException(String code, String message, String missingStep, String stepLabel) {
         super(message);
         if (code == null || !CODE_PATTERN.matcher(code).matches()) {
             throw new IllegalArgumentException(
                     "Business rule code must match ^[A-Z][A-Z0-9_]*$ (openapi Error.code), got: " + code);
         }
         this.code = code;
+        this.missingStep = missingStep;
+        this.stepLabel = stepLabel;
     }
 
     public String getCode() {
         return code;
+    }
+
+    public String getMissingStep() {
+        return missingStep;
+    }
+
+    public String getStepLabel() {
+        return stepLabel;
     }
 }

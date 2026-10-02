@@ -267,6 +267,41 @@ export function ContractPreviewCard({
         </ol>
       </div>
 
+      {/* Signed Photo Attachment Preview (Story 3.4) */}
+      {contract.signedPhotoUrl && (
+        <div className="pt-3 border-t border-sh-divider space-y-2" data-testid="signed-contract-attachment">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-sh-muted uppercase tracking-wider">
+              Signed Contract Document on Record
+            </span>
+            <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Verified Attachment
+            </span>
+          </div>
+          <div className="flex items-center gap-4 p-3 bg-sh-surface-subtle border border-sh-border rounded-sh-md">
+            <img
+              src={contract.signedPhotoUrl}
+              alt="Signed contract attachment"
+              className="w-20 h-20 object-cover rounded border border-sh-border bg-white"
+              onError={(e) => {
+                ;(e.target as HTMLElement).style.display = 'none'
+              }}
+            />
+            <div className="text-xs space-y-1">
+              <span className="font-semibold text-sh-ink block">Physical Contract Signed Copy</span>
+              <a
+                href={contract.signedPhotoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sh-primary hover:underline text-[11px] font-medium inline-flex items-center gap-1"
+              >
+                View Full Document ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Printable Signature Footers for In-Person Ritual */}
       <div className="hidden print:grid grid-cols-2 gap-12 pt-12 text-xs">
         <div className="text-center space-y-16">

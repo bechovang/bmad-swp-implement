@@ -15,17 +15,23 @@ import java.util.List;
 public record ApiError(
         String code,
         String message,
-        @JsonInclude(JsonInclude.Include.NON_EMPTY) List<FieldError> fieldErrors) {
+        @JsonInclude(JsonInclude.Include.NON_EMPTY) List<FieldError> fieldErrors,
+        @JsonInclude(JsonInclude.Include.NON_NULL) String missingStep,
+        @JsonInclude(JsonInclude.Include.NON_NULL) String stepLabel) {
 
     public static ApiError of(ApiErrorCode code) {
-        return new ApiError(code.name(), code.defaultMessage(), null);
+        return new ApiError(code.name(), code.defaultMessage(), null, null, null);
     }
 
     public static ApiError of(ApiErrorCode code, List<FieldError> fieldErrors) {
-        return new ApiError(code.name(), code.defaultMessage(), fieldErrors);
+        return new ApiError(code.name(), code.defaultMessage(), fieldErrors, null, null);
     }
 
     public static ApiError of(String code, String message) {
-        return new ApiError(code, message, null);
+        return new ApiError(code, message, null, null, null);
+    }
+
+    public static ApiError of(String code, String message, String missingStep, String stepLabel) {
+        return new ApiError(code, message, null, missingStep, stepLabel);
     }
 }

@@ -61,9 +61,17 @@ public class TaskServiceTests {
     @Mock
     private UnitRepository unitRepository;
     @Mock
+    private com.storagehub.repository.PaymentRepository paymentRepository;
+    @Mock
+    private com.storagehub.repository.ContractRepository contractRepository;
+    @Mock
+    private com.storagehub.service.PricingEngine pricingEngine;
+    @Mock
     private LogService logService;
     @Mock
     private NotificationService notificationService;
+
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
     private TaskService taskService;
 
@@ -79,8 +87,12 @@ public class TaskServiceTests {
                 userRepository,
                 reservationRepository,
                 unitRepository,
+                paymentRepository,
+                contractRepository,
+                pricingEngine,
                 logService,
-                notificationService
+                notificationService,
+                objectMapper
         );
 
         Role staffRole = new Role(2, "Staff", "Staff role");

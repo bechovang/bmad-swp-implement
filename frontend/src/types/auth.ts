@@ -57,4 +57,6 @@ export interface ApiError {
   code: string
   message: string
   fieldErrors?: FieldError[]
+  missingStep?: string | null
+  stepLabel?: string | null
 }

@@ -44,3 +44,15 @@ export interface ContractDto {
   supersedesContractId?: number | null
   isLatest: number
 }
+
+export interface SignContractRequest {
+  signedPhotoUrl: string
+}
+
+export interface AttachmentUploadResponseDto {
+  fileUrl: string
+  fileName: string
+  size: number
+  contentType: string
+}
+

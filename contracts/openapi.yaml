@@ -426,6 +426,109 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /reservations/{id}/access-code:
+    get:
+      operationId: getReservationAccessCode
+      tags: [Reservations]
+      summary: Reveal access code for checked-in rental (SensitiveValue AD-5)
+      description: >
+        Guarded endpoint to reveal sensitive access code (PIN/QR). Accessible by customer of reservation or staff/admin
+        only after check-in ritual has completed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      responses:
+        '200':
+          description: Sensitive access code revealed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCodeResponseDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /reservations/{id}/extension-boundary:
+    get:
+      operationId: getExtensionBoundary
+      tags: [Reservations]
+      summary: Get extension conflict boundary and latest allowed checkout date (Story 4.1)
+      description: >
+        Returns conflict boundary, next upcoming reservation dates, and max extendable checkout date
+        for an active CHECKED_IN rental.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      responses:
+        '200':
+          description: Extension conflict boundary details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionBoundaryDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reservations/{id}/extension-quote:
+    post:
+      operationId: getExtensionQuote
+      tags: [Reservations]
+      summary: Calculate itemized rental extension fee and deposit top-up (Story 4.1 & 4.2)
+      description: >
+        Validates target checkout date against conflict boundary and computes 2-line financial breakdown
+        (additional rent based on locked rate + deposit top-up formula AD-11).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionQuoteRequest'
+      responses:
+        '200':
+          description: Itemized extension fee breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionQuoteDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Target extension date conflicts with an existing reservation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # -------------------------------------------------------- payments (2.4)
   /payments/create:
     post:
@@ -647,12 +750,181 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+  /contracts/{id}/print:
+    post:
+      operationId: printContract
+      tags: [Contracts]
+      summary: Mark contract as printed
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Transitions contract status from DRAFT to PRINTED.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Contract ID.
+      responses:
+        '200':
+          description: Contract marked as printed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /contracts/{id}/sign:
+    post:
+      operationId: signContract
+      tags: [Contracts]
+      summary: Attach signed contract photo and transition status to SIGNED
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Records signed photo URL relative path and transitions contract status to SIGNED.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Contract ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignContractRequest'
+      responses:
+        '200':
+          description: Contract successfully signed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '409':
-          description: Previous contract is not in DRAFT status.
+          description: Contract already signed or in invalid status.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /contracts/reservation/{reservationId}/chain:
+    get:
+      operationId: getContractChain
+      tags: [Contracts]
+      summary: Get full contract revision chain for a reservation
+      description: >
+        Returns all contract versions (including superseded and latest signed/draft) for a reservation.
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      responses:
+        '200':
+          description: List of contracts in revision order.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ----------------------------------------------------------- attachments (AD-10)
+  /attachments:
+    post:
+      operationId: uploadAttachment
+      tags: [Attachments]
+      summary: Upload file attachment (signed contract photos, inspection images)
+      description: >
+        Multipart upload storing files locally and returning relative API path.
+        Restricted to authenticated users.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File payload (JPEG, PNG, WebP, PDF up to 10MB).
+      responses:
+        '201':
+          description: File uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentUploadResponseDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /attachments/{filename}:
+    get:
+      operationId: getAttachment
+      tags: [Attachments]
+      summary: Stream authenticated file attachment
+      description: >
+        Authenticated streaming of file attachment. Unauthenticated requests are rejected with 401.
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Attachment filename.
+      responses:
+        '200':
+          description: File stream.
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ----------------------------------------------------------- tasks (3.2)
   /tasks:
@@ -805,6 +1077,90 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /tasks/{id}/validate-reservation:
+    post:
+      operationId: validateCheckInReservation
+      tags: [Tasks]
+      summary: Validate reservation code and paid deposit for check-in task
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_BUSINESS_OPS / ROLE_ADMIN / ROLE_SYSTEM_ADMINISTRATOR.
+        Validates customer reservation code, checks that deposit is paid, and returns the 2-line financial breakdown.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Check-in Task ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateCheckInRequest'
+      responses:
+        '200':
+          description: Check-in validation result with 2-line financial breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckInValidationDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Reservation is not in RESERVED status or unpaid deposit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tasks/{id}/activate-checkin:
+    post:
+      operationId: activateCheckIn
+      tags: [Tasks]
+      summary: Finalize check-in ritual, activate rental, and reveal access code
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Verifies that 100% rent is paid and latest contract is SIGNED. In a single atomic transaction:
+        (1) Generates access code on Reservation, (2) transitions Reservation -> CHECKED_IN,
+        (3) transitions Unit -> RENTED, (4) transitions Task -> DONE, and (5) sends notification to customer.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Check-in Task ID.
+      responses:
+        '200':
+          description: Check-in successfully activated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckInActivationDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Contract not signed, rent unpaid, or invalid state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -896,9 +1252,16 @@ components:
           description: Present for validation failures; empty or absent otherwise.
           items:
             $ref: '#/components/schemas/FieldError'
-        # Blocked-transition payloads (FR-22 snap-back) add the violated guard
-        # and the missing closing step as structured data when that endpoint
-        # lands - the FE renders the toast from these fields, not the message.
+        missingStep:
+          type: string
+          nullable: true
+          description: Machine code for the missing closing step (FR-22 snap-back).
+          example: 'RENT_PAYMENT_PENDING'
+        stepLabel:
+          type: string
+          nullable: true
+          description: Human-readable closing step name for rendering the snap-back toast.
+          example: 'Rent payment is still pending on this check-in.'
 
     FieldError:
       type: object
@@ -2107,6 +2470,298 @@ components:
         description:
           type: string
           nullable: true
+
+    ValidateCheckInRequest:
+      type: object
+      required:
+        - reservationCode
+      additionalProperties: false
+      properties:
+        reservationCode:
+          type: string
+          example: 'BK-1042'
+
+    CheckInValidationDto:
+      type: object
+      required:
+        - valid
+        - taskId
+      additionalProperties: false
+      properties:
+        valid:
+          type: boolean
+          example: true
+        errorCode:
+          type: string
+          nullable: true
+          example: 'DEPOSIT_UNPAID'
+        errorMessage:
+          type: string
+          nullable: true
+          example: 'Deposit payment has not been confirmed'
+        taskId:
+          type: integer
+          format: int64
+          example: 1
+        reservationId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+        reservationCode:
+          type: string
+          nullable: true
+          example: 'BK-1042'
+        customerName:
+          type: string
+          nullable: true
+          example: 'Lan Nguyen'
+        unitCode:
+          type: string
+          nullable: true
+          example: 'S-3'
+        depositAmountPaid:
+          type: integer
+          nullable: true
+          example: 103500
+        totalRentDue:
+          type: integer
+          nullable: true
+          example: 1035000
+        depositReceiptCode:
+          type: string
+          nullable: true
+          example: 'RC-1727932800101'
+        rentPaid:
+          type: boolean
+          example: false
+        rentReceiptCode:
+          type: string
+          nullable: true
+          example: 'RC-1727932900202'
+        status:
+          $ref: '#/components/schemas/ReservationStatus'
+
+    SignContractRequest:
+      type: object
+      description: Request payload for attaching signed contract photo.
+      required:
+        - signedPhotoUrl
+      additionalProperties: false
+      properties:
+        signedPhotoUrl:
+          type: string
+          example: '/api/v1/attachments/contract-signed-CT-1042-89f4.jpg'
+
+    AttachmentUploadResponseDto:
+      type: object
+      description: Response containing relative URL and metadata of uploaded attachment.
+      required:
+        - fileUrl
+        - fileName
+        - size
+        - contentType
+      additionalProperties: false
+      properties:
+        fileUrl:
+          type: string
+          example: '/api/v1/attachments/contract-signed-CT-1042-89f4.jpg'
+        fileName:
+          type: string
+          example: 'contract-signed-CT-1042-89f4.jpg'
+        size:
+          type: integer
+          format: int64
+          example: 204850
+        contentType:
+          type: string
+          example: 'image/jpeg'
+
+    CheckInActivationDto:
+      type: object
+      description: Response upon activating check-in and generating access code.
+      required:
+        - accessCode
+        - reservationCode
+        - reservationId
+        - unitCode
+        - reservationStatus
+        - unitStatus
+        - taskStatus
+      additionalProperties: false
+      properties:
+        accessCode:
+          type: string
+          description: Sensitive access PIN/QR code.
+          example: '482913'
+        reservationCode:
+          type: string
+          example: 'BK-1042'
+        reservationId:
+          type: integer
+          format: int64
+          example: 1
+        unitCode:
+          type: string
+          example: 'S-3'
+        reservationStatus:
+          $ref: '#/components/schemas/ReservationStatus'
+        unitStatus:
+          $ref: '#/components/schemas/UnitStatus'
+        taskStatus:
+          $ref: '#/components/schemas/TaskStatus'
+
+    AccessCodeResponseDto:
+      type: object
+      description: Sensitive access code response for checked-in rental (SensitiveValue AD-5).
+      required:
+        - accessCode
+        - accessType
+        - unitCode
+      additionalProperties: false
+      properties:
+        accessCode:
+          type: string
+          example: '482913'
+        accessType:
+          type: string
+          example: 'PIN'
+        unitCode:
+          type: string
+          example: 'S-3'
+
+    # -------------------------------------------------------- extensions (4.1, 4.2)
+    ExtensionBoundaryDto:
+      type: object
+      description: Conflict boundary and allowed checkout window for rental extension (Story 4.1).
+      required:
+        - rentalId
+        - unitCode
+        - currentEndDate
+        - isExtendable
+      additionalProperties: false
+      properties:
+        rentalId:
+          type: integer
+          format: int64
+          example: 1
+        unitCode:
+          type: string
+          example: 'M-2'
+        currentEndDate:
+          type: string
+          format: date
+          example: '2026-10-15'
+        latestPossibleCheckoutDate:
+          type: string
+          format: date
+          nullable: true
+          description: Max checkout date before next upcoming booking.
+          example: '2026-10-18'
+        conflictStartDate:
+          type: string
+          format: date
+          nullable: true
+          description: Start date of the next conflicting reservation.
+          example: '2026-10-19'
+        conflictReservationCode:
+          type: string
+          nullable: true
+          example: 'BK-2026-0045'
+        isExtendable:
+          type: boolean
+          description: Whether the rental is CHECKED_IN and not past endDate.
+          example: true
+        message:
+          type: string
+          nullable: true
+          example: 'M-2 has a reservation starting Oct 19. Latest possible checkout is Oct 18.'
+
+    ExtensionQuoteRequest:
+      type: object
+      required:
+        - newEndDate
+      additionalProperties: false
+      properties:
+        newEndDate:
+          type: string
+          format: date
+          example: '2026-10-18'
+
+    ExtensionQuoteDto:
+      type: object
+      description: Itemized rental extension fee calculation result.
+      required:
+        - rentalId
+        - unitCode
+        - currentEndDate
+        - newEndDate
+        - additionalDays
+        - monthlyRate
+        - additionalRent
+        - currentHeldDeposit
+        - newTotalDepositRequired
+        - depositTopUp
+        - totalFee
+        - currency
+      additionalProperties: false
+      properties:
+        rentalId:
+          type: integer
+          format: int64
+          example: 1
+        unitCode:
+          type: string
+          example: 'M-2'
+        currentEndDate:
+          type: string
+          format: date
+          example: '2026-10-15'
+        newEndDate:
+          type: string
+          format: date
+          example: '2026-10-18'
+        additionalDays:
+          type: integer
+          example: 3
+        additionalMonths:
+          type: number
+          format: double
+          example: 0.1
+        monthlyRate:
+          type: integer
+          format: int64
+          example: 690000
+        additionalRent:
+          type: integer
+          format: int64
+          example: 690000
+        currentHeldDeposit:
+          type: integer
+          format: int64
+          example: 103500
+        newTotalDepositRequired:
+          type: integer
+          format: int64
+          example: 172500
+        depositTopUp:
+          type: integer
+          format: int64
+          description: Top-up deposit required = max(0, newDeposit - currentHeldDeposit)
+          example: 69000
+        totalFee:
+          type: integer
+          format: int64
+          description: Total payable fee = additionalRent + depositTopUp
+          example: 759000
+        currency:
+          type: string
+          example: 'VND'
+        policyVersion:
+          type: string
+          nullable: true
+          example: 'v3'
+
 
 
 

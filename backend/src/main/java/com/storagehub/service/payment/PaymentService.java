@@ -87,17 +87,29 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findById(request.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + request.reservationId()));
 
-        if (reservation.getStatus() != ReservationStatus.PENDING_PAYMENT) {
-            throw new BusinessRuleException("PAYMENT_NOT_ALLOWED",
-                    "Reservation " + reservation.getCode() + " is currently " + reservation.getStatus() + " and not awaiting payment");
+        if (request.purpose() == PaymentPurpose.DEPOSIT) {
+            if (reservation.getStatus() != ReservationStatus.PENDING_PAYMENT) {
+                throw new BusinessRuleException("PAYMENT_NOT_ALLOWED",
+                        "Reservation " + reservation.getCode() + " is currently " + reservation.getStatus() + " and not awaiting deposit payment");
+            }
+        } else if (request.purpose() == PaymentPurpose.RENT) {
+            if (reservation.getStatus() != ReservationStatus.RESERVED) {
+                throw new BusinessRuleException("PAYMENT_NOT_ALLOWED",
+                        "Reservation " + reservation.getCode() + " is currently " + reservation.getStatus() + ", expected RESERVED for rent payment");
+            }
         }
 
         User payer = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + currentUserId));
 
-        long amount = request.amount() != null && request.amount() > 0
-                ? request.amount()
-                : reservation.getDepositAmount().longValue();
+        long amount;
+        if (request.amount() != null && request.amount() > 0) {
+            amount = request.amount();
+        } else if (request.purpose() == PaymentPurpose.RENT) {
+            amount = reservation.getDepositAmount() != null ? reservation.getDepositAmount().longValue() * 10L : 0L;
+        } else {
+            amount = reservation.getDepositAmount() != null ? reservation.getDepositAmount().longValue() : 0L;
+        }
 
         // Generate a unique numeric orderCode for PayOS
         long orderCode = generateOrderCode();
@@ -267,6 +279,25 @@ public class PaymentService {
 
             // Dispatch notification
             String notifTitle = "Deposit received - " + payment.getAmount() + " VND for unit " +
+                    (unit != null ? unit.getCode() : "");
+            notificationService.send(
+                    payment.getPayer().getId(),
+                    "PAYMENT_SUCCEEDED",
+                    notifTitle,
+                    "/rentals/" + reservation.getId()
+            );
+        } else if (reservation != null && payment.getPurpose() == PaymentPurpose.RENT) {
+            // Append audit log for rent payment
+            logService.append(payment.getPayer().getId(), EntityType.PAYMENT, payment.getId(),
+                    Action.STATUS_CHANGE, previousStatus.name(), PaymentStatus.SUCCEEDED.name(),
+                    "Rent payment succeeded via " + method.name());
+
+            // STRICT INVARIANT (Story 3.3): Reservation status remains RESERVED.
+            // Contract ritual & access code activation happen in Story 3.4.
+
+            // Dispatch notification
+            Unit unit = reservation.getUnit();
+            String notifTitle = "Rent payment received - " + payment.getAmount() + " VND for unit " +
                     (unit != null ? unit.getCode() : "");
             notificationService.send(
                     payment.getPayer().getId(),

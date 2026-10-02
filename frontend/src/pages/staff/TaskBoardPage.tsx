@@ -48,12 +48,15 @@ export const TaskBoardPage: React.FC = () => {
 
       return { previousTasks }
     },
-    onError: (_err, _variables, context) => {
+    onError: (err: any, _variables, context) => {
       if (context?.previousTasks) {
         queryClient.setQueryData(['tasks', selectedDate], context.previousTasks)
       }
+      const data = err?.response?.data
+      const toastMessage =
+        data?.stepLabel || data?.message || 'Unable to update task status. Please try again.'
       toastCtx?.showToast({
-        title: 'Unable to update task status. Please try again.',
+        title: toastMessage,
         tone: 'error',
       })
     },

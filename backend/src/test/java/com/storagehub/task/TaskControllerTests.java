@@ -187,4 +187,27 @@ public class TaskControllerTests {
                 .andExpect(jsonPath("$.type").value("CLEANING"))
                 .andExpect(jsonPath("$.unitCode").value("S-3"));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/tasks/{id}/validate-reservation validates code and returns breakdown for staff")
+    void testValidateCheckInReservation_controllerSuccess() throws Exception {
+        com.storagehub.dto.ValidateCheckInRequest req = new com.storagehub.dto.ValidateCheckInRequest("BK-1042");
+        com.storagehub.dto.CheckInValidationDto dto = new com.storagehub.dto.CheckInValidationDto(
+                true, null, null, 1L, 100L, "BK-1042", "Lan Nguyen", "S-3",
+                103500L, 1035000L, "RC-1727932800101", false, null, com.storagehub.entity.ReservationStatus.RESERVED
+        );
+
+        when(taskService.validateCheckInReservation(1L, "BK-1042")).thenReturn(dto);
+
+        mockMvc.perform(post("/api/v1/tasks/1/validate-reservation")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + staffToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(true))
+                .andExpect(jsonPath("$.reservationCode").value("BK-1042"))
+                .andExpect(jsonPath("$.depositAmountPaid").value(103500))
+                .andExpect(jsonPath("$.totalRentDue").value(1035000))
+                .andExpect(jsonPath("$.rentPaid").value(false));
+    }
 }

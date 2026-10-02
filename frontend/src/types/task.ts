@@ -88,3 +88,35 @@ export const TASK_TYPE_CONFIG: Record<TaskType, TaskTypeConfig> = {
     textColor: '#334155',
   },
 }
+
+export interface ValidateCheckInRequest {
+  reservationCode: string
+}
+
+export interface CheckInValidationDto {
+  valid: boolean
+  errorCode?: string | null
+  errorMessage?: string | null
+  taskId: number
+  reservationId?: number | null
+  reservationCode?: string | null
+  customerName?: string | null
+  unitCode?: string | null
+  depositAmountPaid?: number | null
+  totalRentDue?: number | null
+  depositReceiptCode?: string | null
+  rentPaid: boolean
+  rentReceiptCode?: string | null
+  status?: string | null
+}
+
+export interface CheckInActivationDto {
+  accessCode: string
+  reservationCode: string
+  reservationId: number
+  unitCode: string
+  reservationStatus: string
+  unitStatus: string
+  taskStatus: string
+}
+

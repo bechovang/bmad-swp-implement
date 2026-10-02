@@ -73,6 +73,25 @@ public class TaskController {
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping("/{id}/validate-reservation")
+    public ResponseEntity<com.storagehub.dto.CheckInValidationDto> validateCheckInReservation(
+            @PathVariable Long id,
+            @Valid @RequestBody com.storagehub.dto.ValidateCheckInRequest request
+    ) {
+        com.storagehub.dto.CheckInValidationDto result = taskService.validateCheckInReservation(id, request.reservationCode());
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{id}/activate-checkin")
+    public ResponseEntity<com.storagehub.dto.CheckInActivationDto> activateCheckIn(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long staffUserId = getCurrentUserId(authentication);
+        com.storagehub.dto.CheckInActivationDto result = taskService.activateCheckIn(id, staffUserId);
+        return ResponseEntity.ok(result);
+    }
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new org.springframework.security.authentication.InsufficientAuthenticationException("User is not authenticated");

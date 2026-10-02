@@ -54,16 +54,16 @@ development_status:
   2-7-no-show-expired-exactly-once-lazy: done
   epic-2-retrospective: optional
 
-  epic-3: in-progress
+  epic-3: done
   3-1-auto-draft-contract-khi-deposit-thành-công: done
   3-2-kanban-task-board: done
-  3-3-check-in-task-validate-reservation-thu-100-rent-qr-cash: backlog
-  3-4-contract-ritual-access-code-kích-hoạt-rental-contract-chain: backlog
-  3-5-snap-back-chống-done-ảo: backlog
+  3-3-check-in-task-validate-reservation-thu-100-rent-qr-cash: done
+  3-4-contract-ritual-access-code-kích-hoạt-rental-contract-chain: done
+  3-5-snap-back-chống-done-ảo: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-màn-extend-conflict-boundary: backlog
+  epic-4: in-progress
+  4-1-màn-extend-conflict-boundary: done
   4-2-extension-fee-top-up-cọc-payment-ngày-hiệu-lực: backlog
   4-3-addendum-trail-7-ngày-đeo-bám-desk-ritual-chain: backlog
   epic-4-retrospective: optional

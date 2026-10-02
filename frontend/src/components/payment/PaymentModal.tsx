@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ModalRoot, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { ToastContext } from '../../context/toast-context-base'
-import { createPaymentLink, getPaymentStatus, cancelPayment } from '../../api/payment'
+import { createPaymentLink, getPaymentStatus, cancelPayment, confirmCashPayment } from '../../api/payment'
 import type {
   PaymentModalProps,
   PaymentModalState,
@@ -108,12 +108,13 @@ export function PaymentModal({
     return () => clearInterval(timerId)
   }, [modalState, currentPayment?.expiresAt])
 
-  // Polling payment status every 2 seconds while awaiting
+  // Polling payment status every 2 seconds while awaiting (for QR)
   const { data: polledPayment } = useQuery({
     queryKey: ['payment-status', currentPayment?.paymentId],
     queryFn: () => getPaymentStatus(currentPayment!.paymentId),
-    refetchInterval: modalState === 'AWAITING' && currentPayment?.paymentId ? 2000 : false,
-    enabled: modalState === 'AWAITING' && Boolean(currentPayment?.paymentId),
+    refetchInterval:
+      modalState === 'AWAITING' && currentPayment?.paymentId && selectedMethod === 'PAYOS' ? 2000 : false,
+    enabled: modalState === 'AWAITING' && Boolean(currentPayment?.paymentId) && selectedMethod === 'PAYOS',
   })
 
   // Watch polled status changes
@@ -129,6 +130,7 @@ export function PaymentModal({
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['my-reservations'] })
       queryClient.invalidateQueries({ queryKey: ['rental-detail', String(reservationId)] })
+      queryClient.invalidateQueries({ queryKey: ['task-detail'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       queryClient.invalidateQueries({ queryKey: ['unread-notifications-count'] })
 
@@ -146,7 +148,7 @@ export function PaymentModal({
     }
   }, [polledPayment, modalState, amount, unitCode, reservationId, showToast, queryClient, onSuccess])
 
-  // Mutation to create payment link
+  // Mutation to create payment
   const createPaymentMutation = useMutation({
     mutationFn: (methodToUse: PaymentMethod) =>
       createPaymentLink({
@@ -160,7 +162,7 @@ export function PaymentModal({
       if (data.status === 'SUCCEEDED') {
         setModalState('SUCCESS')
         showToast(
-          `Payment of ${formatMoney(amount)} confirmed! Unit ${formatUnitCode(unitCode)} is reserved.`,
+          `Payment of ${formatMoney(amount)} confirmed!`,
           'success'
         )
         onSuccess?.(data)
@@ -176,8 +178,34 @@ export function PaymentModal({
     },
   })
 
+  // Mutation for staff cash receipt confirmation
+  const confirmCashMutation = useMutation({
+    mutationFn: (paymentId: number) => confirmCashPayment(paymentId),
+    onSuccess: (data) => {
+      setModalState('SUCCESS')
+      showToast(
+        `Cash payment of ${formatMoney(amount)} confirmed!`,
+        'success'
+      )
+      queryClient.invalidateQueries({ queryKey: ['my-reservations'] })
+      queryClient.invalidateQueries({ queryKey: ['rental-detail', String(reservationId)] })
+      queryClient.invalidateQueries({ queryKey: ['task-detail'] })
+      onSuccess?.(data)
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || 'Failed to confirm cash receipt. Please try again.'
+      showToast(msg, 'error')
+    },
+  })
+
   const handleStartPayment = () => {
     createPaymentMutation.mutate(selectedMethod)
+  }
+
+  const handleConfirmCash = () => {
+    if (currentPayment?.paymentId) {
+      confirmCashMutation.mutate(currentPayment.paymentId)
+    }
   }
 
   const handleCancelPayment = useCallback(async () => {
@@ -212,6 +240,8 @@ export function PaymentModal({
     DAMAGE_FEE: 'Damage Fee Settlement',
     EXTRA_FEE: 'Extra Fee Settlement',
   }
+
+  const isCash = selectedMethod === 'CASH' || currentPayment?.method === 'CASH'
 
   return (
     <ModalRoot open={open} onOpenChange={isAwaiting ? () => {} : onOpenChange}>
@@ -297,7 +327,7 @@ export function PaymentModal({
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-sh-ink flex items-center gap-2">
-                            {isPayOS ? 'PayOS QR Payment' : 'Cash at Counter'}
+                            {isPayOS ? 'PayOS QR Payment' : 'Cash at Desk'}
                             {isPayOS && (
                               <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">
                                 Instant
@@ -312,9 +342,13 @@ export function PaymentModal({
                         </div>
                       </div>
 
-                      {isPayOS && (
+                      {isPayOS ? (
                         <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-100/70 px-2 py-0.5 rounded">
                           PayOS
+                        </span>
+                      ) : (
+                        <span className="font-mono text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
+                          CASH
                         </span>
                       )}
                     </div>
@@ -334,14 +368,70 @@ export function PaymentModal({
                 data-testid="pay-with-qr-btn"
                 className="font-bold"
               >
-                Pay with QR ({formatMoney(amount)})
+                {selectedMethod === 'CASH'
+                  ? `Pay with Cash (${formatMoney(amount)})`
+                  : `Pay with QR (${formatMoney(amount)})`}
               </Button>
             </ModalFooter>
           </>
         )}
 
-        {/* State 2: AWAITING (QR & Polling) */}
-        {modalState === 'AWAITING' && (
+        {/* State 2: AWAITING (QR or Cash Desk) */}
+        {modalState === 'AWAITING' && isCash && (
+          <>
+            <ModalHeader showClose={false}>
+              <div className="flex items-center justify-between pr-2">
+                <ModalTitle>Cash Collection at Desk</ModalTitle>
+                <span className="font-mono text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">
+                  CASH
+                </span>
+              </div>
+              <ModalDescription>
+                Collect cash from customer and confirm once received in full.
+              </ModalDescription>
+            </ModalHeader>
+
+            <div className="space-y-4 text-center">
+              <div className="p-5 bg-sh-surface-muted border border-sh-border rounded-sh-md space-y-2 text-center">
+                <span className="text-xs text-sh-muted uppercase tracking-wider block">
+                  Amount to Collect
+                </span>
+                <span className="font-mono text-3xl font-bold text-sh-ink tabular-nums block">
+                  {formatMoney(amount)}
+                </span>
+                <p className="text-xs text-sh-ink-secondary">
+                  Unit: <span className="font-mono font-semibold">{formatUnitCode(unitCode)}</span> • Order #{currentPayment?.orderCode || reservationId}
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-sh-md text-xs text-amber-900 text-left">
+                <span className="font-semibold block mb-0.5">Staff Verification Requirement:</span>
+                Verify banknote authenticity and amount. Clicking "Cash received" will record the transaction and generate the official CASH receipt.
+              </div>
+            </div>
+
+            <ModalFooter>
+              <Button
+                variant="secondary"
+                onClick={handleCancelPayment}
+                data-testid="cancel-payment-btn"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleConfirmCash}
+                isLoading={confirmCashMutation.isPending}
+                data-testid="confirm-cash-btn"
+                className="font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                Cash received ({formatMoney(amount)})
+              </Button>
+            </ModalFooter>
+          </>
+        )}
+
+        {modalState === 'AWAITING' && !isCash && (
           <>
             <ModalHeader showClose={false}>
               <div className="flex items-center justify-between pr-2">

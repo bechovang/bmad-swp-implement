@@ -2,14 +2,16 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getRentalDetail } from '../../api/rental'
-import { getContractByReservation } from '../../api/contract'
+import { getContractByReservation, getContractChain } from '../../api/contract'
 import type { ReservationStatus, PaymentStatus } from '../../types/rental'
+import type { ContractDto } from '../../types/contract'
 import { Card } from '../../components/ui/Card'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table'
 import { CheckInPassModal } from '../../components/rentals/CheckInPassModal'
+import { ExtensionModal } from '../../components/rentals/ExtensionModal'
 import { PaymentModal } from '../../components/payment/PaymentModal'
 import { ContractPreviewCard } from '../../components/contract/ContractPreviewCard'
 import { formatMoney, formatUnitCode } from '../../lib/format'
@@ -75,6 +77,8 @@ export function RentalDetailPage() {
   const navigate = useNavigate()
   const [showPassModal, setShowPassModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showExtensionModal, setShowExtensionModal] = useState(false)
+  const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
 
   const { data: reservation, isLoading, isError, refetch } = useQuery({
     queryKey: ['rental-detail', id],
@@ -82,12 +86,23 @@ export function RentalDetailPage() {
     enabled: Boolean(id),
   })
 
-  const { data: contract, refetch: refetchContract } = useQuery({
+  const { data: contractChain, refetch: refetchContractChain } = useQuery<ContractDto[]>({
+    queryKey: ['contract-chain', reservation?.id],
+    queryFn: () => getContractChain(reservation!.id),
+    enabled: Boolean(reservation?.id),
+    retry: false,
+  })
+
+  const { data: latestContract, refetch: refetchLatestContract } = useQuery({
     queryKey: ['contract-reservation', reservation?.id],
     queryFn: () => getContractByReservation(reservation!.id),
     enabled: Boolean(reservation?.id),
     retry: false,
   })
+
+  const displayedContract = selectedContractId
+    ? contractChain?.find((c) => c.id === selectedContractId) || latestContract
+    : latestContract
 
   if (isLoading) {
     return (
@@ -130,6 +145,9 @@ export function RentalDetailPage() {
   const isReserved = reservation.status === 'RESERVED'
   const isCheckedIn = reservation.status === 'CHECKED_IN'
   const isPendingPayment = reservation.status === 'PENDING_PAYMENT'
+  const todayStr = new Date().toISOString().split('T')[0]
+  const isPastEndDate = Boolean(reservation.endDate && reservation.endDate < todayStr)
+  const canExtend = isCheckedIn && !isPastEndDate
   const payments = reservation.payments || []
 
   return (
@@ -160,16 +178,28 @@ export function RentalDetailPage() {
             </p>
           </div>
 
-          {isReserved && (
-            <Button variant="primary" size="sm" onClick={() => setShowPassModal(true)}>
-              View Check-in Pass
-            </Button>
-          )}
-          {isPendingPayment && (
-            <Button variant="primary" size="sm" onClick={() => setShowPaymentModal(true)}>
-              Pay Deposit Now
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {canExtend && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowExtensionModal(true)}
+                data-testid="extend-rental-btn"
+              >
+                Extend Rental
+              </Button>
+            )}
+            {isReserved && (
+              <Button variant="primary" size="sm" onClick={() => setShowPassModal(true)}>
+                View Check-in Pass
+              </Button>
+            )}
+            {isPendingPayment && (
+              <Button variant="primary" size="sm" onClick={() => setShowPaymentModal(true)}>
+                Pay Deposit Now
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -399,10 +429,34 @@ export function RentalDetailPage() {
         </Card>
       </div>
 
-      {/* Contract Agreement Preview (Story 3.1) */}
-      {contract && (
-        <div className="pt-2">
-          <ContractPreviewCard contract={contract} />
+      {/* Contract Agreement Preview & Chain History (Story 3.1 & 3.4) */}
+      {displayedContract && (
+        <div className="pt-2 space-y-3">
+          {contractChain && contractChain.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-xs font-semibold text-sh-muted uppercase tracking-wider">
+                Contract Revisions:
+              </span>
+              {contractChain.map((c, index) => {
+                const isSelected = displayedContract.id === c.id
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedContractId(c.id)}
+                    className={`px-2.5 py-1 text-xs rounded-sh-sm font-medium transition-colors cursor-pointer border ${
+                      isSelected
+                        ? 'bg-sh-primary text-sh-surface border-sh-primary'
+                        : 'bg-sh-surface text-sh-muted border-sh-border hover:text-sh-ink'
+                    }`}
+                  >
+                    Rev {index + 1} ({c.code}) · {c.status}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          <ContractPreviewCard contract={displayedContract} />
         </div>
       )}
 
@@ -424,7 +478,21 @@ export function RentalDetailPage() {
           purpose="DEPOSIT"
           onSuccess={() => {
             refetch()
-            refetchContract()
+            refetchLatestContract()
+            refetchContractChain()
+          }}
+        />
+      )}
+
+      {/* Extension Modal (Story 4.1) */}
+      {reservation && (
+        <ExtensionModal
+          open={showExtensionModal}
+          onOpenChange={setShowExtensionModal}
+          reservation={reservation}
+          onProceedToPayment={() => {
+            setShowExtensionModal(false)
+            refetch()
           }}
         />
       )}

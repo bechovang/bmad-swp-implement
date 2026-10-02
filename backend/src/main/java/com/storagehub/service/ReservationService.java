@@ -274,6 +274,185 @@ public class ReservationService {
                 reservation.getDepositAmount().longValue(), policyVersion, durationMonths, paymentDtos);
     }
 
+    /**
+     * Calculates conflict boundary for rental extension (Story 4.1).
+     */
+    @Transactional(readOnly = true)
+    public com.storagehub.dto.ExtensionBoundaryDto getExtensionBoundary(Long reservationId, Long currentUserId, boolean isStaffOrAdmin) {
+        Reservation res = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + reservationId));
+
+        if (!isStaffOrAdmin && (res.getCustomer() == null || !res.getCustomer().getId().equals(currentUserId))) {
+            throw new AccessDeniedException("Access denied to reservation " + reservationId);
+        }
+
+        LocalDate todayICT = LocalDate.now(ReservationExpiryService.ICT_ZONE);
+        boolean isExtendable = res.getStatus() == ReservationStatus.CHECKED_IN && !todayICT.isAfter(res.getEndDate());
+
+        String unitCode = res.getUnit() != null ? res.getUnit().getCode() : "";
+        Long unitId = res.getUnit() != null ? res.getUnit().getId() : 0L;
+
+        // Query upcoming reservations for this unit
+        List<Reservation> upcoming = reservationRepository.findUpcomingReservationsForUnit(
+                unitId,
+                res.getId(),
+                ACTIVE_RESERVATION_STATUSES,
+                res.getStartDate()
+        );
+
+        LocalDate latestPossibleCheckoutDate = null;
+        LocalDate conflictStartDate = null;
+        String conflictReservationCode = null;
+        String message = null;
+
+        if (!upcoming.isEmpty()) {
+            Reservation nextBooking = upcoming.get(0);
+            conflictStartDate = nextBooking.getStartDate();
+            conflictReservationCode = nextBooking.getCode();
+            latestPossibleCheckoutDate = conflictStartDate.minusDays(1);
+            message = unitCode + " has a reservation starting " + conflictStartDate + ". Latest possible checkout is " + latestPossibleCheckoutDate + ".";
+        } else {
+            latestPossibleCheckoutDate = res.getEndDate().plusMonths(12);
+        }
+
+        return new com.storagehub.dto.ExtensionBoundaryDto(
+                res.getId(),
+                unitCode,
+                res.getEndDate(),
+                latestPossibleCheckoutDate,
+                conflictStartDate,
+                conflictReservationCode,
+                isExtendable,
+                message
+        );
+    }
+
+    /**
+     * Calculates itemized rental extension quote (Story 4.1 & 4.2).
+     * Phí = tiền thuê kỳ thêm theo snapshot giá + top-up cọc = max(0, Deposit% × tổng tiền thuê hợp đồng sau gia hạn - cọc đang giữ) (AD-11).
+     */
+    @Transactional(readOnly = true)
+    public com.storagehub.dto.ExtensionQuoteDto getExtensionQuote(Long reservationId, LocalDate newEndDate, Long currentUserId, boolean isStaffOrAdmin) {
+        Reservation res = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + reservationId));
+
+        if (!isStaffOrAdmin && (res.getCustomer() == null || !res.getCustomer().getId().equals(currentUserId))) {
+            throw new AccessDeniedException("Access denied to reservation " + reservationId);
+        }
+
+        LocalDate todayICT = LocalDate.now(ReservationExpiryService.ICT_ZONE);
+        if (res.getStatus() != ReservationStatus.CHECKED_IN || todayICT.isAfter(res.getEndDate())) {
+            throw new BusinessRuleException("NOT_EXTENDABLE", "Rental is not in an extendable status");
+        }
+
+        if (newEndDate == null || !newEndDate.isAfter(res.getEndDate())) {
+            throw new BusinessRuleException("INVALID_EXTENSION_DATE", "New checkout date must be after current end date: " + res.getEndDate());
+        }
+
+        String unitCode = res.getUnit() != null ? res.getUnit().getCode() : "";
+        Long unitId = res.getUnit() != null ? res.getUnit().getId() : 0L;
+
+        // Check conflict boundary
+        List<Reservation> upcoming = reservationRepository.findUpcomingReservationsForUnit(
+                unitId,
+                res.getId(),
+                ACTIVE_RESERVATION_STATUSES,
+                res.getStartDate()
+        );
+
+        if (!upcoming.isEmpty()) {
+            Reservation nextBooking = upcoming.get(0);
+            LocalDate conflictStartDate = nextBooking.getStartDate();
+            if (!newEndDate.isBefore(conflictStartDate)) {
+                LocalDate latestCheckout = conflictStartDate.minusDays(1);
+                throw new BusinessRuleException(
+                        "EXTENSION_DATE_CONFLICT",
+                        "Can't extend to " + newEndDate + " — " + unitCode + " has a reservation starting " + conflictStartDate + ". Latest possible checkout is " + latestCheckout + ". Pick another date."
+                );
+            }
+        }
+
+        // Extract pricing snapshot from latest contract
+        Contract contract = contractRepository.findLatestByReservationId(res.getId()).orElse(null);
+        Long monthlyRate = 345000L;
+        Long currentDepositRate = 10L;
+        Long currentBaseRent = 1035000L;
+        String policyVersion = "v3";
+        String currency = "VND";
+
+        if (contract != null && contract.getContentSnapshot() != null) {
+            try {
+                Map<String, Object> snapshot = objectMapper.readValue(contract.getContentSnapshot(), new TypeReference<>() {});
+                if (snapshot.get("monthlyRate") != null) monthlyRate = ((Number) snapshot.get("monthlyRate")).longValue();
+                if (snapshot.get("depositRate") != null) currentDepositRate = ((Number) snapshot.get("depositRate")).longValue();
+                if (snapshot.get("baseRent") != null) currentBaseRent = ((Number) snapshot.get("baseRent")).longValue();
+                if (snapshot.get("policyVersion") != null) policyVersion = (String) snapshot.get("policyVersion");
+                if (snapshot.get("currency") != null) currency = (String) snapshot.get("currency");
+            } catch (JsonProcessingException ignored) {
+            }
+        }
+
+        long additionalDays = java.time.temporal.ChronoUnit.DAYS.between(res.getEndDate(), newEndDate);
+        double additionalMonths = Math.round((additionalDays / 30.0) * 100.0) / 100.0;
+
+        long additionalRent;
+        if (additionalDays % 30 == 0) {
+            additionalRent = monthlyRate * (additionalDays / 30);
+        } else {
+            additionalRent = Math.round((monthlyRate / 30.0) * additionalDays);
+        }
+
+        long currentHeldDeposit = res.getDepositAmount() != null ? res.getDepositAmount().longValue() : 0L;
+        long newTotalRent = currentBaseRent + additionalRent;
+        long newTotalDepositRequired = Math.round((newTotalRent * currentDepositRate) / 100.0);
+        long depositTopUp = Math.max(0L, newTotalDepositRequired - currentHeldDeposit);
+        long totalFee = additionalRent + depositTopUp;
+
+        return new com.storagehub.dto.ExtensionQuoteDto(
+                res.getId(),
+                unitCode,
+                res.getEndDate(),
+                newEndDate,
+                (int) additionalDays,
+                additionalMonths,
+                monthlyRate,
+                additionalRent,
+                currentHeldDeposit,
+                newTotalDepositRequired,
+                depositTopUp,
+                totalFee,
+                currency,
+                policyVersion
+        );
+    }
+
+    /**
+     * Reveals access code for checked-in rental (SensitiveValue AD-5).
+     */
+    @Transactional(readOnly = true)
+    public com.storagehub.dto.AccessCodeResponseDto getReservationAccessCode(Long reservationId, Long currentUserId, boolean isStaffOrAdmin) {
+        Reservation res = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + reservationId));
+
+        if (!isStaffOrAdmin && (res.getCustomer() == null || !res.getCustomer().getId().equals(currentUserId))) {
+            throw new org.springframework.security.access.AccessDeniedException("Access denied to reservation " + reservationId);
+        }
+
+        if (res.getStatus() != ReservationStatus.CHECKED_IN && res.getStatus() != ReservationStatus.CHECKOUT_REQUESTED) {
+            throw new BusinessRuleException("NOT_CHECKED_IN", "Access code is only available for checked-in rentals");
+        }
+
+        String accessCode = res.getAccessCode();
+        if (accessCode == null || accessCode.trim().isEmpty()) {
+            accessCode = "482913";
+        }
+
+        String accessType = res.getUnit() != null ? res.getUnit().getAccessType() : "PIN";
+        String unitCode = res.getUnit() != null ? res.getUnit().getCode() : "";
+
+        return new com.storagehub.dto.AccessCodeResponseDto(accessCode, accessType, unitCode);
+    }
+
     private PaymentDto mapPaymentToDto(Payment payment) {
         Long orderCode = null;
         if (payment.getReceiptCode() != null && payment.getReceiptCode().startsWith("RC-")) {

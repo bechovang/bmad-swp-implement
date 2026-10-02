@@ -8,19 +8,27 @@ import type {
   ApiError,
   AuthUser,
 } from '../types/auth'
-import type { CreateReservationRequest, ReservationDto } from '../types/reservation'
+import type { CreateReservationRequest, ReservationDto, AccessCodeResponseDto } from '../types/reservation'
 import type {
   CreatePaymentRequest,
   PaymentResponseDto,
   PaymentDto,
   PaymentStatus,
 } from '../types/payment'
-import type { ContractDto } from '../types/contract'
+import type { ContractDto, SignContractRequest } from '../types/contract'
 import type {
   TaskDto,
   CreateTaskRequest,
   UpdateTaskStatusRequest,
+  ValidateCheckInRequest,
+  CheckInValidationDto,
+  CheckInActivationDto,
 } from '../types/task'
+import type {
+  ExtensionBoundaryDto,
+  ExtensionQuoteRequest,
+  ExtensionQuoteDto,
+} from '../types/extension'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -630,6 +638,66 @@ export const handlers = [
     return HttpResponse.json(newContract, { status: 200 })
   }),
 
+  http.post('/api/v1/contracts/:id/print', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const contract = mockContractsList.find((c) => c.id === id)
+    if (!contract) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Contract ${id} not found` }, { status: 404 })
+    }
+    if (contract.status === 'DRAFT') {
+      contract.status = 'PRINTED'
+    }
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
+  http.post('/api/v1/contracts/:id/sign', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const contract = mockContractsList.find((c) => c.id === id)
+    if (!contract) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Contract ${id} not found` }, { status: 404 })
+    }
+
+    const body = (await request.json()) as SignContractRequest
+    if (!body || !body.signedPhotoUrl || !body.signedPhotoUrl.trim()) {
+      return HttpResponse.json({ code: 'VALIDATION_FAILED', message: 'Signed photo URL is required' }, { status: 400 })
+    }
+
+    contract.signedPhotoUrl = body.signedPhotoUrl.trim()
+    contract.status = 'SIGNED'
+
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
+  http.get('/api/v1/contracts/reservation/:reservationId/chain', ({ params }) => {
+    const reservationId = parseInt(params.reservationId as string, 10)
+    const contracts = mockContractsList
+      .filter((c) => c.reservationId === reservationId)
+      .sort((a, b) => a.id - b.id)
+
+    return HttpResponse.json(contracts, { status: 200 })
+  }),
+
+  // ------------------------------------------------------------ Attachments (AD-10)
+  http.post('/api/v1/attachments', async () => {
+    const mockFileUrl = `/api/v1/attachments/signed-contract-${Date.now()}.jpg`
+    return HttpResponse.json(
+      {
+        fileUrl: mockFileUrl,
+        fileName: `signed-contract-${Date.now()}.jpg`,
+        size: 204800,
+        contentType: 'image/jpeg',
+      },
+      { status: 201 }
+    )
+  }),
+
+  http.get('/api/v1/attachments/:filename', () => {
+    return new HttpResponse(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+      status: 200,
+      headers: { 'Content-Type': 'image/jpeg' },
+    })
+  }),
+
   // ------------------------------------------------------------ Tasks (3.2)
   http.get('/api/v1/tasks', ({ request }) => {
     const url = new URL(request.url)
@@ -697,6 +765,54 @@ export const handlers = [
       )
     }
 
+    if (body.status === 'DONE' && task.type === 'CHECK_IN') {
+      const resCode = task.refCode
+      const reservation = mockReservationsList.find((r) => r.code === resCode || (resCode === 'BK-1042' && r.id === 1))
+      if (reservation) {
+        const rentPayment = mockPaymentsList.find(
+          (p) => p.reservationId === reservation.id && p.purpose === 'RENT' && p.status === 'SUCCEEDED'
+        )
+        if (!rentPayment) {
+          return HttpResponse.json(
+            {
+              code: 'CLOSING_STEP_MISSING',
+              message: 'Rent payment is still pending on this check-in.',
+              missingStep: 'RENT_PAYMENT_PENDING',
+              stepLabel: 'Rent payment is still pending on this check-in.',
+            },
+            { status: 409 }
+          )
+        }
+
+        const contract = mockContractsList.find(
+          (c) => (c.reservationId === reservation.id || c.reservationCode === reservation.code) && (c.status === 'SIGNED' || c.status === 'ACTIVE')
+        )
+        if (!contract) {
+          return HttpResponse.json(
+            {
+              code: 'CLOSING_STEP_MISSING',
+              message: 'Contract signature is required before completing check-in.',
+              missingStep: 'CONTRACT_UNSIGNED',
+              stepLabel: 'Contract signature is required before completing check-in.',
+            },
+            { status: 409 }
+          )
+        }
+
+        if (reservation.status !== 'CHECKED_IN') {
+          return HttpResponse.json(
+            {
+              code: 'CLOSING_STEP_MISSING',
+              message: 'Access code handover and check-in activation are required before completing check-in.',
+              missingStep: 'CHECKIN_NOT_ACTIVATED',
+              stepLabel: 'Access code handover and check-in activation are required before completing check-in.',
+            },
+            { status: 409 }
+          )
+        }
+      }
+    }
+
     task.status = body.status
     return HttpResponse.json(task, { status: 200 })
   }),
@@ -723,6 +839,245 @@ export const handlers = [
 
     mockTasksList.push(newTask)
     return HttpResponse.json(newTask, { status: 201 })
+  }),
+
+  // Check-in task validation (3.3)
+  http.post('/api/v1/tasks/:id/validate-reservation', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const task = mockTasksList.find((t) => t.id === id)
+    if (!task) {
+      return HttpResponse.json(
+        { code: 'NOT_FOUND', message: `Task ${id} not found` },
+        { status: 404 }
+      )
+    }
+
+    const body = (await request.json()) as ValidateCheckInRequest
+    if (!body || !body.reservationCode || !body.reservationCode.trim()) {
+      return HttpResponse.json(
+        { code: 'VALIDATION_FAILED', message: 'Reservation code is required' },
+        { status: 400 }
+      )
+    }
+
+    const code = body.reservationCode.trim()
+    if (code === 'BK-UNPAID') {
+      return HttpResponse.json(
+        { code: 'DEPOSIT_UNPAID', message: `Cannot proceed to check-in because deposit is not paid for reservation ${code}` },
+        { status: 409 }
+      )
+    }
+
+    const reservation = mockReservationsList.find((r) => r.code === code || (code === 'BK-1042' && r.id === 1))
+    if (!reservation) {
+      return HttpResponse.json(
+        { code: 'NOT_FOUND', message: `Reservation ${code} not found` },
+        { status: 404 }
+      )
+    }
+
+    if (reservation.status === 'PENDING_PAYMENT') {
+      return HttpResponse.json(
+        { code: 'DEPOSIT_UNPAID', message: `Deposit has not been paid for reservation ${code}` },
+        { status: 409 }
+      )
+    }
+
+    if (reservation.status === 'EXPIRED') {
+      return HttpResponse.json(
+        { code: 'RESERVATION_EXPIRED', message: `Reservation ${code} has expired` },
+        { status: 409 }
+      )
+    }
+
+    if (reservation.status !== 'RESERVED') {
+      return HttpResponse.json(
+        { code: 'INVALID_RESERVATION_STATUS', message: `Reservation ${code} is in ${reservation.status} status and cannot be checked in` },
+        { status: 409 }
+      )
+    }
+
+    const depositPayment = mockPaymentsList.find(
+      (p) => p.reservationId === reservation.id && p.purpose === 'DEPOSIT' && p.status === 'SUCCEEDED'
+    )
+
+    if (!depositPayment) {
+      return HttpResponse.json(
+        { code: 'DEPOSIT_UNPAID', message: `Deposit has not been paid for reservation ${code}` },
+        { status: 409 }
+      )
+    }
+
+    const rentPayment = mockPaymentsList.find(
+      (p) => p.reservationId === reservation.id && p.purpose === 'RENT' && p.status === 'SUCCEEDED'
+    )
+
+    const response: CheckInValidationDto = {
+      valid: true,
+      errorCode: null,
+      errorMessage: null,
+      taskId: id,
+      reservationId: reservation.id,
+      reservationCode: reservation.code,
+      customerName: reservation.customerName,
+      unitCode: reservation.unitCode,
+      depositAmountPaid: depositPayment.amount,
+      totalRentDue: reservation.totalRent || (depositPayment.amount * 10),
+      depositReceiptCode: depositPayment.receiptCode,
+      rentPaid: Boolean(rentPayment),
+      rentReceiptCode: rentPayment ? rentPayment.receiptCode : null,
+      status: reservation.status,
+    }
+
+    return HttpResponse.json(response, { status: 200 })
+  }),
+
+  // Activate check-in & reveal access code (Story 3.4)
+  http.post('/api/v1/tasks/:id/activate-checkin', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const task = mockTasksList.find((t) => t.id === id)
+    if (!task) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Task ${id} not found` }, { status: 404 })
+    }
+
+    const code = task.refCode || 'BK-1042'
+    const res = mockReservationsList.find((r) => r.code === code || (code === 'BK-1042' && r.id === 1))
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${code} not found` }, { status: 404 })
+    }
+
+    const accessCode = res.accessCode || '482913'
+    res.accessCode = accessCode
+    res.status = 'CHECKED_IN'
+
+    const contract = mockContractsList.find((c) => c.reservationId === res.id && c.isLatest === 1)
+    if (contract) {
+      contract.status = 'ACTIVE'
+    }
+
+    task.status = 'DONE'
+
+    const response: CheckInActivationDto = {
+      accessCode,
+      reservationCode: res.code,
+      reservationId: res.id,
+      unitCode: res.unitCode,
+      reservationStatus: 'CHECKED_IN',
+      unitStatus: 'RENTED',
+      taskStatus: 'DONE',
+    }
+
+    return HttpResponse.json(response, { status: 200 })
+  }),
+
+  http.get('/api/v1/reservations/:id/access-code', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${id} not found` }, { status: 404 })
+    }
+
+    const response: AccessCodeResponseDto = {
+      accessCode: res.accessCode || '482913',
+      accessType: res.accessType || 'PIN',
+      unitCode: res.unitCode,
+    }
+
+    return HttpResponse.json(response, { status: 200 })
+  }),
+
+  // Extension Boundary & Quote (Story 4.1)
+  http.get('/api/v1/reservations/:id/extension-boundary', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${id} not found` }, { status: 404 })
+    }
+
+    // Check conflict against mock upcoming reservations on same unit
+    let latestPossibleCheckoutDate: string | null = null
+    let conflictStartDate: string | null = null
+    let conflictReservationCode: string | null = null
+
+    // For Unit M-5 or custom tests: if there's a conflict scheduled
+    if (res.unitCode === 'M-5' || res.unitCode === 'S-3-CONFLICT') {
+      conflictStartDate = '2027-01-15'
+      conflictReservationCode = 'BK-UPCOMING-99'
+      const d = new Date(conflictStartDate)
+      d.setDate(d.getDate() - 1)
+      latestPossibleCheckoutDate = d.toISOString().split('T')[0]
+    }
+
+    const response: ExtensionBoundaryDto = {
+      rentalId: res.id,
+      unitCode: res.unitCode,
+      currentEndDate: res.endDate,
+      latestPossibleCheckoutDate,
+      conflictStartDate,
+      conflictReservationCode,
+      isExtendable: res.status === 'CHECKED_IN',
+      message: latestPossibleCheckoutDate
+        ? `Upcoming reservation starts ${conflictStartDate}. Latest checkout is ${latestPossibleCheckoutDate}.`
+        : 'No upcoming reservation conflict for this unit.',
+    }
+
+    return HttpResponse.json(response, { status: 200 })
+  }),
+
+  http.post('/api/v1/reservations/:id/extension-quote', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${id} not found` }, { status: 404 })
+    }
+
+    const body = (await request.json()) as ExtensionQuoteRequest
+    const newEndDate = body.newEndDate
+
+    // Check conflict boundary
+    if (
+      (res.unitCode === 'M-5' || res.unitCode === 'S-3-CONFLICT') &&
+      newEndDate > '2027-01-14'
+    ) {
+      return HttpResponse.json(
+        {
+          code: 'EXTENSION_DATE_CONFLICT',
+          message: `Can't extend to ${newEndDate} — ${res.unitCode} has a reservation starting 2027-01-15. Latest possible checkout is 2027-01-14. Pick another date.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    const currentEnd = new Date(res.endDate)
+    const newEnd = new Date(newEndDate)
+    const diffTime = newEnd.getTime() - currentEnd.getTime()
+    const additionalDays = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)))
+    const monthlyRate = res.monthlyRate || 690000
+    const additionalRent = Math.round((monthlyRate / 30) * additionalDays)
+    const currentHeldDeposit = res.depositAmount || 207000
+    const totalRentAfter = (res.baseRent || 2070000) + additionalRent
+    const newTotalDepositRequired = Math.round(totalRentAfter * 0.1)
+    const depositTopUp = Math.max(0, newTotalDepositRequired - currentHeldDeposit)
+    const totalFee = additionalRent + depositTopUp
+
+    const quote: ExtensionQuoteDto = {
+      rentalId: res.id,
+      unitCode: res.unitCode,
+      currentEndDate: res.endDate,
+      newEndDate,
+      additionalDays,
+      additionalMonths: Math.ceil(additionalDays / 30),
+      monthlyRate,
+      additionalRent,
+      currentHeldDeposit,
+      newTotalDepositRequired,
+      depositTopUp,
+      totalFee,
+      currency: 'VND',
+      policyVersion: res.policyVersion || 'v3',
+    }
+
+    return HttpResponse.json(quote, { status: 200 })
   }),
 ]
 

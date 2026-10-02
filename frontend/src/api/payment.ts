@@ -20,3 +20,8 @@ export async function cancelPayment(id: number | string): Promise<void> {
     // Gracefully handle if cancel endpoint is optional / simulated
   }
 }
+
+export async function confirmCashPayment(id: number | string): Promise<PaymentDto> {
+  const response = await apiClient.post<PaymentDto>(`/payments/${id}/confirm-cash`)
+  return response.data
+}

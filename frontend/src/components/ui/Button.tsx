@@ -8,6 +8,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: ButtonVariant
   size?: ButtonSize
   isLoading?: boolean
+  loading?: boolean
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -18,12 +19,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'default',
       isLoading = false,
+      loading = false,
       disabled,
       children,
       ...props
     },
     ref
   ) => {
+    const isSpinnerActive = isLoading || loading
     const baseStyles =
       'inline-flex items-center justify-center font-semibold rounded-sh-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sh-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none text-[13px] leading-none'
 
@@ -44,18 +47,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       page: 'h-[40px] px-4',
     }
 
-    const isDisabled = disabled || isLoading
+    const isDisabled = disabled || isSpinnerActive
 
     return (
       <button
         ref={ref}
         type={type}
         disabled={isDisabled}
-        aria-busy={isLoading}
+        aria-busy={isSpinnerActive}
         className={cn(baseStyles, variantStyles[variant], sizeStyles[size], className)}
         {...props}
       >
-        {isLoading && (
+        {isSpinnerActive && (
           <>
             <svg
               className="animate-spin -ml-1 mr-2 h-4 w-4"

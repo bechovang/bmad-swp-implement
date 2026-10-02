@@ -20,7 +20,6 @@ import {
   ReportsPage,
   UserManagementPage,
   LoginHistoryPage,
-  TaskDetailPage,
   SupportTicketDetailPage,
   EscalationDetailPage,
   PolicyEditorPage,
@@ -31,6 +30,7 @@ import { BookingSummaryPage } from '../pages/booking/BookingSummaryPage'
 import { MyRentalsPage } from '../pages/rentals/MyRentalsPage'
 import { RentalDetailPage } from '../pages/rentals/RentalDetailPage'
 import { TaskBoardPage } from '../pages/staff/TaskBoardPage'
+import { TaskDetailPage } from '../pages/staff/TaskDetailPage'
 
 import { RootRedirect } from './RootRedirect'
 

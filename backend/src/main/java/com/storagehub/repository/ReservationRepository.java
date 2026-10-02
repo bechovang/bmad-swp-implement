@@ -54,4 +54,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("status") ReservationStatus status,
             @Param("date") LocalDate date
     );
+
+    @Query("SELECT r FROM Reservation r WHERE r.unit.id = :unitId AND r.id <> :excludeReservationId AND r.status IN :statuses AND r.startDate >= :afterDate ORDER BY r.startDate ASC")
+    List<Reservation> findUpcomingReservationsForUnit(
+            @Param("unitId") Long unitId,
+            @Param("excludeReservationId") Long excludeReservationId,
+            @Param("statuses") Collection<ReservationStatus> statuses,
+            @Param("afterDate") LocalDate afterDate
+    );
 }

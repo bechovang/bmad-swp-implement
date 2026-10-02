@@ -40,3 +40,10 @@ export interface ReservationDto {
   payments?: import('./rental').PaymentDto[]
 }
 
+export interface AccessCodeResponseDto {
+  accessCode: string
+  accessType: string
+  unitCode: string
+}
+
+

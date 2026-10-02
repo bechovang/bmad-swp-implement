@@ -55,6 +55,40 @@ public class ReservationController {
         return ResponseEntity.ok(reservationDto);
     }
 
+    @GetMapping("/{id}/access-code")
+    public ResponseEntity<com.storagehub.dto.AccessCodeResponseDto> getReservationAccessCode(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long currentUserId = getCurrentUserId(authentication);
+        boolean isStaffOrAdmin = isStaffOrAdmin(authentication);
+        com.storagehub.dto.AccessCodeResponseDto accessCodeDto = reservationService.getReservationAccessCode(id, currentUserId, isStaffOrAdmin);
+        return ResponseEntity.ok(accessCodeDto);
+    }
+
+    @GetMapping("/{id}/extension-boundary")
+    public ResponseEntity<com.storagehub.dto.ExtensionBoundaryDto> getExtensionBoundary(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long currentUserId = getCurrentUserId(authentication);
+        boolean isStaffOrAdmin = isStaffOrAdmin(authentication);
+        com.storagehub.dto.ExtensionBoundaryDto boundaryDto = reservationService.getExtensionBoundary(id, currentUserId, isStaffOrAdmin);
+        return ResponseEntity.ok(boundaryDto);
+    }
+
+    @PostMapping("/{id}/extension-quote")
+    public ResponseEntity<com.storagehub.dto.ExtensionQuoteDto> getExtensionQuote(
+            @PathVariable Long id,
+            @Valid @RequestBody com.storagehub.dto.ExtensionQuoteRequest request,
+            Authentication authentication
+    ) {
+        Long currentUserId = getCurrentUserId(authentication);
+        boolean isStaffOrAdmin = isStaffOrAdmin(authentication);
+        com.storagehub.dto.ExtensionQuoteDto quoteDto = reservationService.getExtensionQuote(id, request.newEndDate(), currentUserId, isStaffOrAdmin);
+        return ResponseEntity.ok(quoteDto);
+    }
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new org.springframework.security.authentication.InsufficientAuthenticationException("User is not authenticated");

@@ -117,10 +117,12 @@ public class GlobalExceptionHandler {
                 .body(ApiError.of(ApiErrorCode.NOT_FOUND.name(), ex.getMessage()));
     }
 
-    /** Business-rule block -> 409 with the caller-chosen code. */
+    /** Business-rule block -> 409 with the caller-chosen code and structured closing step info (Story 3.5). */
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiError> onBusinessRule(BusinessRuleException ex) {
-        return ResponseEntity.status(409).body(ApiError.of(ex.getCode(), ex.getMessage()));
+        return ResponseEntity.status(409).body(
+                ApiError.of(ex.getCode(), ex.getMessage(), ex.getMissingStep(), ex.getStepLabel())
+        );
     }
 
     /**
