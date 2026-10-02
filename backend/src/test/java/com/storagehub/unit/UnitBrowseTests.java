@@ -53,6 +53,9 @@ class UnitBrowseTests {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private com.storagehub.service.ReservationExpiryService reservationExpiryService;
+
     private UnitService unitService;
 
     private RentalPolicy activePolicy;
@@ -68,7 +71,7 @@ class UnitBrowseTests {
 
     @BeforeEach
     void setUp() {
-        unitService = new UnitService(unitRepository, pricingEngine, policyRuleRepository, reservationRepository);
+        unitService = new UnitService(unitRepository, pricingEngine, policyRuleRepository, reservationRepository, reservationExpiryService);
 
         activePolicy = new RentalPolicy("v3", LocalDate.of(2026, 10, 1), PolicyStatus.ACTIVE);
         facility = new Facility("Tan Binh Depot", "45 Nguyen Van Troi", "02839991122", 1);

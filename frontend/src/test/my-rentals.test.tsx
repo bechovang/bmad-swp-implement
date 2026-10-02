@@ -150,4 +150,50 @@ describe('Story 2.5: My Rentals + Check-in Pass', () => {
       expect(screen.getByTestId('browse-units-view')).toBeInTheDocument()
     })
   })
+
+  it('renders expired no-show reservations under History tab with Expired status badge', async () => {
+    resetMockReservations([
+      {
+        id: 99,
+        code: 'BK-2026-0099',
+        customerId: 1,
+        customerName: 'Lan Nguyen',
+        unitId: 1,
+        unitCode: 'S-3',
+        unitTypeName: 'S',
+        facilityName: 'Tan Binh Depot',
+        facilityAddress: '45 Nguyen Van Troi',
+        zoneCode: 'A',
+        floor: 1,
+        sizeM2: 5.0,
+        accessType: 'PIN',
+        startDate: '2026-09-01',
+        endDate: '2026-10-01',
+        durationMonths: 1,
+        depositAmount: 103500,
+        monthlyRate: 345000,
+        baseRent: 345000,
+        totalRent: 345000,
+        policyVersion: 'v3',
+        accessCode: null,
+        status: 'EXPIRED',
+        payments: [],
+      },
+    ])
+
+    renderMyRentalsPage()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tab-history')).toHaveTextContent(/History \(1\)/i)
+    })
+
+    const historyTab = screen.getByTestId('tab-history')
+    fireEvent.mouseDown(historyTab, { button: 0 })
+    fireEvent.click(historyTab)
+
+    await waitFor(() => {
+      expect(screen.getByText('BK-2026-0099')).toBeInTheDocument()
+      expect(screen.getByText('Expired')).toBeInTheDocument()
+    })
+  })
 })

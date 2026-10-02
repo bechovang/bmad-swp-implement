@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,6 +32,8 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class UnitService {
 
+    public static final ZoneId ICT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
     private static final Set<UnitStatus> EXCLUDED_STATUSES = Set.of(
             UnitStatus.RENTED,
             UnitStatus.MAINTENANCE,
@@ -41,19 +44,25 @@ public class UnitService {
     private final PricingEngine pricingEngine;
     private final PolicyRuleRepository policyRuleRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationExpiryService reservationExpiryService;
 
     public UnitService(UnitRepository unitRepository,
                        PricingEngine pricingEngine,
                        PolicyRuleRepository policyRuleRepository,
-                       ReservationRepository reservationRepository) {
+                       ReservationRepository reservationRepository,
+                       ReservationExpiryService reservationExpiryService) {
         this.unitRepository = unitRepository;
         this.pricingEngine = pricingEngine;
         this.policyRuleRepository = policyRuleRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationExpiryService = reservationExpiryService;
     }
 
+    @Transactional
     public BrowseUnitsResponse browseUnits(String type, String size, LocalDate startDate, Integer durationMonths) {
-        LocalDate queryStartDate = (startDate != null) ? startDate : LocalDate.now();
+        reservationExpiryService.expireAllPastReservedReservations();
+
+        LocalDate queryStartDate = (startDate != null) ? startDate : LocalDate.now(ICT_ZONE);
         int duration = (durationMonths != null && durationMonths > 0) ? durationMonths : 1;
         RentalPolicy activePolicy = pricingEngine.resolveActivePolicy(queryStartDate);
 
@@ -81,7 +90,7 @@ public class UnitService {
             int turnoverBufferDays = (turnoverBufferHours > 0) ? turnoverBufferHours : 0;
 
             boolean isInCleaningBuffer = false;
-            LocalDate today = LocalDate.now();
+            LocalDate today = LocalDate.now(ICT_ZONE);
             LocalDate availableFromDate = today;
 
             if (unit.getStatus() == UnitStatus.PREPARING) {
@@ -188,12 +197,15 @@ public class UnitService {
         return new BrowseUnitsResponse(items, items.size(), totalUnits);
     }
 
+    @Transactional
     public UnitDetailDto getUnitDetail(String code) {
         Unit unit = unitRepository.findByCodeWithDetails(code)
                 .or(() -> unitRepository.findByCode(code))
                 .orElseThrow(() -> new ResourceNotFoundException("Unit " + code + " not found"));
 
-        PricingBreakdownDto baselinePricing = pricingEngine.calculatePricing(unit, 1, LocalDate.now());
+        reservationExpiryService.expirePastReservationsForUnit(unit.getId());
+
+        PricingBreakdownDto baselinePricing = pricingEngine.calculatePricing(unit, 1, LocalDate.now(ICT_ZONE));
 
         List<String> securityFeatures = List.of(
                 "24/7 CCTV Monitoring",

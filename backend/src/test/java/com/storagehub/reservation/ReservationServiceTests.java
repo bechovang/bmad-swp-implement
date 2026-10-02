@@ -32,6 +32,7 @@ import com.storagehub.repository.UnitRepository;
 import com.storagehub.repository.UserRepository;
 import com.storagehub.service.LogService;
 import com.storagehub.service.PricingEngine;
+import com.storagehub.service.ReservationExpiryService;
 import com.storagehub.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -82,6 +83,9 @@ class ReservationServiceTests {
     @Mock
     private LogService logService;
 
+    @Mock
+    private ReservationExpiryService reservationExpiryService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private ReservationService reservationService;
@@ -102,6 +106,7 @@ class ReservationServiceTests {
                 paymentRepository,
                 pricingEngine,
                 logService,
+                reservationExpiryService,
                 objectMapper
         );
 

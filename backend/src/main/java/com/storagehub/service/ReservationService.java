@@ -62,6 +62,7 @@ public class ReservationService {
     private final PaymentRepository paymentRepository;
     private final PricingEngine pricingEngine;
     private final LogService logService;
+    private final ReservationExpiryService reservationExpiryService;
     private final ObjectMapper objectMapper;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -72,6 +73,7 @@ public class ReservationService {
                               PaymentRepository paymentRepository,
                               PricingEngine pricingEngine,
                               LogService logService,
+                              ReservationExpiryService reservationExpiryService,
                               ObjectMapper objectMapper) {
         this.reservationRepository = reservationRepository;
         this.unitRepository = unitRepository;
@@ -81,6 +83,7 @@ public class ReservationService {
         this.paymentRepository = paymentRepository;
         this.pricingEngine = pricingEngine;
         this.logService = logService;
+        this.reservationExpiryService = reservationExpiryService;
         this.objectMapper = objectMapper;
     }
 
@@ -116,11 +119,12 @@ public class ReservationService {
             }
             int turnoverBufferDays = turnoverBufferHours;
             List<Reservation> pastReservations = reservationRepository.findByUnitIdOrderByEndDateDesc(unit.getId());
-            LocalDate availableFromDate = LocalDate.now().plusDays(turnoverBufferDays);
+            LocalDate todayICT = LocalDate.now(ReservationExpiryService.ICT_ZONE);
+            LocalDate availableFromDate = todayICT.plusDays(turnoverBufferDays);
             if (!pastReservations.isEmpty()) {
                 LocalDate latestEnd = pastReservations.get(0).getEndDate();
                 LocalDate cand = latestEnd.plusDays(turnoverBufferDays);
-                availableFromDate = cand.isBefore(LocalDate.now()) ? LocalDate.now().plusDays(turnoverBufferDays) : cand;
+                availableFromDate = cand.isBefore(todayICT) ? todayICT.plusDays(turnoverBufferDays) : cand;
             }
             if (availableFromDate.isAfter(startDate)) {
                 throw new BusinessRuleException("UNIT_UNAVAILABLE",
@@ -200,9 +204,10 @@ public class ReservationService {
 
     /**
      * Lists all reservations and rentals belonging to the authenticated customer.
+     * Evaluates and expires past no-show reservations lazily on read (FR-36, AD-4).
      */
-    @Transactional(readOnly = true)
     public List<ReservationDto> getMyReservations(Long customerId) {
+        reservationExpiryService.expirePastReservationsForCustomer(customerId);
         List<Reservation> reservations = reservationRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
         return reservations.stream()
                 .map(this::mapReservationWithSnapshotAndPayments)
@@ -211,8 +216,8 @@ public class ReservationService {
 
     /**
      * Gets reservation details by ID with price snapshot and payment receipts.
+     * Evaluates and expires past no-show reservations lazily on read (FR-36, AD-4).
      */
-    @Transactional(readOnly = true)
     public ReservationDto getReservation(Long id, Long currentUserId, boolean isStaffOrAdmin) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation " + id + " not found"));
@@ -220,6 +225,8 @@ public class ReservationService {
         if (!isStaffOrAdmin && !reservation.getCustomer().getId().equals(currentUserId)) {
             throw new AccessDeniedException("Access denied to reservation " + id);
         }
+
+        reservationExpiryService.checkAndExpireReservation(reservation);
 
         return mapReservationWithSnapshotAndPayments(reservation);
     }

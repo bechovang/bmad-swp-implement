@@ -34,4 +34,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.startDate < :date")
+    List<Reservation> findByStatusAndStartDateBefore(
+            @Param("status") ReservationStatus status,
+            @Param("date") LocalDate date
+    );
+
+    @Query("SELECT r FROM Reservation r WHERE r.customer.id = :customerId AND r.status = :status AND r.startDate < :date")
+    List<Reservation> findByCustomerIdAndStatusAndStartDateBefore(
+            @Param("customerId") Long customerId,
+            @Param("status") ReservationStatus status,
+            @Param("date") LocalDate date
+    );
+
+    @Query("SELECT r FROM Reservation r WHERE r.unit.id = :unitId AND r.status = :status AND r.startDate < :date")
+    List<Reservation> findByUnitIdAndStatusAndStartDateBefore(
+            @Param("unitId") Long unitId,
+            @Param("status") ReservationStatus status,
+            @Param("date") LocalDate date
+    );
 }
