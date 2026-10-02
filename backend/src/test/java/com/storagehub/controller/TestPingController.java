@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -102,6 +103,18 @@ class TestPingController {
     /** Guarded by the test-only TESTER role (TestSecurityConfig) -> 403 row. */
     @GetMapping("/role-guarded")
     Map<String, String> roleGuarded() {
+        return Map.of("status", "ok");
+    }
+
+    /**
+     * Story 1.3 permission-matrix row (test-only endpoint): URL rule lets any
+     * authenticated request in, ONLY method security decides - wrong role must
+     * surface as the FORBIDDEN envelope through GlobalExceptionHandler (the
+     * latent 1.2 catch-all fix), not a 500 and not a default body.
+     */
+    @GetMapping("/customer-only")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    Map<String, String> customerOnly() {
         return Map.of("status", "ok");
     }
 }

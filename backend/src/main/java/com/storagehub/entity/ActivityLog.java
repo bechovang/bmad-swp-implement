@@ -14,9 +14,9 @@ import jakarta.persistence.Table;
  * every column is insert-only at the JPA level (updatable = false) and the
  * repository exposes nothing but save - LogService is the sole writer (AD-6,
  * NFR-6). The table intentionally has no timestamp column (deferred [D5]);
- * LogID ordering is the chronology. actorId stays a plain Long on this side -
- * the User entity belongs to its own story - while the DB-level FK to users
- * keeps referential integrity.
+ * LogID ordering is the chronology. actorId stays a plain Long (no JPA
+ * association) - login audits write it directly, including NULL for
+ * LOGIN_FAILED rows with an unknown email (V3, Q1=A).
  */
 @Entity
 @Table(name = "activity_logs")
@@ -27,7 +27,12 @@ public class ActivityLog {
     @Column(name = "LogID", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name = "ActorID", nullable = false, updatable = false)
+    /**
+     * Nullable since V3 (Q1=A): LOGIN_FAILED rows for unknown emails have no
+     * actor - the Reason carries the attempted email. Every other action
+     * keeps a real user id (FK still enforced when non-null).
+     */
+    @Column(name = "ActorID", updatable = false)
     private Long actorId;
 
     @Enumerated(EnumType.STRING)

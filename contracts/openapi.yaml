@@ -34,11 +34,91 @@ servers:
 security:
   - bearerAuth: []
 
-paths: {}
-  # Example of the shape each sprint PR adds (epic 1 will add):
-  #   /auth/login          POST  public
-  #   /auth/register       POST  public, customer-only, accepts no role field
-  #   /auth/forgot-password POST public, generic response (P2)
+paths:
+
+  # ------------------------------------------------------------ auth (1.3)
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Auth]
+      summary: Sign in with email and password
+      description: >
+        Public. Returns a JWT Bearer token (HS256, claims sub/role/iat/exp,
+        24h TTL, no refresh token - AD-5). Every failure branch - unknown
+        email, wrong password, inactive or locked account - answers the SAME
+        401 envelope message and never reveals which field failed. Both
+        successful and failed attempts are audited as LOGIN / LOGIN_FAILED.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token plus the signed-in user (role is UPPER_SNAKE).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [Auth]
+      summary: Self-register a customer account
+      description: >
+        Public. Customer-only self-register: the API accepts no role field
+        (an extra JSON field is ignored) and always creates a CUSTOMER user
+        with Status=1 (active) and a BCrypt password hash. Register is not
+        audited (no REGISTER action in the 1.2 registry).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: The created user - always role CUSTOMER, status active.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [Auth]
+      summary: Request a password reset (P2 stub)
+      description: >
+        Public. Always answers the same generic 200 whether or not the email
+        matches an account - never reveals account existence. No real email
+        is sent in v1 (P2).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Generic acknowledgment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
 
 components:
   securitySchemes:
@@ -49,6 +129,41 @@ components:
       description: >
         JWT with role claim, 24h TTL, no refresh token (AD-5). Logout is the
         client dropping the token.
+
+  # D6 reusable non-2xx bodies (deferred from 1.1, landed with the first
+  # auth paths in 1.3): every usage renders the same Error envelope.
+  responses:
+
+    Unauthorized:
+      description: >
+        Missing, invalid or expired Bearer token - or bad credentials /
+        inactive / locked account at login. Error envelope, code
+        UNAUTHENTICATED (401). Carries `WWW-Authenticate: Bearer` on guarded
+        paths. At login every failure branch shares one generic message.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: >
+        Authenticated but the token's role is not allowed on this endpoint
+        (server-side permission matrix). Error envelope, code FORBIDDEN (403).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ValidationError:
+      description: >
+        Request body failed validation (missing/invalid fields, duplicate
+        email, password confirmation mismatch, terms not accepted). Error
+        envelope, code VALIDATION_FAILED (400) with one fieldError per
+        offending field.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 
   schemas:
     # ------------------------------------------------------------------ error
@@ -138,3 +253,157 @@ components:
           type: integer
           minimum: 0
           description: Total rows matching the filter.
+
+    # ----------------------------------------------------------------- auth
+    LoginRequest:
+      type: object
+      description: Sign-in payload. Failures never reveal which field was wrong.
+      required:
+        - email
+        - password
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        password:
+          type: string
+          maxLength: 72
+          description: Plain password; compared against the BCrypt hash server-side.
+
+    RegisterRequest:
+      type: object
+      description: >
+        Customer self-register payload. No role field exists - an extra JSON
+        field is ignored and the created user is always CUSTOMER. The
+        cross-field rules (password == confirmPassword, agreeToTerms true)
+        are enforced server-side with fieldErrors on confirmPassword /
+        agreeToTerms.
+      required:
+        - fullName
+        - phone
+        - email
+        - password
+        - confirmPassword
+        - agreeToTerms
+      additionalProperties: true
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        password:
+          type: string
+          maxLength: 72
+        confirmPassword:
+          type: string
+          maxLength: 72
+        agreeToTerms:
+          type: boolean
+          description: Must be true; false answers 400 with fieldErrors[agreeToTerms].
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+
+    Role:
+      type: string
+      description: >
+        Role name, UPPER_SNAKE - identical in the JWT role claim, the login
+        response and contracts/routes.yaml role keys.
+      enum:
+        - CUSTOMER
+        - STAFF
+        - FACILITY_MANAGER
+        - BUSINESS_OPS
+        - SYSTEM_ADMINISTRATOR
+
+    AuthUser:
+      type: object
+      description: The signed-in user as returned by login.
+      required:
+        - id
+        - fullName
+        - email
+        - role
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        phone:
+          type: string
+          nullable: true
+
+    LoginResponse:
+      type: object
+      description: JWT plus the signed-in user. Logout = the client drops the token.
+      required:
+        - token
+        - user
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+          description: >
+            Signed JWT (HS256). Claims: sub = UserID, role = UPPER_SNAKE
+            Role, iat, exp (24h). No refresh token (AD-5).
+        user:
+          $ref: '#/components/schemas/AuthUser'
+
+    RegisterResponse:
+      type: object
+      description: The created account - always CUSTOMER and active (Status=1).
+      required:
+        - id
+        - fullName
+        - email
+        - role
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        phone:
+          type: string
+          nullable: true
+
+    ForgotPasswordResponse:
+      type: object
+      description: Generic acknowledgment - identical whether or not the account exists.
+      required:
+        - message
+      additionalProperties: false
+      properties:
+        message:
+          type: string

@@ -41,3 +41,7 @@ Entries appended by the bmad-build review loop. Do not modify existing entries.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-be-foundations-error-list-envelope-logservice-append-only.md`
   summary: Class-level Bean Validation constraints (cross-field rules) map to VALIDATION_FAILED with no fieldErrors and the constraint message dropped — `onValidation` reads only `getFieldErrors()`.
   evidence: Verified in GlobalExceptionHandler; no DTO uses class-level constraints yet, but epic 2/4 cross-field rules (EndDate >= StartDate, extension bounds) are certain to. Representation of a field-less error is a shape decision (extend FieldError vs a new envelope field) the spec's frozen matrix ("fieldErrors đủ từng field") does not settle — decide in the first story that adds a cross-field DTO.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-3-auth-backend-jwt-permission-matrix-login-audit.md`
+  summary: Backend SecurityConfig lacks CORS configuration and OPTIONS preflight permit, which will block cross-origin browser fetch calls from frontend dev server.
+  evidence: Verified in SecurityConfig — no cors() is configured on HttpSecurity and requestMatchers only permit HttpMethod.POST on auth endpoints; browser preflight OPTIONS requests fail with 401 UNAUTHENTICATED. Defer to story 1.5 when frontend auth connects to backend.

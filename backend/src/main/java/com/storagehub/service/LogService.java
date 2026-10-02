@@ -29,6 +29,9 @@ public class LogService {
     }
 
     /**
+     * @param actorId nullable since V3 (Q1=A): LOGIN_FAILED with an unknown
+     *        email has no actor - Reason then carries the attempted email.
+     *        Every other caller passes a real user id.
      * @throws IllegalArgumentException the action requires a reason and
      *         {@code reason} is null or blank, or any of fromValue/toValue/reason
      *         exceeds {@value #MAX_TEXT_LENGTH} characters (the DDL column size)

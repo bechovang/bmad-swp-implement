@@ -38,10 +38,13 @@ Ai fail-fast ngay khi thiếu, ai chưa:
 - **`DB_URL` / `DB_USERNAME` / `DB_PASSWORD`** — datasource bind ngay lúc
   khởi động: thiếu biến nào thì boot fail tại placeholder đó, message nêu
   rõ tên biến.
-- **`JWT_SECRET` / `PAYOS_*`** — đã khai báo trong `application.yml`
-  (`app.jwt.*`, `app.payos.*`) nhưng chưa có code nào đọc trước story 1.3
-  (JWT) / epic 2 (PayOS), nên boot scaffold **chưa** ép chúng. Từ story 1.3
-  chúng trở thành bắt buộc fail-fast — đặt sẵn từ bây giờ để sau không bất ngờ.
+- **`JWT_SECRET`** — **từ story 1.3 đã fail-fast thật**: `app.jwt.*` được
+  bind vào `JwtProperties` lúc khởi động. Thiếu env var thì boot chết ngay
+  tại placeholder `${JWT_SECRET}`; đặt mà ngắn hơn 32 ký tự thì bị
+  `JwtProperties` từ chối (HS256 cần key ≥ 256 bit) với message nêu rõ.
+- **`PAYOS_*`** — đã khai báo trong `application.yml` (`app.payos.*`) nhưng
+  chưa có code nào đọc trước epic 2 (PayOS webhook), nên boot scaffold chưa
+  ép chúng.
 
 | Biến | Ý nghĩa | Ví dụ |
 | --- | --- | --- |
@@ -82,17 +85,50 @@ PAYOS_CLIENT_ID=x PAYOS_API_KEY=x PAYOS_CHECKSUM_KEY=x \
 - Profile **dev**: Flyway chạy `V1__init_schema.sql` **và** `V2__seed_demo.sql`
   (seed chỉ nằm trong `db/seed/dev`, được add vào `spring.flyway.locations`
   của profile dev — không có Java code phân nhánh).
-- Profile **prod** (hoặc không profile): **chỉ V1**, không seed. Đừng chạy prod
-  profile vào DB đã seed dev: Flyway validate fail cứng ngay lúc boot
-  (`applied migration not resolved locally: 2` — history có V2 nhưng locations
-  của prod không chứa seed), không phải chỉ "thiếu dữ liệu". Và vì `V2` đã
-  thuộc về seed dev, migration schema kế tiếp bắt đầu từ `V3`.
+- Profile **prod** (hoặc không profile): **chỉ V1 + V3, không seed** (V3 từ
+  story 1.3: `activity_logs.ActorID` NULL để log được LOGIN_FAILED email lạ).
+  Đừng chạy prod profile vào DB đã seed dev: Flyway validate fail cứng ngay
+  lúc boot (`applied migration not resolved locally: 2` — history có V2 nhưng
+  locations của prod không chứa seed), không phải chỉ "thiếu dữ liệu". Và vì
+  `V2` đã thuộc về seed dev, các migration schema thật tiếp theo chạy số từ
+  `V3` như hiện tại.
 - `ddl-auto: validate` — Flyway là nguồn DDL duy nhất, JPA chỉ kiểm schema.
 - Mọi connection ép session timezone **UTC** (`connectionTimeZone=UTC` qua
   Hikari `data-source-properties`) — `DEFAULT CURRENT_TIMESTAMP` ghi UTC,
   khớp chuẩn "timestamps stored as UTC" và literal UTC trong seed.
 
 Health check: `curl http://localhost:8080/actuator/health` → `{"status":"UP"}`.
+
+Đăng nhập demo (story 1.3) — 3 endpoint public `POST /api/v1/auth/login |
+register | forgot-password`, trả JWT HS256 (claim `role` UPPER_SNAKE, TTL
+24h, không refresh token; logout = client bỏ token):
+
+```bash
+# Login đúng (mật khẩu chung của 5 tài khoản demo: Demo1234!)
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"lan@storagehub.dev","password":"Demo1234!"}'
+# → 200 {"token":"<JWT>","user":{"id":1,"fullName":"Lan Nguyen",...,"role":"CUSTOMER",...}}
+# và một hàng audit LOGIN (EntityType USER) trong activity_logs.
+
+# Sai password — mọi nhánh thất bại (sai email / sai password / Status 0-2)
+# trả CÙNG một message chung, kèm hàng LOGIN_FAILED (email lạ: ActorID NULL,
+# Reason chứa email đã thử):
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"lan@storagehub.dev","password":"WrongPassword1"}'
+# → 401 {"code":"UNAUTHENTICATED","message":"The email or password is not correct. ..."}
+
+# Dùng token (filter parse + re-check users.Status, cache ~30s):
+curl -s http://localhost:8080/api/v1/anything -H "Authorization: Bearer <JWT>"
+# → 404 envelope NOT_FOUND (token hợp lệ nên đã qua 401; chưa có endpoint)
+curl -s http://localhost:8080/api/v1/anything
+# → 401 envelope UNAUTHENTICATED + WWW-Authenticate: Bearer (không token)
+
+# Vô hiệu hóa tài khoản để thấy token chết trong ≤30s (không đợi TTL 24h):
+#   UPDATE users SET Status = 2 WHERE Email = 'lan@storagehub.dev';
+# rồi gọi lại curl có token sau ≤30s → 401. Reset Status=1 sau khi thử.
+```
 
 ### 3. Frontend
 

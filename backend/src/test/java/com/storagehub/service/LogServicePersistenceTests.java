@@ -104,4 +104,25 @@ class LogServicePersistenceTests {
                 "SELECT COUNT(*) FROM activity_logs WHERE ActorID = ?", Integer.class, TEST_ACTOR_ID);
         assertThat(rows).isZero();
     }
+
+    /**
+     * V3 (story 1.3, Q1=A): LOGIN_FAILED with an unknown email persists with
+     * ActorID NULL and the attempted email inside Reason - the column is
+     * nullable for exactly this row shape.
+     */
+    @Test
+    void appendAcceptsANullActorForUnknownEmailLoginFailures() {
+        logService.append(null, EntityType.USER, 0L, Action.LOGIN_FAILED, null, null,
+                "Sign-in failed - unknown email: ghost@storagehub.dev");
+
+        Map<String, Object> row = jdbcTemplate.queryForMap(
+                "SELECT ActorID, EntityType, Action, Reason FROM activity_logs "
+                        + "WHERE Action = 'LOGIN_FAILED' AND Reason LIKE '%ghost@storagehub.dev%'");
+
+        assertThat(row)
+                .containsEntry("ActorID", null)
+                .containsEntry("EntityType", "USER")
+                .containsEntry("Action", "LOGIN_FAILED")
+                .containsEntry("Reason", "Sign-in failed - unknown email: ghost@storagehub.dev");
+    }
 }

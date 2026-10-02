@@ -1,8 +1,10 @@
 package com.storagehub.controller;
 
 import com.storagehub.config.SecurityConfig;
+import com.storagehub.repository.UserRepository;
 import com.storagehub.security.EnvelopeAccessDeniedHandler;
 import com.storagehub.security.EnvelopeAuthenticationEntryPoint;
+import com.storagehub.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -29,12 +32,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Error envelope declared in contracts/openapi.yaml - no default Spring body.
  * Runs in the web slice, no database needed. The 403 row needs a role rule,
  * which only exists in TestSecurityConfig - see AccessDeniedEnvelopeTests.
+ * Since story 1.3 the real chain contains the JWT filter: JwtService is the
+ * real bean (with the test secret) and UserRepository is a mock - no Bearer
+ * token is sent here, so it is never consulted.
  */
-@WebMvcTest(controllers = TestPingController.class)
-@Import({ SecurityConfig.class, EnvelopeAuthenticationEntryPoint.class,
+@WebMvcTest(controllers = TestPingController.class, properties =
+        "app.jwt.secret=webmvc-test-secret-0123456789-0123456789")
+@Import({ SecurityConfig.class, JwtService.class, EnvelopeAuthenticationEntryPoint.class,
         EnvelopeAccessDeniedHandler.class, ErrorEnvelopeWriter.class })
 @WithMockUser
 class GlobalExceptionHandlerTests {
+
+    @MockitoBean
+    private UserRepository userRepository;
+
 
     @Autowired
     private MockMvc mockMvc;

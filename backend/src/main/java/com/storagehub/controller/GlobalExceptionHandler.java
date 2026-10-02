@@ -4,11 +4,16 @@ import com.storagehub.dto.ApiError;
 import com.storagehub.dto.ApiErrorCode;
 import com.storagehub.dto.FieldError;
 import com.storagehub.exception.BusinessRuleException;
+import com.storagehub.exception.InvalidCredentialsException;
+import com.storagehub.exception.InvalidRequestException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -108,6 +113,42 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiError> onBusinessRule(BusinessRuleException ex) {
         return ResponseEntity.status(409).body(ApiError.of(ex.getCode(), ex.getMessage()));
+    }
+
+    /**
+     * Cross-field / data-dependent validation raised by a service (register:
+     * confirmPassword, agreeToTerms, duplicate email) -> 400 VALIDATION_FAILED
+     * with the service's fieldErrors - the same envelope Bean Validation
+     * produces (defer F18).
+     */
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ApiError> onInvalidRequest(InvalidRequestException ex) {
+        return respond(ApiErrorCode.VALIDATION_FAILED, ex.fieldErrors());
+    }
+
+    /**
+     * Login failure (unknown email / wrong password / Status 0 or 2) ->
+     * 401 envelope carrying the ONE shared message; written after the
+     * LOGIN_FAILED audit row (AD-5). The UNAUTHENTICATED code stays the same
+     * as the security layer's so the FE has a single 401 shape.
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiError> onInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .body(ApiError.of(ApiErrorCode.UNAUTHENTICATED.name(), ex.getMessage()));
+    }
+
+    /**
+     * Method security (@PreAuthorize, permission matrix) denial that surfaces
+     * inside MVC handling -> 403 FORBIDDEN envelope. Fixes the latent 1.2
+     * gap where an AccessDeniedException fell into the catch-all and became
+     * a 500; denials caught by the security chain itself still leave through
+     * EnvelopeAccessDeniedHandler, rendering the identical envelope.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> onAccessDenied(AccessDeniedException ex) {
+        return respond(ApiErrorCode.FORBIDDEN);
     }
 
     /**

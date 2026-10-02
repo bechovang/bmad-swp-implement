@@ -58,6 +58,27 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- JWT sign/verify (story 1.3, AD-5): jjwt 0.13.x - api at compile
+		     time, impl + jackson (Jackson 2 packages, coexists with Boot 4's
+		     Jackson 3 / tools.jackson) only at runtime. -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.13.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.13.0</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Docs-only per AD-2: renders Swagger UI, never a contract source. -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
