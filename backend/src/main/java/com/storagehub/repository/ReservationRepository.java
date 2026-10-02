@@ -17,6 +17,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByCode(String code);
 
+    @Query("SELECT r FROM Reservation r WHERE r.customer.id = :customerId ORDER BY r.id DESC")
+    List<Reservation> findByCustomerIdOrderByCreatedAtDesc(@Param("customerId") Long customerId);
+
+    List<Reservation> findByCustomer_IdOrderByIdDesc(Long customerId);
+
     List<Reservation> findByUnit_IdAndStatusIn(Long unitId, Collection<ReservationStatus> statuses);
 
     @Query("SELECT r FROM Reservation r WHERE r.unit.id = :unitId ORDER BY r.endDate DESC")

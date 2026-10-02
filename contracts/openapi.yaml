@@ -377,6 +377,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /reservations/my:
+    get:
+      operationId: getMyReservations
+      tags: [Reservations]
+      summary: List reservations belonging to the authenticated customer
+      description: >
+        Returns list of reservations and rentals created by the authenticated customer,
+        ordered by most recently created first.
+      responses:
+        '200':
+          description: List of reservations belonging to customer.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservationDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /reservations/{id}:
     get:
       operationId: getReservation
@@ -1319,6 +1339,11 @@ components:
           example: '482913'
         status:
           $ref: '#/components/schemas/ReservationStatus'
+        payments:
+          type: array
+          description: Associated payment receipts and transactions.
+          items:
+            $ref: '#/components/schemas/PaymentDto'
 
     # ----------------------------------------------------------- payments (2.4)
     PaymentStatus:

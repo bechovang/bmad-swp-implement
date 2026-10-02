@@ -433,6 +433,10 @@ export const handlers = [
     return HttpResponse.json(resDto, { status: 201 })
   }),
 
+  http.get('/api/v1/reservations/my', () => {
+    return HttpResponse.json(mockReservationsList, { status: 200 })
+  }),
+
   http.get('/api/v1/reservations/:id', ({ params }) => {
     const id = parseInt(params.id as string, 10)
     const res = mockReservationsList.find((r) => r.id === id)
@@ -449,10 +453,103 @@ export const handlers = [
   }),
 ]
 
-let mockReservationsList: ReservationDto[] = []
+export const INITIAL_RESERVATIONS: ReservationDto[] = [
+  {
+    id: 1,
+    code: 'BK-2026-0001',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 1,
+    unitCode: 'S-3',
+    unitTypeName: 'S',
+    facilityName: 'Tan Binh Depot',
+    facilityAddress: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City',
+    zoneCode: 'A',
+    floor: 1,
+    sizeM2: 5.0,
+    accessType: 'PIN',
+    startDate: '2026-10-05',
+    endDate: '2027-01-05',
+    durationMonths: 3,
+    depositAmount: 103500,
+    monthlyRate: 345000,
+    baseRent: 1035000,
+    totalRent: 1035000,
+    policyVersion: 'v3',
+    accessCode: null,
+    status: 'RESERVED',
+    payments: [
+      {
+        id: 101,
+        receiptCode: 'RC-101',
+        payerId: 1,
+        reservationId: 1,
+        orderCode: 1727932800101,
+        purpose: 'DEPOSIT',
+        method: 'PAYOS',
+        amount: 103500,
+        status: 'SUCCEEDED',
+        createdAt: '2026-10-02T10:00:00Z',
+      },
+    ],
+  },
+  {
+    id: 2,
+    code: 'BK-2026-0002',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 3,
+    unitCode: 'M-5',
+    unitTypeName: 'M',
+    facilityName: 'Tan Binh Depot',
+    facilityAddress: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City',
+    zoneCode: 'B',
+    floor: 2,
+    sizeM2: 8.0,
+    accessType: 'QR',
+    startDate: '2026-09-01',
+    endDate: '2026-12-01',
+    durationMonths: 3,
+    depositAmount: 207000,
+    monthlyRate: 690000,
+    baseRent: 2070000,
+    totalRent: 2070000,
+    policyVersion: 'v3',
+    accessCode: '482913',
+    status: 'CHECKED_IN',
+    payments: [
+      {
+        id: 102,
+        receiptCode: 'RC-102',
+        payerId: 1,
+        reservationId: 2,
+        orderCode: 1727932800102,
+        purpose: 'DEPOSIT',
+        method: 'PAYOS',
+        amount: 207000,
+        status: 'SUCCEEDED',
+        createdAt: '2026-09-01T08:00:00Z',
+      },
+      {
+        id: 103,
+        receiptCode: 'RC-103',
+        payerId: 1,
+        reservationId: 2,
+        orderCode: 1727932800103,
+        purpose: 'RENT',
+        method: 'CASH',
+        amount: 2070000,
+        status: 'SUCCEEDED',
+        createdAt: '2026-09-01T09:00:00Z',
+      },
+    ],
+  },
+]
+
+let mockReservationsList: ReservationDto[] = JSON.parse(JSON.stringify(INITIAL_RESERVATIONS))
 
 export function resetMockReservations(custom?: ReservationDto[]) {
-  mockReservationsList = custom ? [...custom] : []
+  mockReservationsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_RESERVATIONS))
 }
 
 export const MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {

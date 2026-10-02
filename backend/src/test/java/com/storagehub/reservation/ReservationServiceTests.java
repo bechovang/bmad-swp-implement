@@ -25,6 +25,7 @@ import com.storagehub.entity.Zone;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
 import com.storagehub.repository.ContractRepository;
+import com.storagehub.repository.PaymentRepository;
 import com.storagehub.repository.PolicyRuleRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.UnitRepository;
@@ -73,6 +74,9 @@ class ReservationServiceTests {
     private PolicyRuleRepository policyRuleRepository;
 
     @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
     private PricingEngine pricingEngine;
 
     @Mock
@@ -95,6 +99,7 @@ class ReservationServiceTests {
                 userRepository,
                 contractRepository,
                 policyRuleRepository,
+                paymentRepository,
                 pricingEngine,
                 logService,
                 objectMapper
@@ -237,7 +242,7 @@ class ReservationServiceTests {
     }
 
     @Test
-    @DisplayName("getReservation: customer accessing own reservation succeeds with snapshot")
+    @DisplayName("getReservation: customer accessing own reservation succeeds with snapshot and payments")
     void getReservation_customerOwnReservation_success() {
         Reservation reservation = new Reservation("BK-2026-0001", testCustomer, testUnit,
                 LocalDate.of(2026, 10, 5), LocalDate.of(2026, 11, 5),
@@ -250,6 +255,7 @@ class ReservationServiceTests {
 
         when(reservationRepository.findById(10L)).thenReturn(Optional.of(reservation));
         when(contractRepository.findLatestByReservationId(any())).thenReturn(Optional.of(contract));
+        when(paymentRepository.findByReservationIdOrderByCreatedAtAsc(10L)).thenReturn(List.of());
 
         ReservationDto dto = reservationService.getReservation(10L, testCustomer.getId(), false);
 
@@ -257,6 +263,30 @@ class ReservationServiceTests {
         assertThat(dto.code()).isEqualTo("BK-2026-0001");
         assertThat(dto.monthlyRate()).isEqualTo(345000L);
         assertThat(dto.policyVersion()).isEqualTo("v3");
+        assertThat(dto.payments()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getMyReservations: returns only reservations belonging to current customer")
+    void getMyReservations_success() {
+        Reservation r1 = new Reservation("BK-2026-0001", testCustomer, testUnit,
+                LocalDate.of(2026, 10, 5), LocalDate.of(2026, 11, 5),
+                new BigDecimal("103500"), null, ReservationStatus.RESERVED);
+        ReflectionTestUtils.setField(r1, "id", 10L);
+
+        Contract contract = new Contract("CT-2026-0001", r1, activePolicy,
+                "{\"monthlyRate\":345000,\"baseRent\":345000,\"totalRent\":345000,\"depositAmount\":103500,\"durationMonths\":1,\"policyVersion\":\"v3\"}",
+                null, ContractStatus.DRAFT, null, 1);
+
+        when(reservationRepository.findByCustomerIdOrderByCreatedAtDesc(1L)).thenReturn(List.of(r1));
+        when(contractRepository.findLatestByReservationId(10L)).thenReturn(Optional.of(contract));
+        when(paymentRepository.findByReservationIdOrderByCreatedAtAsc(10L)).thenReturn(List.of());
+
+        List<ReservationDto> results = reservationService.getMyReservations(1L);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).code()).isEqualTo("BK-2026-0001");
+        assertThat(results.get(0).customerId()).isEqualTo(1L);
     }
 
     @Test

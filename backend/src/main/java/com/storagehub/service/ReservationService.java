@@ -4,23 +4,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.storagehub.dto.CreateReservationRequest;
+import com.storagehub.dto.PaymentDto;
 import com.storagehub.dto.PricingBreakdownDto;
 import com.storagehub.dto.ReservationDto;
 import com.storagehub.entity.Action;
 import com.storagehub.entity.Contract;
 import com.storagehub.entity.ContractStatus;
 import com.storagehub.entity.EntityType;
+import com.storagehub.entity.Payment;
 import com.storagehub.entity.PolicyRuleType;
 import com.storagehub.entity.RentalPolicy;
 import com.storagehub.entity.Reservation;
 import com.storagehub.entity.ReservationStatus;
-import com.storagehub.entity.RoleName;
 import com.storagehub.entity.Unit;
 import com.storagehub.entity.UnitStatus;
 import com.storagehub.entity.User;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
 import com.storagehub.repository.ContractRepository;
+import com.storagehub.repository.PaymentRepository;
 import com.storagehub.repository.PolicyRuleRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.UnitRepository;
@@ -57,6 +59,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ContractRepository contractRepository;
     private final PolicyRuleRepository policyRuleRepository;
+    private final PaymentRepository paymentRepository;
     private final PricingEngine pricingEngine;
     private final LogService logService;
     private final ObjectMapper objectMapper;
@@ -66,6 +69,7 @@ public class ReservationService {
                               UserRepository userRepository,
                               ContractRepository contractRepository,
                               PolicyRuleRepository policyRuleRepository,
+                              PaymentRepository paymentRepository,
                               PricingEngine pricingEngine,
                               LogService logService,
                               ObjectMapper objectMapper) {
@@ -74,6 +78,7 @@ public class ReservationService {
         this.userRepository = userRepository;
         this.contractRepository = contractRepository;
         this.policyRuleRepository = policyRuleRepository;
+        this.paymentRepository = paymentRepository;
         this.pricingEngine = pricingEngine;
         this.logService = logService;
         this.objectMapper = objectMapper;
@@ -190,11 +195,22 @@ public class ReservationService {
         // 8. Map and return DTO
         return mapToDto(reservation, unit, customer, pricing.monthlyRate().longValue(),
                 pricing.baseRent().longValue(), pricing.totalRent().longValue(),
-                pricing.depositAmount().longValue(), pricing.policyVersion(), request.durationMonths());
+                pricing.depositAmount().longValue(), pricing.policyVersion(), request.durationMonths(), List.of());
     }
 
     /**
-     * Gets reservation details by ID with price snapshot.
+     * Lists all reservations and rentals belonging to the authenticated customer.
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationDto> getMyReservations(Long customerId) {
+        List<Reservation> reservations = reservationRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
+        return reservations.stream()
+                .map(this::mapReservationWithSnapshotAndPayments)
+                .toList();
+    }
+
+    /**
+     * Gets reservation details by ID with price snapshot and payment receipts.
      */
     @Transactional(readOnly = true)
     public ReservationDto getReservation(Long id, Long currentUserId, boolean isStaffOrAdmin) {
@@ -205,6 +221,10 @@ public class ReservationService {
             throw new AccessDeniedException("Access denied to reservation " + id);
         }
 
+        return mapReservationWithSnapshotAndPayments(reservation);
+    }
+
+    private ReservationDto mapReservationWithSnapshotAndPayments(Reservation reservation) {
         Unit unit = reservation.getUnit();
         User customer = reservation.getCustomer();
 
@@ -238,8 +258,41 @@ public class ReservationService {
             policyVersion = pricing.policyVersion();
         }
 
+        List<Payment> payments = paymentRepository.findByReservationIdOrderByCreatedAtAsc(reservation.getId());
+        List<PaymentDto> paymentDtos = payments.stream()
+                .map(this::mapPaymentToDto)
+                .toList();
+
         return mapToDto(reservation, unit, customer, monthlyRate, baseRent, totalRent,
-                reservation.getDepositAmount().longValue(), policyVersion, durationMonths);
+                reservation.getDepositAmount().longValue(), policyVersion, durationMonths, paymentDtos);
+    }
+
+    private PaymentDto mapPaymentToDto(Payment payment) {
+        Long orderCode = null;
+        if (payment.getReceiptCode() != null && payment.getReceiptCode().startsWith("RC-")) {
+            try {
+                orderCode = Long.parseLong(payment.getReceiptCode().substring(3));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        if (orderCode == null) {
+            orderCode = payment.getId();
+        }
+
+        Long payerId = payment.getPayer() != null ? payment.getPayer().getId() : null;
+        Long reservationId = payment.getReservation() != null ? payment.getReservation().getId() : null;
+
+        return new PaymentDto(
+                payment.getId(),
+                payment.getReceiptCode(),
+                payerId,
+                reservationId,
+                orderCode,
+                payment.getPurpose(),
+                payment.getMethod(),
+                payment.getAmount().longValue(),
+                payment.getStatus()
+        );
     }
 
     private String generateReservationCode() {
@@ -249,8 +302,9 @@ public class ReservationService {
     }
 
     private ReservationDto mapToDto(Reservation reservation, Unit unit, User customer,
-                                   Long monthlyRate, Long baseRent, Long totalRent,
-                                   Long depositAmount, String policyVersion, int durationMonths) {
+                                    Long monthlyRate, Long baseRent, Long totalRent,
+                                    Long depositAmount, String policyVersion, int durationMonths,
+                                    List<PaymentDto> payments) {
         String typeName = unit.getUnitType() != null ? unit.getUnitType().getName() : null;
         String facilityName = unit.getZone() != null && unit.getZone().getFacility() != null
                 ? unit.getZone().getFacility().getName() : "Tan Binh Depot";
@@ -282,7 +336,8 @@ public class ReservationService {
                 totalRent,
                 policyVersion,
                 reservation.getAccessCode(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                payments
         );
     }
 }

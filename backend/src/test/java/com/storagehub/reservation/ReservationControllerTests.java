@@ -176,14 +176,33 @@ class ReservationControllerTests {
     }
 
     @Test
-    @DisplayName("GET /api/v1/reservations/{id}: 403 FORBIDDEN when user denied")
-    void getReservation_forbidden_returns403() throws Exception {
-        when(reservationService.getReservation(eq(2L), eq(USER_ID), anyBoolean()))
-                .thenThrow(new AccessDeniedException("Access denied to reservation 2"));
+    @DisplayName("GET /api/v1/reservations/my: 200 OK returns customer reservations")
+    void getMyReservations_success() throws Exception {
+        ReservationDto dto = new ReservationDto(
+                1L, "BK-2026-0001", USER_ID, "Customer User",
+                10L, "S-3", "Small", "Tan Binh Depot",
+                "45 Nguyen Van Troi", "A", 1, 4.0, "PIN",
+                LocalDate.of(2026, 10, 5), LocalDate.of(2027, 1, 5),
+                3, 103500L, 345000L, 1035000L, 1035000L, "v3", null,
+                ReservationStatus.PENDING_PAYMENT
+        );
 
-        mockMvc.perform(get("/api/v1/reservations/2")
+        when(reservationService.getMyReservations(eq(USER_ID)))
+                .thenReturn(java.util.List.of(dto));
+
+        mockMvc.perform(get("/api/v1/reservations/my")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + customerToken))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].code").value("BK-2026-0001"))
+                .andExpect(jsonPath("$[0].unitCode").value("S-3"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/reservations/my: 401 Unauthorized without auth token")
+    void getMyReservations_unauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/reservations/my"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
     }
 }

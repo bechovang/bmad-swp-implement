@@ -9,7 +9,6 @@ import { NotificationCenterPage } from '../pages/notification/NotificationCenter
 import { ForbiddenPage } from '../pages/error/ForbiddenPage'
 import { NotFoundPage } from '../pages/error/NotFoundPage'
 import {
-  MyRentalsPage,
   SupportPage,
   TaskBoardPage,
   FacilityOverviewPage,
@@ -22,7 +21,6 @@ import {
   ReportsPage,
   UserManagementPage,
   LoginHistoryPage,
-  RentalDetailPage,
   TaskDetailPage,
   SupportTicketDetailPage,
   EscalationDetailPage,
@@ -31,6 +29,8 @@ import {
 import { BrowseUnitsPage } from '../pages/unit/BrowseUnitsPage'
 import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
 import { BookingSummaryPage } from '../pages/booking/BookingSummaryPage'
+import { MyRentalsPage } from '../pages/rentals/MyRentalsPage'
+import { RentalDetailPage } from '../pages/rentals/RentalDetailPage'
 
 import { RootRedirect } from './RootRedirect'
 

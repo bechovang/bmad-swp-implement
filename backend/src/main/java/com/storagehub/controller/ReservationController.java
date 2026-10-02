@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/reservations")
 public class ReservationController {
@@ -33,6 +35,13 @@ public class ReservationController {
         Long currentUserId = getCurrentUserId(authentication);
         ReservationDto reservationDto = reservationService.createReservation(request, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<ReservationDto>> getMyReservations(Authentication authentication) {
+        Long currentUserId = getCurrentUserId(authentication);
+        List<ReservationDto> reservations = reservationService.getMyReservations(currentUserId);
+        return ResponseEntity.ok(reservations);
     }
 
     @GetMapping("/{id}")

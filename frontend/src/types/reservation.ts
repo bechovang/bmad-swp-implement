@@ -37,4 +37,6 @@ export interface ReservationDto {
   policyVersion: string
   accessCode?: string | null
   status: ReservationStatus
+  payments?: import('./rental').PaymentDto[]
 }
+

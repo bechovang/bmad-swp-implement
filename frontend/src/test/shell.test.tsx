@@ -223,9 +223,9 @@ describe('Adaptive Shell & 5-Role Navigation', () => {
         role: 'CUSTOMER',
       })
 
-      renderWithRouter(['/rentals/10'])
+      renderWithRouter(['/rentals/1'])
 
-      expect(await screen.findByRole('heading', { level: 1, name: 'Rental Agreement #10' })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { level: 1, name: /Unit S-3/i })).toBeInTheDocument()
     })
 
     it('renders Task Detail page for authorized Staff', async () => {
