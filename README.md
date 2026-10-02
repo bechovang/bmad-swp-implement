@@ -17,10 +17,10 @@ chưa có feature nào của Epic 1).
 | Quyết định | Trạng thái | Ghi chú |
 | --- | --- | --- |
 | FE scaffold dùng **TypeScript** | **Đã chốt 2026-10-02** | `frontend/` là react-ts template; KHÔNG dùng JS |
-| Component library | **Deferred** | Chốt **trước story 1.4** (gate dựng shared components) |
-| Drag & drop (task board) | **Deferred** | Chốt trước story 1.4 |
-| Chart library (BO dashboard) | **Deferred** | Chốt trước story 1.4 |
-| QR/code scanner (check-in) | **Deferred** | Chốt trước story 1.4 |
+| Component library | **Đã chốt 2026-10-02 (Story 1.4)** | Tailwind CSS v4 + Radix UI headless primitives + Control Room Primitives; không dùng UI suite cồng kềnh |
+| Drag & drop (task board) | **Đã chốt 2026-10-02** | Chọn `@dnd-kit` (Kanban task board Epic 3); chưa cài vào package.json, cài khi bắt đầu Story Epic 3 |
+| Chart library (BO dashboard) | **Đã chốt 2026-10-02** | Chọn `recharts` (Back-Office analytics dashboard Epic 7); chưa cài vào package.json, cài khi bắt đầu Story Epic 7 |
+| QR/code scanner (check-in) | **Đã chốt 2026-10-02** | Chọn `html5-qrcode` (Check-in QR scanner Epic 3); chưa cài vào package.json, cài khi bắt đầu Story Epic 3 |
 
 ## Yêu cầu môi trường (từ 0)
 
