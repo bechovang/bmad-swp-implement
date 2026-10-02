@@ -9,6 +9,7 @@ import { useToast } from '../../hooks/useToast'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
+import { PaymentModal } from '../../components/payment/PaymentModal'
 
 function calculateEndDateString(startDateStr: string, durationMonths: number): string {
   try {
@@ -47,7 +48,8 @@ export function BookingSummaryPage() {
   const startDate = searchParams.get('startDate') || new Date().toISOString().split('T')[0]
   const endDate = calculateEndDateString(startDate, durationMonths)
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createdReservation, setCreatedReservation] = useState<any | null>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   // Fetch unit details
   const {
@@ -86,13 +88,11 @@ export function BookingSummaryPage() {
         durationMonths,
       }),
     onSuccess: (res) => {
-      setIsSubmitting(false)
+      setCreatedReservation(res)
+      setShowPaymentModal(true)
       showToast('Reservation created successfully! Proceeding to payment.', 'success')
-      // Navigate to rental detail or payment modal touchpoint
-      navigate(`/booking/summary?unit=${encodeURIComponent(unitCode)}&reserved=${res.code}`)
     },
     onError: (err: any) => {
-      setIsSubmitting(false)
       const status = err?.response?.status
       const errorCode = err?.response?.data?.code
       const errorMessage =
@@ -108,7 +108,6 @@ export function BookingSummaryPage() {
   })
 
   const handleConfirm = () => {
-    setIsSubmitting(true)
     reservationMutation.mutate()
   }
 
@@ -369,7 +368,7 @@ export function BookingSummaryPage() {
           size="page"
           className="w-full sm:w-auto"
           onClick={() => navigate(`/units/${encodeURIComponent(unit.code)}`)}
-          disabled={isSubmitting}
+          disabled={reservationMutation.isPending}
           data-testid="summary-back-btn"
         >
           Back
@@ -379,12 +378,23 @@ export function BookingSummaryPage() {
           size="page"
           className="w-full sm:w-auto font-bold shadow-md"
           onClick={handleConfirm}
-          isLoading={isSubmitting}
+          isLoading={reservationMutation.isPending}
           data-testid="confirm-booking-btn"
         >
           Confirm & Proceed to Payment ({formatMoney(pricing.totalDueNow || pricing.depositAmount)})
         </Button>
       </div>
+
+      {createdReservation && (
+        <PaymentModal
+          open={showPaymentModal}
+          onOpenChange={setShowPaymentModal}
+          reservationId={createdReservation.id}
+          unitCode={createdReservation.unitCode}
+          amount={createdReservation.depositAmount}
+          purpose="DEPOSIT"
+        />
+      )}
     </div>
   )
 }

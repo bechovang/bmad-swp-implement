@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table'
 import { CheckInPassModal } from '../../components/rentals/CheckInPassModal'
+import { PaymentModal } from '../../components/payment/PaymentModal'
 import { formatMoney, formatUnitCode } from '../../lib/format'
 
 function getStatusBadgeProps(status: ReservationStatus): { variant: BadgeVariant; label: string } {
@@ -71,6 +72,7 @@ export function RentalDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [showPassModal, setShowPassModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const { data: reservation, isLoading, isError, refetch } = useQuery({
     queryKey: ['rental-detail', id],
@@ -154,6 +156,11 @@ export function RentalDetailPage() {
               View Check-in Pass
             </Button>
           )}
+          {isPendingPayment && (
+            <Button variant="primary" size="sm" onClick={() => setShowPaymentModal(true)}>
+              Pay Deposit Now
+            </Button>
+          )}
         </div>
       </div>
 
@@ -169,6 +176,9 @@ export function RentalDetailPage() {
                 Please complete the {formatMoney(reservation.depositAmount)} refundable deposit to confirm and lock this unit reservation.
               </p>
             </div>
+            <Button variant="primary" size="sm" onClick={() => setShowPaymentModal(true)}>
+              Pay Deposit Now
+            </Button>
           </div>
         </Card>
       )}
@@ -386,6 +396,21 @@ export function RentalDetailPage() {
         onOpenChange={setShowPassModal}
         reservation={reservation}
       />
+
+      {/* Payment Modal */}
+      {reservation && (
+        <PaymentModal
+          open={showPaymentModal}
+          onOpenChange={setShowPaymentModal}
+          reservationId={reservation.id}
+          unitCode={reservation.unitCode}
+          amount={reservation.depositAmount}
+          purpose="DEPOSIT"
+          onSuccess={() => {
+            refetch()
+          }}
+        />
+      )}
     </div>
   )
 }

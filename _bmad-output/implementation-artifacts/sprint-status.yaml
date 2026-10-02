@@ -50,7 +50,7 @@ development_status:
   2-3-reserve-re-check-booking-summary: done
   2-4-payment-backend-payospaymentgateway: done
   2-5-my-rentals-check-in-pass-rental-detail-cơ-bản: done
-  2-6-payment-modal-fe-qr-payos-tại-deposit-khép-flow-1: backlog
+  2-6-payment-modal-fe-qr-payos-tại-deposit-khép-flow-1: done
   2-7-no-show-expired-exactly-once-lazy: backlog
   epic-2-retrospective: optional
 

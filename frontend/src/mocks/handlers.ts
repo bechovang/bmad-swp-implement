@@ -9,6 +9,12 @@ import type {
   AuthUser,
 } from '../types/auth'
 import type { CreateReservationRequest, ReservationDto } from '../types/reservation'
+import type {
+  CreatePaymentRequest,
+  PaymentResponseDto,
+  PaymentDto,
+  PaymentStatus,
+} from '../types/payment'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -451,7 +457,172 @@ export const handlers = [
     }
     return HttpResponse.json(res, { status: 200 })
   }),
+
+  // ------------------------------------------------------------ Payments (2.4, 2.6)
+  http.post('/api/v1/payments/create', async ({ request }) => {
+    const body = (await request.json()) as CreatePaymentRequest
+    const reservationId = body.reservationId
+    const res = mockReservationsList.find((r) => r.id === reservationId)
+
+    const amount = body.amount || (res ? res.depositAmount : 103500)
+    const maxId = mockPaymentsList.reduce((max, p) => Math.max(max, p.id), 100)
+    const paymentId = maxId + 1
+    const orderCode = 1727932800000 + paymentId
+
+    const newPayment: PaymentDto = {
+      id: paymentId,
+      receiptCode: `RC-${orderCode}`,
+      payerId: 1,
+      reservationId,
+      orderCode,
+      purpose: body.purpose || 'DEPOSIT',
+      method: body.method || 'PAYOS',
+      amount,
+      status: body.method === 'CASH' ? 'PENDING_CASH' : 'PENDING',
+      createdAt: new Date().toISOString(),
+    }
+
+    mockPaymentsList.push(newPayment)
+
+    const response: PaymentResponseDto = {
+      paymentId: newPayment.id,
+      orderCode,
+      amount,
+      status: newPayment.status,
+      method: newPayment.method,
+      purpose: newPayment.purpose,
+      checkoutUrl: `https://pay.payos.vn/web/${orderCode}`,
+      qrCode: `00020101021238540010A000000727012400069704150110${orderCode}5303704540${amount}5802VN62150811StorageHub6304`,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    }
+
+    return HttpResponse.json(response, { status: 201 })
+  }),
+
+  http.get('/api/v1/payments/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const payment = mockPaymentsList.find((p) => p.id === id)
+    if (!payment) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Payment ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(payment, { status: 200 })
+  }),
+
+  http.post('/api/v1/payments/:id/cancel', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const payment = mockPaymentsList.find((p) => p.id === id)
+    if (payment) {
+      payment.status = 'EXPIRED'
+    }
+    return HttpResponse.json({ success: true }, { status: 200 })
+  }),
+
+  http.post('/api/v1/payments/:id/confirm-cash', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const payment = mockPaymentsList.find((p) => p.id === id)
+    if (!payment) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Payment ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+
+    payment.status = 'SUCCEEDED'
+
+    if (payment.reservationId) {
+      const res = mockReservationsList.find((r) => r.id === payment.reservationId)
+      if (res) {
+        res.status = 'RESERVED'
+      }
+    }
+
+    return HttpResponse.json(payment, { status: 200 })
+  }),
 ]
+
+export const INITIAL_PAYMENTS: PaymentDto[] = [
+  {
+    id: 101,
+    receiptCode: 'RC-101',
+    payerId: 1,
+    reservationId: 1,
+    orderCode: 1727932800101,
+    purpose: 'DEPOSIT',
+    method: 'PAYOS',
+    amount: 103500,
+    status: 'SUCCEEDED',
+    createdAt: '2026-10-02T10:00:00Z',
+  },
+  {
+    id: 102,
+    receiptCode: 'RC-102',
+    payerId: 1,
+    reservationId: 2,
+    orderCode: 1727932800102,
+    purpose: 'DEPOSIT',
+    method: 'PAYOS',
+    amount: 207000,
+    status: 'SUCCEEDED',
+    createdAt: '2026-09-01T08:00:00Z',
+  },
+  {
+    id: 103,
+    receiptCode: 'RC-103',
+    payerId: 1,
+    reservationId: 2,
+    orderCode: 1727932800103,
+    purpose: 'RENT',
+    method: 'CASH',
+    amount: 2070000,
+    status: 'SUCCEEDED',
+    createdAt: '2026-09-01T09:00:00Z',
+  },
+]
+
+let mockPaymentsList: PaymentDto[] = JSON.parse(JSON.stringify(INITIAL_PAYMENTS))
+
+export function resetMockPayments(custom?: PaymentDto[]) {
+  mockPaymentsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_PAYMENTS))
+}
+
+export function setMockPaymentStatus(
+  paymentIdOrStatus: number | PaymentStatus,
+  maybeStatus?: PaymentStatus
+) {
+  let targetPayment: PaymentDto | undefined
+  let targetStatus: PaymentStatus
+
+  if (typeof paymentIdOrStatus === 'string') {
+    targetStatus = paymentIdOrStatus
+    targetPayment = mockPaymentsList[mockPaymentsList.length - 1]
+  } else {
+    targetStatus = maybeStatus || 'SUCCEEDED'
+    targetPayment = mockPaymentsList.find((item) => item.id === paymentIdOrStatus)
+  }
+
+  if (targetPayment) {
+    targetPayment.status = targetStatus
+    if (targetStatus === 'SUCCEEDED' && targetPayment.reservationId) {
+      const res = mockReservationsList.find((r) => r.id === targetPayment.reservationId)
+      if (res) {
+        res.status = 'RESERVED'
+        if (!res.payments) res.payments = []
+        if (!res.payments.find((x) => x.id === targetPayment.id)) {
+          res.payments.push(targetPayment)
+        }
+      }
+    }
+  }
+}
 
 export const INITIAL_RESERVATIONS: ReservationDto[] = [
   {
