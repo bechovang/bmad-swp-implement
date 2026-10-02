@@ -19,9 +19,21 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Response interceptor: handle 401 Unauthorized
+// Response interceptor: handle 401 Unauthorized and auto-dispatch toast notification
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (
+      typeof window !== 'undefined' &&
+      response?.data &&
+      typeof response.data === 'object' &&
+      response.data.notification
+    ) {
+      window.dispatchEvent(
+        new CustomEvent('storagehub:toast', { detail: response.data.notification })
+      )
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       const requestUrl = error.config?.url || ''

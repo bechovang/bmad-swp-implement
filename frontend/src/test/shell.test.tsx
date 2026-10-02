@@ -42,6 +42,7 @@ describe('Adaptive Shell & 5-Role Navigation', () => {
     expect(screen.getByRole('link', { name: 'Browse Units' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'My Rentals' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Support' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument()
 
     // Ensure staff/admin navs are NOT rendered
     expect(screen.queryByRole('link', { name: 'Task Board' })).not.toBeInTheDocument()

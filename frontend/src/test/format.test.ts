@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney, formatUnitCode } from '../lib/format'
+import { formatMoney, formatUnitCode, formatNotificationDate } from '../lib/format'
 
 describe('formatMoney (VND Currency Formatting)', () => {
   it('formats standard positive amount correctly with dot separator and dong symbol', () => {
@@ -67,5 +67,22 @@ describe('formatUnitCode', () => {
     expect(formatUnitCode(123 as unknown as string)).toBe('')
     expect(formatUnitCode({} as unknown as string)).toBe('')
     expect(formatUnitCode(true as unknown as string)).toBe('')
+  })
+})
+
+describe('formatNotificationDate', () => {
+  it('formats valid ISO date string into readable date', () => {
+    const formatted = formatNotificationDate('2026-10-02T10:00:00Z')
+    expect(formatted).toMatch(/Oct\s+2/)
+  })
+
+  it('handles empty, null, or undefined string gracefully by returning empty string', () => {
+    expect(formatNotificationDate('')).toBe('')
+    expect(formatNotificationDate(null as unknown as string)).toBe('')
+    expect(formatNotificationDate(undefined as unknown as string)).toBe('')
+  })
+
+  it('returns raw string fallback when given an invalid date string', () => {
+    expect(formatNotificationDate('not-a-valid-date')).toBe('not-a-valid-date')
   })
 })

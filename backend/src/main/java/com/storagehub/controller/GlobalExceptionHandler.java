@@ -6,6 +6,7 @@ import com.storagehub.dto.FieldError;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.InvalidCredentialsException;
 import com.storagehub.exception.InvalidRequestException;
+import com.storagehub.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +110,13 @@ public class GlobalExceptionHandler {
         return respond(ApiErrorCode.NOT_FOUND);
     }
 
+    /** Requested resource not found -> 404 NOT_FOUND. */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> onResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiError.of(ApiErrorCode.NOT_FOUND.name(), ex.getMessage()));
+    }
+
     /** Business-rule block -> 409 with the caller-chosen code. */
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiError> onBusinessRule(BusinessRuleException ex) {
@@ -149,6 +157,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> onAccessDenied(AccessDeniedException ex) {
         return respond(ApiErrorCode.FORBIDDEN);
+    }
+
+    /**
+     * Unauthenticated access inside MVC handling -> 401 UNAUTHENTICATED envelope.
+     */
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiError> onAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .body(ApiError.of(ApiErrorCode.UNAUTHENTICATED.name(), ex.getMessage()));
     }
 
     /**

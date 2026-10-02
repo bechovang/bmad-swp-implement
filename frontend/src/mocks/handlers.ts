@@ -148,4 +148,181 @@ export const handlers = [
       total: 0,
     })
   }),
+
+  // ------------------------------------------------------------ Notifications endpoints (1.6)
+  http.get('/api/v1/notifications/unread-count', ({ request }) => {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return HttpResponse.json(
+        { code: 'UNAUTHENTICATED', message: 'Full authentication is required to access this resource' },
+        { status: 401 }
+      )
+    }
+
+    const currentUserId = extractUserId(authHeader)
+    const count = mockNotifications.filter(
+      (n) => n.userId === currentUserId && !n.isRead
+    ).length
+    return HttpResponse.json({ count }, { status: 200 })
+  }),
+
+  http.get('/api/v1/notifications', ({ request }) => {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return HttpResponse.json(
+        { code: 'UNAUTHENTICATED', message: 'Full authentication is required to access this resource' },
+        { status: 401 }
+      )
+    }
+
+    const currentUserId = extractUserId(authHeader)
+    const url = new URL(request.url)
+    const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10))
+    const pageSize = Math.max(1, parseInt(url.searchParams.get('pageSize') || '25', 10))
+
+    const userNotifications = mockNotifications
+      .filter((n) => n.userId === currentUserId)
+      .sort((a, b) => {
+        if (a.isRead !== b.isRead) {
+          return a.isRead ? 1 : -1
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      })
+
+    const start = (page - 1) * pageSize
+    const items = userNotifications.slice(start, start + pageSize)
+
+    return HttpResponse.json(
+      {
+        items,
+        page,
+        pageSize,
+        total: userNotifications.length,
+      },
+      { status: 200 }
+    )
+  }),
+
+  http.post('/api/v1/notifications/:id/read', ({ request, params }) => {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return HttpResponse.json(
+        { code: 'UNAUTHENTICATED', message: 'Full authentication is required to access this resource' },
+        { status: 401 }
+      )
+    }
+
+    const currentUserId = extractUserId(authHeader)
+    const id = parseInt(params.id as string, 10)
+    const item = mockNotifications.find((n) => n.id === id)
+
+    if (!item) {
+      return HttpResponse.json(
+        { code: 'NOT_FOUND', message: 'Notification not found' },
+        { status: 404 }
+      )
+    }
+
+    if (item.userId !== currentUserId) {
+      return HttpResponse.json(
+        { code: 'FORBIDDEN', message: 'Forbidden' },
+        { status: 403 }
+      )
+    }
+
+    item.isRead = true
+    return HttpResponse.json(item, { status: 200 })
+  }),
+
+  http.post('/api/v1/notifications/mark-all-read', ({ request }) => {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return HttpResponse.json(
+        { code: 'UNAUTHENTICATED', message: 'Full authentication is required to access this resource' },
+        { status: 401 }
+      )
+    }
+
+    const currentUserId = extractUserId(authHeader)
+    mockNotifications.forEach((n) => {
+      if (n.userId === currentUserId) {
+        n.isRead = true
+      }
+    })
+
+    return HttpResponse.json({ count: 0 }, { status: 200 })
+  }),
 ]
+
+export interface MockNotification {
+  id: number
+  userId: number
+  type: string
+  title: string
+  deepLink?: string | null
+  isRead: boolean
+  createdAt: string
+}
+
+export const INITIAL_NOTIFICATIONS: MockNotification[] = [
+  {
+    id: 1,
+    userId: 1,
+    type: 'PAYMENT_SUCCEEDED',
+    title: 'Deposit received for Unit S-04',
+    deepLink: '/rentals/1',
+    isRead: false,
+    createdAt: '2026-10-02T10:00:00Z',
+  },
+  {
+    id: 2,
+    userId: 1,
+    type: 'RESERVATION_CONFIRMED',
+    title: 'Reservation confirmed for Unit M-12',
+    deepLink: '/rentals/2',
+    isRead: true,
+    createdAt: '2026-10-01T15:30:00Z',
+  },
+  {
+    id: 3,
+    userId: 2,
+    type: 'TASK_ASSIGNED',
+    title: 'New cleaning task assigned: Unit L-01',
+    deepLink: '/tasks/3',
+    isRead: false,
+    createdAt: '2026-10-02T08:15:00Z',
+  },
+]
+
+let mockNotifications: MockNotification[] = JSON.parse(JSON.stringify(INITIAL_NOTIFICATIONS))
+
+export function resetMockNotifications(custom?: MockNotification[]) {
+  mockNotifications = custom
+    ? JSON.parse(JSON.stringify(custom))
+    : JSON.parse(JSON.stringify(INITIAL_NOTIFICATIONS))
+}
+
+function extractUserId(authHeader: string): number {
+  const token = authHeader.replace(/^Bearer\s+/, '').trim()
+  const match = token.match(/-(\d+)$/)
+  if (match) {
+    return parseInt(match[1], 10)
+  }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const stored =
+        localStorage.getItem('storagehub_user') ||
+        localStorage.getItem('storagehub_auth_user')
+      if (stored) {
+        const u = JSON.parse(stored)
+        if (u && typeof u.id === 'number') {
+          return u.id
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return 1
+}
+

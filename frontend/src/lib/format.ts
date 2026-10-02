@@ -36,3 +36,25 @@ export function formatUnitCode(code: string | null | undefined): string {
   }
   return code.trim().toUpperCase()
 }
+
+/**
+ * Formats an ISO date string into standard human-readable display.
+ * Example: "2026-10-02T10:00:00Z" -> "Oct 2, 17:00"
+ */
+export function formatNotificationDate(isoString: string): string {
+  if (!isoString) return ''
+  try {
+    const date = new Date(isoString)
+    if (isNaN(date.getTime())) return isoString
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+  } catch {
+    return isoString
+  }
+}
+

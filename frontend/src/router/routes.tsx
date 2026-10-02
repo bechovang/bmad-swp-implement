@@ -5,6 +5,7 @@ import { LoginPage } from '../pages/auth/LoginPage'
 import { RegisterPage } from '../pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
 import { ProfilePage } from '../pages/profile/ProfilePage'
+import { NotificationCenterPage } from '../pages/notification/NotificationCenterPage'
 import { ForbiddenPage } from '../pages/error/ForbiddenPage'
 import { NotFoundPage } from '../pages/error/NotFoundPage'
 import {
@@ -22,7 +23,6 @@ import {
   ReportsPage,
   UserManagementPage,
   LoginHistoryPage,
-  NotificationsPage,
   UnitDetailPage,
   RentalDetailPage,
   TaskDetailPage,
@@ -73,7 +73,7 @@ export const routesConfig: RouteObject[] = [
         path: '/notifications',
         element: (
           <ProtectedRoute allowedRoles={['CUSTOMER', 'STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR']}>
-            <NotificationsPage />
+            <NotificationCenterPage />
           </ProtectedRoute>
         ),
       },
