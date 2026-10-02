@@ -30,6 +30,7 @@ import {
 } from '../pages/placeholders'
 import { BrowseUnitsPage } from '../pages/unit/BrowseUnitsPage'
 import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
+import { BookingSummaryPage } from '../pages/booking/BookingSummaryPage'
 
 import { RootRedirect } from './RootRedirect'
 
@@ -90,6 +91,14 @@ export const routesConfig: RouteObject[] = [
         element: (
           <ProtectedRoute allowedRoles={['CUSTOMER']}>
             <UnitDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/booking/summary',
+        element: (
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <BookingSummaryPage />
           </ProtectedRoute>
         ),
       },

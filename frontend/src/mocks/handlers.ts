@@ -8,6 +8,7 @@ import type {
   ApiError,
   AuthUser,
 } from '../types/auth'
+import type { CreateReservationRequest, ReservationDto } from '../types/reservation'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -363,7 +364,96 @@ export const handlers = [
       { status: 200 }
     )
   }),
+
+  // ------------------------------------------------------------ Reservations (2.3)
+  http.post('/api/v1/reservations', async ({ request }) => {
+    const body = (await request.json()) as CreateReservationRequest
+    const unitCode = body.unitCode?.toUpperCase() || ''
+
+    if (unitCode === 'M-2' || unitCode === 'CONFLICT' || unitCode === 'OCCUPIED') {
+      return HttpResponse.json(
+        {
+          code: 'UNIT_UNAVAILABLE',
+          message: `Unit ${unitCode} was just reserved. Similar units still available.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    const unit = MOCK_UNITS[unitCode]
+    if (!unit) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Unit ${unitCode} not found`,
+        },
+        { status: 404 }
+      )
+    }
+
+    const durationMonths = body.durationMonths || 1
+    const startDate = body.startDate || '2026-10-03'
+    const start = new Date(startDate)
+    const end = new Date(start)
+    end.setMonth(end.getMonth() + durationMonths)
+    const endDate = end.toISOString().split('T')[0]
+
+    const monthlyRate = unit.monthlyRate
+    const baseRent = monthlyRate * durationMonths
+    const depositAmount = Math.round((baseRent * unit.depositRate) / 100)
+
+    const reservationId = mockReservationsList.length + 1
+    const resDto: ReservationDto = {
+      id: reservationId,
+      code: `BK-2026-${String(reservationId).padStart(4, '0')}`,
+      customerId: 1,
+      customerName: 'Lan Nguyen',
+      unitId: unit.id,
+      unitCode: unit.code,
+      unitTypeName: unit.typeName,
+      facilityName: unit.facilityName,
+      facilityAddress: unit.facilityAddress,
+      zoneCode: unit.zoneCode,
+      floor: unit.floor,
+      sizeM2: unit.sizeM2,
+      accessType: unit.accessType,
+      startDate,
+      endDate,
+      durationMonths,
+      depositAmount,
+      monthlyRate,
+      baseRent,
+      totalRent: baseRent,
+      policyVersion: 'v3',
+      accessCode: null,
+      status: 'PENDING_PAYMENT',
+    }
+
+    mockReservationsList.push(resDto)
+    return HttpResponse.json(resDto, { status: 201 })
+  }),
+
+  http.get('/api/v1/reservations/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Reservation ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(res, { status: 200 })
+  }),
 ]
+
+let mockReservationsList: ReservationDto[] = []
+
+export function resetMockReservations(custom?: ReservationDto[]) {
+  mockReservationsList = custom ? [...custom] : []
+}
 
 export const MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {
   'S-3': {

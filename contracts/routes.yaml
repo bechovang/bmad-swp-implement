@@ -63,6 +63,7 @@ routes:
   - { id: profile,       path: /profile,       screen: Profile,               roles: [CUSTOMER, STAFF, FACILITY_MANAGER, BUSINESS_OPS, SYSTEM_ADMINISTRATOR], status: placeholder }
   # Catalog
   - { id: unit-detail,     path: /units/{code},        screen: Unit Detail,      roles: [CUSTOMER],            status: placeholder }
+  - { id: booking-summary, path: /booking/summary,     screen: Booking Summary,  roles: [CUSTOMER],            status: active }
   # Rentals & operations
   - { id: rental-detail,   path: /rentals/{id},        screen: Rental Detail,    roles: [CUSTOMER],            status: placeholder }
   - { id: task-detail,     path: /tasks/{id},          screen: Task Detail,      roles: [STAFF],               status: placeholder }

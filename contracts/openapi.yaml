@@ -341,8 +341,199 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  # ----------------------------------------------------- reservations (2.3)
+  /reservations:
+    post:
+      operationId: createReservation
+      tags: [Reservations]
+      summary: Create a pending reservation with locked price snapshot
+      description: >
+        Atomically validates unit availability and creates a PENDING_PAYMENT reservation
+        with a unique BK- code and immutable price snapshot. Returns 409 UNIT_UNAVAILABLE
+        if the unit is occupied, under maintenance, or has conflicting reservations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        '201':
+          description: Reservation created successfully in PENDING_PAYMENT status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          description: Unit is unavailable or conflicting reservation exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reservations/{id}:
+    get:
+      operationId: getReservation
+      tags: [Reservations]
+      summary: Get reservation details by ID
+      description: >
+        Returns reservation details including unit info, timeline, status, and price snapshot.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      responses:
+        '200':
+          description: Reservation details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # -------------------------------------------------------- payments (2.4)
+  /payments/create:
+    post:
+      operationId: createPayment
+      tags: [Payments]
+      summary: Create a payment and generate checkout QR link
+      description: >
+        Creates a pending payment for a reservation deposit or rent, registers with PayOS,
+        and returns checkout link with QR data and expiry timestamp.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment initiated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponseDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Reservation not in payable state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payments/webhook:
+    post:
+      operationId: receivePayOsWebhook
+      tags: [Payments]
+      summary: Public webhook endpoint for PayOS payment notifications
+      description: >
+        Public endpoint (no JWT required). Validates PayOS checksum and updates payment
+        and reservation state idempotently.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayOsWebhookPayload'
+      responses:
+        '200':
+          description: Webhook received and processed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayOsWebhookResponse'
+        '400':
+          description: Checksum verification failed or invalid payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payments/{id}:
+    get:
+      operationId: getPayment
+      tags: [Payments]
+      summary: Get payment details by ID
+      description: >
+        Returns payment status, order code, amounts, and receipt reference.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Payment ID.
+      responses:
+        '200':
+          description: Payment details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /payments/{id}/confirm-cash:
+    post:
+      operationId: confirmCashPayment
+      tags: [Payments]
+      summary: Staff confirmation of cash received at counter
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN. Transitions
+        PENDING_CASH payment to SUCCEEDED and completes reservation/unit lifecycle.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Payment ID.
+      responses:
+        '200':
+          description: Cash payment confirmed and business state updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Payment not in PENDING_CASH status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   securitySchemes:
@@ -981,5 +1172,373 @@ components:
         policyVersion:
           type: string
           example: 'v3'
+
+    # -------------------------------------------------------- reservations (2.3)
+    CreateReservationRequest:
+      type: object
+      description: Payload to atomically validate and create a pending reservation.
+      required:
+        - unitCode
+        - startDate
+        - durationMonths
+      additionalProperties: false
+      properties:
+        unitCode:
+          type: string
+          description: Unique unit code (e.g. S-3, M-5).
+          example: 'M-5'
+        startDate:
+          type: string
+          format: date
+          description: Desired rental start date (YYYY-MM-DD).
+          example: '2026-10-03'
+        durationMonths:
+          type: integer
+          minimum: 1
+          maximum: 120
+          description: Rental duration in months.
+          example: 1
+
+    ReservationStatus:
+      type: string
+      description: Lifecycle status of a reservation.
+      enum:
+        - PENDING_PAYMENT
+        - RESERVED
+        - CHECKED_IN
+        - CHECKOUT_REQUESTED
+        - CLOSED
+        - EXPIRED
+        - CANCELLED
+
+    ReservationDto:
+      type: object
+      description: Full reservation representation including locked price snapshot.
+      required:
+        - id
+        - code
+        - customerId
+        - unitId
+        - unitCode
+        - startDate
+        - endDate
+        - durationMonths
+        - depositAmount
+        - monthlyRate
+        - baseRent
+        - totalRent
+        - policyVersion
+        - status
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        code:
+          type: string
+          example: 'BK-2026-0001'
+        customerId:
+          type: integer
+          format: int64
+          example: 1
+        customerName:
+          type: string
+          nullable: true
+          example: 'Lan Nguyen'
+        unitId:
+          type: integer
+          format: int64
+          example: 3
+        unitCode:
+          type: string
+          example: 'M-5'
+        unitTypeName:
+          type: string
+          nullable: true
+          example: 'M'
+        facilityName:
+          type: string
+          nullable: true
+          example: 'Tan Binh Depot'
+        facilityAddress:
+          type: string
+          nullable: true
+          example: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City'
+        zoneCode:
+          type: string
+          nullable: true
+          example: 'B'
+        floor:
+          type: integer
+          nullable: true
+          example: 2
+        sizeM2:
+          type: number
+          format: double
+          nullable: true
+          example: 8.0
+        accessType:
+          type: string
+          nullable: true
+          example: 'QR'
+        startDate:
+          type: string
+          format: date
+          example: '2026-10-03'
+        endDate:
+          type: string
+          format: date
+          example: '2026-11-03'
+        durationMonths:
+          type: integer
+          example: 1
+        depositAmount:
+          type: integer
+          description: Locked deposit amount in VND.
+          example: 69000
+        monthlyRate:
+          type: integer
+          description: Locked monthly rate in VND.
+          example: 690000
+        baseRent:
+          type: integer
+          description: Locked base rent in VND (monthlyRate * durationMonths).
+          example: 690000
+        totalRent:
+          type: integer
+          description: Locked total rent in VND.
+          example: 690000
+        policyVersion:
+          type: string
+          description: Locked rental policy version.
+          example: 'v3'
+        accessCode:
+          type: string
+          nullable: true
+          example: '482913'
+        status:
+          $ref: '#/components/schemas/ReservationStatus'
+
+    # ----------------------------------------------------------- payments (2.4)
+    PaymentStatus:
+      type: string
+      description: Lifecycle status of a payment.
+      enum:
+        - PENDING
+        - PENDING_CASH
+        - PROCESSING
+        - SUCCEEDED
+        - FAILED
+        - EXPIRED
+
+    PaymentPurpose:
+      type: string
+      description: Purpose of payment transaction.
+      enum:
+        - DEPOSIT
+        - RENT
+        - EXTENSION_FEE
+        - DAMAGE_FEE
+        - EXTRA_FEE
+
+    PaymentMethod:
+      type: string
+      description: Payment method.
+      enum:
+        - PAYOS
+        - CASH
+        - CARD
+        - MOMO
+        - VNPAY
+
+    CreatePaymentRequest:
+      type: object
+      description: Request payload to create a payment link or counter cash record.
+      required:
+        - reservationId
+        - purpose
+        - method
+      additionalProperties: false
+      properties:
+        reservationId:
+          type: integer
+          format: int64
+          example: 1
+        purpose:
+          $ref: '#/components/schemas/PaymentPurpose'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        amount:
+          type: integer
+          description: Optional override amount in VND; defaults to deposit/rent from reservation snapshot.
+          example: 69000
+
+    PaymentResponseDto:
+      type: object
+      description: Created payment response containing checkout details.
+      required:
+        - paymentId
+        - orderCode
+        - amount
+        - status
+        - method
+        - purpose
+      additionalProperties: false
+      properties:
+        paymentId:
+          type: integer
+          format: int64
+          example: 10
+        orderCode:
+          type: integer
+          format: int64
+          description: Numeric PayOS order code.
+          example: 1727932800101
+        amount:
+          type: integer
+          example: 69000
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        purpose:
+          $ref: '#/components/schemas/PaymentPurpose'
+        checkoutUrl:
+          type: string
+          nullable: true
+          example: 'https://pay.payos.vn/web/...'
+        qrCode:
+          type: string
+          nullable: true
+          example: '00020101021238540010A000000727...'
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    PaymentDto:
+      type: object
+      description: Full payment detail.
+      required:
+        - id
+        - receiptCode
+        - payerId
+        - orderCode
+        - purpose
+        - method
+        - amount
+        - status
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        receiptCode:
+          type: string
+          example: 'RC-2026-0001'
+        payerId:
+          type: integer
+          format: int64
+          example: 1
+        reservationId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+        orderCode:
+          type: integer
+          format: int64
+          example: 1727932800101
+        purpose:
+          $ref: '#/components/schemas/PaymentPurpose'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        amount:
+          type: integer
+          example: 69000
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    PayOsWebhookData:
+      type: object
+      description: Embedded PayOS webhook payload data.
+      required:
+        - orderCode
+        - amount
+      additionalProperties: true
+      properties:
+        orderCode:
+          type: integer
+          format: int64
+          example: 1727932800101
+        amount:
+          type: integer
+          example: 69000
+        description:
+          type: string
+          nullable: true
+        accountNumber:
+          type: string
+          nullable: true
+        reference:
+          type: string
+          nullable: true
+        transactionDateTime:
+          type: string
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        paymentLinkId:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        desc:
+          type: string
+          nullable: true
+
+    PayOsWebhookPayload:
+      type: object
+      description: Root PayOS webhook payload with signature.
+      required:
+        - code
+        - desc
+        - data
+        - signature
+      additionalProperties: true
+      properties:
+        code:
+          type: string
+          example: '00'
+        desc:
+          type: string
+          example: 'success'
+        data:
+          $ref: '#/components/schemas/PayOsWebhookData'
+        signature:
+          type: string
+          example: '73013e50e4d987c2e574faef1c7a1aed503a397b1ce52c25cad07f65927b89c7'
+
+    PayOsWebhookResponse:
+      type: object
+      required:
+        - code
+        - message
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: '00'
+        message:
+          type: string
+          example: 'Webhook processed successfully'
 
 
