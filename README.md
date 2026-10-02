@@ -195,7 +195,13 @@ chưa có tín hiệu xấu nào.
   forgot-password, landing theo 5 vai trò, các route detail — status
   `placeholder` chờ epic 1.
 - Test backend cần MySQL thật qua env (`DB_URL`…); thiếu env thì tự **skip**
-  (`@EnabledIfEnvironmentVariable`), không fail. `StorageHubNonDevProfileTests`
-  dùng schema riêng `storagehub_nondev_test` (tự tạo) chứng minh seed không
-  chạy ngoài dev; `SeedDemoCredentialsTests` pin hash BCrypt `Demo1234!`.
+  (`@EnabledIfEnvironmentVariable`), không fail. Hai lớp test DB dùng schema
+  riêng tách khỏi dev qua biến URL riêng: `LogServicePersistenceTests` (story
+  1.2) đọc `DB_URL_LOGTEST` (mặc định
+  `jdbc:mysql://localhost:3306/storagehub_log_test`, tự tạo),
+  `StorageHubNonDevProfileTests` đọc `DB_URL_NONDEV` (mặc định schema
+  `storagehub_nondev_test`) — guard chạy vẫn theo `DB_URL`, nên khi trỏ env
+  sang server khác phải set thêm biến riêng tương ứng.
+  `StorageHubNonDevProfileTests` chứng minh seed không chạy ngoài dev;
+  `SeedDemoCredentialsTests` pin hash BCrypt `Demo1234!`.
   (Testcontainers tính tiếp ở story sau.)

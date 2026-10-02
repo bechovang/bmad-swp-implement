@@ -25,3 +25,19 @@ Entries appended by the bmad-build review loop. Do not modify existing entries.
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-1-monorepo-starter-template-theo-structural-seed.md`
   summary: `contracts/openapi.yaml` has no reusable `components.responses` (Unauthorized/Forbidden/Conflict/ValidationError) and MSW has no Error-envelope handler example.
   evidence: Verified — skeleton ships Error/ListEnvelope schemas only, as the spec required; the response catalog and error-mock pattern pay off when the first sprint PR adds paths (epic 1 auth endpoints), which is when to add them.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-2-be-foundations-error-list-envelope-logservice-append-only.md`
+  summary: `@ExceptionHandler(Exception.class)` will swallow `AccessDeniedException` raised by method security (`@PreAuthorize`) as 500 instead of 403 once story 1.3 adds the permission matrix.
+  evidence: Verified in GlobalExceptionHandler — the catch-all maps every Exception to INTERNAL_ERROR; no production path triggers it today (the real SecurityConfig chain has no role rule), but 1.3's matrix makes it certain. Fix there: add a rethrow handler for AccessDeniedException (letting the filter chain's EnvelopeAccessDeniedHandler render 403) or authorize only via authorizeHttpRequests; add a MockMvc test driving it through the real chain.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-2-be-foundations-error-list-envelope-logservice-append-only.md`
+  summary: `ListQuery`/`pageSize` has no upper bound — the resolver accepts `pageSize=10000000` and the openapi ListEnvelope declares no `maximum`, so the first real list endpoint gets an unbounded LIMIT plus a `(page-1)*pageSize` int-overflow risk.
+  evidence: Verified — ListQuery enforces only >= 1 and openapi pageSize carries `minimum: 1, default: 25` alone; no SQL consumer exists yet so nothing breaks today. Cap value is a product decision: pick it (plus mirror as `maximum` in the contract) in the first story that adds a real list endpoint (epic 2 browse/lists).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-2-be-foundations-error-list-envelope-logservice-append-only.md`
+  summary: Client-origin framework exceptions outside the frozen matrix rows — `HttpMediaTypeNotAcceptableException` (406, Accept header excludes JSON), missing `@RequestHeader`/`@RequestCookie` bindings, async timeout — fall into the catch-all and surface as 500 instead of a 4xx envelope.
+  evidence: Verified in GlobalExceptionHandler — no handlers exist for them; nothing triggers these today (no endpoint reads headers, FE always accepts JSON). Note 406 handling needs care: writing the JSON envelope against a non-JSON Accept requires the ErrorEnvelopeWriter path, and a new NOT_ACCEPTABLE enum value would amend the openapi catalog — design it when a real endpoint needs it.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-2-be-foundations-error-list-envelope-logservice-append-only.md`
+  summary: Class-level Bean Validation constraints (cross-field rules) map to VALIDATION_FAILED with no fieldErrors and the constraint message dropped — `onValidation` reads only `getFieldErrors()`.
+  evidence: Verified in GlobalExceptionHandler; no DTO uses class-level constraints yet, but epic 2/4 cross-field rules (EndDate >= StartDate, extension bounds) are certain to. Representation of a field-less error is a shape decision (extend FieldError vs a new envelope field) the spec's frozen matrix ("fieldErrors đủ từng field") does not settle — decide in the first story that adds a cross-field DTO.

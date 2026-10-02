@@ -23,6 +23,11 @@ spring:
     hibernate:
       # Schema is owned by Flyway (AD-6): no DDL from Hibernate, validate only.
       ddl-auto: validate
+      # V1 DDL uses PascalCase columns (LogID, ActorID, EntityType, ...), so
+      # entities declare explicit @Column names that must map VERBATIM - Boot's
+      # default camelCase->snake_case physical strategy would turn EntityType
+      # into entity_type and fail validation against the frozen schema.
+      naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     open-in-view: false
 
   flyway:

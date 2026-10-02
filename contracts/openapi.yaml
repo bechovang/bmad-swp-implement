@@ -65,7 +65,16 @@ components:
       properties:
         code:
           type: string
-          description: Machine-readable, stable, UPPER_SNAKE.
+          description: >
+            Machine-readable, stable, UPPER_SNAKE. Two layers share this field.
+            Framework codes, issued by the backend error envelope for every
+            non-2xx response including security 401/403: VALIDATION_FAILED
+            (400, with fieldErrors), MALFORMED_REQUEST (400), UNAUTHENTICATED
+            (401), FORBIDDEN (403), NOT_FOUND (404), METHOD_NOT_ALLOWED (405),
+            UNSUPPORTED_MEDIA_TYPE (415), INTERNAL_ERROR (500, generic message
+            only). Business codes are declared by each operation when its path
+            lands in this file and travel in this same field; a business-rule
+            block maps to 409.
           pattern: '^[A-Z][A-Z0-9_]*$'
           examples:
             - VALIDATION_FAILED
