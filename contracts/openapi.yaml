@@ -223,6 +223,79 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  # ----------------------------------------------------------- units (2.1)
+  /units/{code}:
+    get:
+      operationId: getUnitDetail
+      tags: [Units]
+      summary: Get unit detail by code
+      description: >
+        Returns unit specification, facility info, monthly rate, deposit rate,
+        and security features for a specific unit code.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique unit code (e.g. S-3, M-5).
+      responses:
+        '200':
+          description: Detailed unit specifications and pricing base.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnitDetailDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # --------------------------------------------------------- pricing (2.1)
+  /pricing/calculate:
+    get:
+      operationId: calculatePricing
+      tags: [Pricing]
+      summary: Calculate rental price breakdown
+      description: >
+        Computes itemized rental pricing (base rent, surcharges, and refundable deposit)
+        using the backend PricingEngine and active RentalPolicy.
+      parameters:
+        - name: unitCode
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Unit code to calculate pricing for (e.g. S-3).
+        - name: durationMonths
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 120
+          description: Number of rental months (must be between 1 and 120).
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Desired start date (YYYY-MM-DD). Defaults to current date.
+      responses:
+        '200':
+          description: Pricing breakdown calculation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingBreakdownDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -595,4 +668,168 @@ components:
           type: string
           nullable: true
           description: Relative FE path for optional single action link.
+
+    # ----------------------------------------------------------- units & pricing
+    UnitDetailDto:
+      type: object
+      description: Complete unit details for unit page view.
+      required:
+        - id
+        - code
+        - typeName
+        - facilityName
+        - facilityAddress
+        - zoneCode
+        - floor
+        - sizeM2
+        - accessType
+        - status
+        - imageUrl
+        - monthlyRate
+        - depositRate
+        - securityFeatures
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+          example: 'S-3'
+        typeName:
+          type: string
+          example: 'S'
+        typeDescription:
+          type: string
+          nullable: true
+          example: 'Small unit around 5 m2'
+        facilityName:
+          type: string
+          example: 'Tan Binh Depot'
+        facilityAddress:
+          type: string
+          example: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City'
+        zoneCode:
+          type: string
+          example: 'A'
+        floor:
+          type: integer
+          example: 1
+        sizeM2:
+          type: number
+          format: double
+          example: 5.0
+        accessType:
+          type: string
+          example: 'PIN'
+        status:
+          type: string
+          example: 'AVAILABLE'
+        imageUrl:
+          type: string
+          example: '/units/S-3.jpg'
+        monthlyRate:
+          type: integer
+          description: Base monthly rate in VND.
+          example: 345000
+        depositRate:
+          type: integer
+          description: Deposit rate percentage (e.g. 10 for 10%).
+          example: 10
+        securityFeatures:
+          type: array
+          items:
+            type: string
+          example:
+            - '24/7 CCTV Monitoring'
+            - 'Personal Access Code (PIN)'
+            - 'Individually Alarmed Unit'
+            - 'Climate & Humidity Controlled'
+            - 'Fire Protection & Sprinklers'
+
+    SurchargeItemDto:
+      type: object
+      description: Line item surcharge.
+      required:
+        - type
+        - name
+        - amount
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          example: 'SURCHARGE'
+        name:
+          type: string
+          example: 'Late checkout surcharge'
+        amount:
+          type: integer
+          example: 0
+        description:
+          type: string
+          nullable: true
+          example: '5% surcharge capped at 10%'
+
+    PricingBreakdownDto:
+      type: object
+      description: Itemized rental pricing calculation result.
+      required:
+        - unitCode
+        - durationMonths
+        - monthlyRate
+        - baseRent
+        - surcharges
+        - totalRent
+        - depositRate
+        - depositAmount
+        - depositRefundable
+        - totalDueNow
+        - currency
+      additionalProperties: false
+      properties:
+        unitCode:
+          type: string
+          example: 'S-3'
+        durationMonths:
+          type: integer
+          example: 3
+        monthlyRate:
+          type: integer
+          description: Unit monthly rate in VND.
+          example: 345000
+        baseRent:
+          type: integer
+          description: Monthly rate * durationMonths.
+          example: 1035000
+        surcharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurchargeItemDto'
+        totalRent:
+          type: integer
+          description: Total rent including any applicable surcharges.
+          example: 1035000
+        depositRate:
+          type: integer
+          description: Deposit rate percentage.
+          example: 10
+        depositAmount:
+          type: integer
+          description: Refundable deposit amount in VND.
+          example: 103500
+        depositRefundable:
+          type: boolean
+          example: true
+        totalDueNow:
+          type: integer
+          description: Amount due immediately upon reservation (deposit).
+          example: 103500
+        currency:
+          type: string
+          default: 'VND'
+          example: 'VND'
+        policyVersion:
+          type: string
+          example: 'v3'
+
 

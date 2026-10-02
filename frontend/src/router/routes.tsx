@@ -23,13 +23,13 @@ import {
   ReportsPage,
   UserManagementPage,
   LoginHistoryPage,
-  UnitDetailPage,
   RentalDetailPage,
   TaskDetailPage,
   SupportTicketDetailPage,
   EscalationDetailPage,
   PolicyEditorPage,
 } from '../pages/placeholders'
+import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
 
 import { RootRedirect } from './RootRedirect'
 
