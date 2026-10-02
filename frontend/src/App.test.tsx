@@ -2,16 +2,13 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import App from './App.tsx'
 
-describe('App (scaffold smoke)', () => {
-  it('renders the scaffold heading', () => {
+describe('App', () => {
+  it('renders the platform and redirects unauthenticated visitor to login', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1, name: 'StorageHub' })).toBeInTheDocument()
-  })
-
-  it('lists the five role landings', () => {
-    render(<App />)
-    for (const role of ['Customer', 'Staff', 'Facility Manager', 'Business Ops', 'System Administrator']) {
-      expect(screen.getByText(role, { exact: false })).toBeInTheDocument()
-    }
+    expect(screen.getByRole('heading', { level: 2, name: 'Sign In' })).toBeInTheDocument()
+    expect(screen.getByLabelText(/email address/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
   })
 })

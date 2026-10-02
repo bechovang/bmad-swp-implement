@@ -27,11 +27,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px;
-}
 
 code {
   font-family: ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
