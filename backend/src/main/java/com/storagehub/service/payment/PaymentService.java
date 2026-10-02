@@ -22,6 +22,7 @@ import com.storagehub.repository.PaymentRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.UnitRepository;
 import com.storagehub.repository.UserRepository;
+import com.storagehub.service.ContractService;
 import com.storagehub.service.LogService;
 import com.storagehub.service.NotificationService;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public class PaymentService {
     private final PayOS payOS;
     private final LogService logService;
     private final NotificationService notificationService;
+    private final ContractService contractService;
     private final ObjectMapper objectMapper;
 
     public PaymentService(PaymentRepository paymentRepository,
@@ -61,6 +63,7 @@ public class PaymentService {
                           PayOS payOS,
                           LogService logService,
                           NotificationService notificationService,
+                          ContractService contractService,
                           ObjectMapper objectMapper) {
         this.paymentRepository = paymentRepository;
         this.reservationRepository = reservationRepository;
@@ -70,6 +73,7 @@ public class PaymentService {
         this.payOS = payOS;
         this.logService = logService;
         this.notificationService = notificationService;
+        this.contractService = contractService;
         this.objectMapper = objectMapper;
     }
 
@@ -251,6 +255,9 @@ public class PaymentService {
             logService.append(payment.getPayer().getId(), EntityType.RESERVATION, reservation.getId(),
                     Action.STATUS_CHANGE, ReservationStatus.PENDING_PAYMENT.name(), ReservationStatus.RESERVED.name(),
                     "Deposit confirmed - reservation locked");
+
+            // Story 3.1: Auto-draft contract within the same transaction
+            contractService.createDraftContract(reservation);
 
             // Dispatch notification
             String notifTitle = "Deposit received - " + payment.getAmount() + " VND for unit " +

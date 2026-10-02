@@ -54,8 +54,8 @@ development_status:
   2-7-no-show-expired-exactly-once-lazy: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-auto-draft-contract-khi-deposit-thành-công: backlog
+  epic-3: in-progress
+  3-1-auto-draft-contract-khi-deposit-thành-công: done
   3-2-kanban-task-board: backlog
   3-3-check-in-task-validate-reservation-thu-100-rent-qr-cash: backlog
   3-4-contract-ritual-access-code-kích-hoạt-rental-contract-chain: backlog

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getRentalDetail } from '../../api/rental'
+import { getContractByReservation } from '../../api/contract'
 import type { ReservationStatus, PaymentStatus } from '../../types/rental'
 import { Card } from '../../components/ui/Card'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
@@ -10,6 +11,7 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table'
 import { CheckInPassModal } from '../../components/rentals/CheckInPassModal'
 import { PaymentModal } from '../../components/payment/PaymentModal'
+import { ContractPreviewCard } from '../../components/contract/ContractPreviewCard'
 import { formatMoney, formatUnitCode } from '../../lib/format'
 
 function getStatusBadgeProps(status: ReservationStatus): { variant: BadgeVariant; label: string } {
@@ -78,6 +80,13 @@ export function RentalDetailPage() {
     queryKey: ['rental-detail', id],
     queryFn: () => getRentalDetail(id || ''),
     enabled: Boolean(id),
+  })
+
+  const { data: contract, refetch: refetchContract } = useQuery({
+    queryKey: ['contract-reservation', reservation?.id],
+    queryFn: () => getContractByReservation(reservation!.id),
+    enabled: Boolean(reservation?.id),
+    retry: false,
   })
 
   if (isLoading) {
@@ -390,6 +399,13 @@ export function RentalDetailPage() {
         </Card>
       </div>
 
+      {/* Contract Agreement Preview (Story 3.1) */}
+      {contract && (
+        <div className="pt-2">
+          <ContractPreviewCard contract={contract} />
+        </div>
+      )}
+
       {/* Check-in Pass Modal */}
       <CheckInPassModal
         open={showPassModal}
@@ -408,6 +424,7 @@ export function RentalDetailPage() {
           purpose="DEPOSIT"
           onSuccess={() => {
             refetch()
+            refetchContract()
           }}
         />
       )}

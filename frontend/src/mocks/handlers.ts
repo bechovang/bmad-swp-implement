@@ -15,6 +15,7 @@ import type {
   PaymentDto,
   PaymentStatus,
 } from '../types/payment'
+import type { ContractDto } from '../types/contract'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -547,7 +548,150 @@ export const handlers = [
 
     return HttpResponse.json(payment, { status: 200 })
   }),
+
+  // ------------------------------------------------------------ Contracts (3.1)
+  http.get('/api/v1/contracts/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const contract = mockContractsList.find((c) => c.id === id)
+    if (!contract) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Contract ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
+  http.get('/api/v1/contracts/reservation/:reservationId', ({ params }) => {
+    const reservationId = parseInt(params.reservationId as string, 10)
+    const contract = mockContractsList.find(
+      (c) => c.reservationId === reservationId && c.isLatest === 1
+    ) || mockContractsList.find((c) => c.reservationId === reservationId)
+    if (!contract) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `No contract found for reservation ${reservationId}`,
+        },
+        { status: 404 }
+      )
+    }
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
+  http.post('/api/v1/contracts/:id/re-draft', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const prevContract = mockContractsList.find((c) => c.id === id)
+    if (!prevContract) {
+      return HttpResponse.json(
+        {
+          code: 'NOT_FOUND',
+          message: `Contract ${id} not found`,
+        },
+        { status: 404 }
+      )
+    }
+
+    if (prevContract.status !== 'DRAFT') {
+      return HttpResponse.json(
+        {
+          code: 'INVALID_CONTRACT_STATUS',
+          message: 'Only DRAFT contracts can be re-drafted',
+        },
+        { status: 409 }
+      )
+    }
+
+    // Supersede old contract
+    prevContract.status = 'SUPERSEDED'
+    prevContract.isLatest = 0
+
+    // Create new draft
+    const newId = Math.max(...mockContractsList.map((c) => c.id), 0) + 1
+    const newCode = `${prevContract.code.replace(/-R\d+$/, '')}-R${newId}`
+    const newContract: ContractDto = {
+      ...prevContract,
+      id: newId,
+      code: newCode,
+      status: 'DRAFT',
+      supersedesContractId: prevContract.id,
+      isLatest: 1,
+    }
+    mockContractsList.push(newContract)
+
+    return HttpResponse.json(newContract, { status: 200 })
+  }),
 ]
+
+export const INITIAL_CONTRACTS: ContractDto[] = [
+  {
+    id: 1,
+    code: 'CT-1042',
+    reservationId: 1,
+    reservationCode: 'BK-1042',
+    policyId: 1,
+    policyVersion: 'v3',
+    contentSnapshot: JSON.stringify({
+      code: 'CT-1042',
+      reservationCode: 'BK-1042',
+      unitCode: 'S-3',
+      monthlyRate: 345000,
+      baseRent: 1035000,
+      totalRent: 1035000,
+      depositAmount: 103500,
+      depositRate: 10,
+      durationMonths: 3,
+      policyVersion: 'v3',
+      currency: 'VND',
+      startDate: '2026-10-05',
+      endDate: '2027-01-05',
+      customerName: 'Lan Nguyen',
+      customerEmail: 'lan@storagehub.dev',
+      customerPhone: '0901234567',
+      facilityName: 'Tan Binh Depot',
+      facilityAddress: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City',
+      zoneCode: 'A',
+      floor: 1,
+      sizeM2: 5.0,
+    }),
+    snapshot: {
+      code: 'CT-1042',
+      reservationCode: 'BK-1042',
+      unitCode: 'S-3',
+      monthlyRate: 345000,
+      baseRent: 1035000,
+      totalRent: 1035000,
+      depositAmount: 103500,
+      depositRate: 10,
+      durationMonths: 3,
+      policyVersion: 'v3',
+      currency: 'VND',
+      startDate: '2026-10-05',
+      endDate: '2027-01-05',
+      customerName: 'Lan Nguyen',
+      customerEmail: 'lan@storagehub.dev',
+      customerPhone: '0901234567',
+      facilityName: 'Tan Binh Depot',
+      facilityAddress: '45 Nguyen Van Troi, Tan Binh, Ho Chi Minh City',
+      zoneCode: 'A',
+      floor: 1,
+      sizeM2: 5.0,
+    },
+    signedPhotoUrl: null,
+    status: 'DRAFT',
+    supersedesContractId: null,
+    isLatest: 1,
+  },
+]
+
+let mockContractsList: ContractDto[] = JSON.parse(JSON.stringify(INITIAL_CONTRACTS))
+
+export function resetMockContracts(custom?: ContractDto[]) {
+  mockContractsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_CONTRACTS))
+}
 
 export const INITIAL_PAYMENTS: PaymentDto[] = [
   {
