@@ -14,6 +14,9 @@ public interface UnitRepository extends JpaRepository<Unit, Long> {
     @Query("SELECT u FROM Unit u JOIN FETCH u.unitType JOIN FETCH u.zone z JOIN FETCH z.facility WHERE u.code = :code")
     Optional<Unit> findByCodeWithDetails(@Param("code") String code);
 
+    @Query("SELECT u FROM Unit u JOIN FETCH u.unitType JOIN FETCH u.zone z JOIN FETCH z.facility")
+    java.util.List<Unit> findAllWithDetails();
+
     Optional<Unit> findByCode(String code);
 
     boolean existsByCode(String code);

@@ -9,7 +9,6 @@ import { NotificationCenterPage } from '../pages/notification/NotificationCenter
 import { ForbiddenPage } from '../pages/error/ForbiddenPage'
 import { NotFoundPage } from '../pages/error/NotFoundPage'
 import {
-  BrowseUnitsPage,
   MyRentalsPage,
   SupportPage,
   TaskBoardPage,
@@ -29,6 +28,7 @@ import {
   EscalationDetailPage,
   PolicyEditorPage,
 } from '../pages/placeholders'
+import { BrowseUnitsPage } from '../pages/unit/BrowseUnitsPage'
 import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
 
 import { RootRedirect } from './RootRedirect'

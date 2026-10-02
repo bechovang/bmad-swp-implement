@@ -253,9 +253,50 @@ export const handlers = [
     return HttpResponse.json({ count: 0 }, { status: 200 })
   }),
 
-  // ------------------------------------------------------------ Units & Pricing (2.1)
+  // ------------------------------------------------------------ Units & Pricing (2.1, 2.2)
+  http.get('/api/v1/units/browse', ({ request }) => {
+    const url = new URL(request.url)
+    const type = url.searchParams.get('type')
+    const size = url.searchParams.get('size')
+    const startDate = url.searchParams.get('startDate')
+
+    let filtered = [...MOCK_BROWSE_UNITS]
+
+    if (startDate) {
+      filtered = filtered.filter((u) => u.availableFromDate <= startDate)
+    }
+
+    if (type && type.toLowerCase() !== 'all') {
+      filtered = filtered.filter((u) => u.typeName.toLowerCase() === type.toLowerCase())
+    }
+
+    if (size && size.toLowerCase() !== 'all') {
+      const sizeLower = size.toLowerCase()
+      filtered = filtered.filter((u) => {
+        if (sizeLower === 'small') return u.sizeM2 <= 5.0
+        if (sizeLower === 'medium') return u.sizeM2 > 5.0 && u.sizeM2 <= 10.0
+        if (sizeLower === 'large') return u.sizeM2 > 10.0
+        return (
+          u.sizeM2.toString() === size ||
+          `${u.sizeM2} m2`.toLowerCase() === sizeLower ||
+          `${u.sizeM2} m²`.toLowerCase() === sizeLower
+        )
+      })
+    }
+
+    return HttpResponse.json(
+      {
+        items: filtered,
+        totalAvailable: filtered.length,
+        totalUnits: MOCK_BROWSE_UNITS.length,
+      },
+      { status: 200 }
+    )
+  }),
+
   http.get('/api/v1/units/:code', ({ params }) => {
     const code = (params.code as string)?.toUpperCase()
+    if (code === 'BROWSE') return undefined
     const unit = MOCK_UNITS[code]
 
     if (!unit) {
@@ -395,6 +436,48 @@ export const MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> =
     ],
   },
 }
+
+export const MOCK_BROWSE_UNITS: import('../types/unit').BrowseUnitDto[] = [
+  {
+    id: 1,
+    code: 'S-3',
+    typeName: 'S',
+    typeDescription: 'Small unit around 5 m2',
+    zoneCode: 'A',
+    facilityName: 'Tan Binh Depot',
+    floor: 1,
+    sizeM2: 5.0,
+    accessType: 'PIN',
+    status: 'PREPARING',
+    imageUrl: '/units/S-3.jpg',
+    monthlyRate: 345000,
+    depositRate: 10,
+    availabilityStatus: 'Available Oct 5 · cleaning buffer',
+    availableFromDate: '2026-10-05',
+    isImmediatelyAvailable: false,
+    isInCleaningBuffer: true,
+  },
+  {
+    id: 3,
+    code: 'M-5',
+    typeName: 'M',
+    typeDescription: 'Medium unit around 8 m2',
+    zoneCode: 'B',
+    facilityName: 'Tan Binh Depot',
+    floor: 2,
+    sizeM2: 8.0,
+    accessType: 'QR',
+    status: 'AVAILABLE',
+    imageUrl: '/units/M-5.jpg',
+    monthlyRate: 690000,
+    depositRate: 10,
+    availabilityStatus: 'Available now',
+    availableFromDate: '2026-10-02',
+    isImmediatelyAvailable: true,
+    isInCleaningBuffer: false,
+  },
+]
+
 
 
 export interface MockNotification {

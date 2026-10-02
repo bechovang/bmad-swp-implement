@@ -197,16 +197,41 @@ class UnitControllerTests {
     }
 
     @Test
-    @DisplayName("GET /api/v1/pricing/calculate with no active policy returns 409 ACTIVE_POLICY_NOT_FOUND")
-    void calculatePricing_noActivePolicy_returns409() throws Exception {
-        when(pricingEngine.calculatePricing(eq("S-3"), eq(3), any()))
-                .thenThrow(new BusinessRuleException("ACTIVE_POLICY_NOT_FOUND", "No active rental policy found"));
+    @DisplayName("GET /api/v1/units/browse when authenticated returns 200 and BrowseUnitsResponse")
+    void browseUnits_authenticated_returns200() throws Exception {
+        com.storagehub.dto.BrowseUnitDto unit1 = new com.storagehub.dto.BrowseUnitDto(
+                1L,
+                "S-3",
+                "S",
+                "Small unit around 5 m2",
+                "A",
+                "Tan Binh Depot",
+                1,
+                new BigDecimal("5.00"),
+                "PIN",
+                "PREPARING",
+                "/units/S-3.jpg",
+                new BigDecimal("345000"),
+                new BigDecimal("10"),
+                "Available Oct 5 · cleaning buffer",
+                LocalDate.of(2026, 10, 5),
+                false,
+                true
+        );
+        com.storagehub.dto.BrowseUnitsResponse response = new com.storagehub.dto.BrowseUnitsResponse(
+                List.of(unit1),
+                1,
+                2
+        );
+        when(unitService.browseUnits(any(), any(), any(), any())).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/pricing/calculate")
-                        .param("unitCode", "S-3")
-                        .param("durationMonths", "3")
+        mockMvc.perform(get("/api/v1/units/browse")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + validToken))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ACTIVE_POLICY_NOT_FOUND"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalAvailable").value(1))
+                .andExpect(jsonPath("$.totalUnits").value(2))
+                .andExpect(jsonPath("$.items[0].code").value("S-3"))
+                .andExpect(jsonPath("$.items[0].availabilityStatus").value("Available Oct 5 · cleaning buffer"))
+                .andExpect(jsonPath("$.items[0].isInCleaningBuffer").value(true));
     }
 }

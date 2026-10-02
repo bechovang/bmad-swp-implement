@@ -223,7 +223,55 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  # ----------------------------------------------------------- units (2.1)
+  # ----------------------------------------------------------- units (2.1, 2.2)
+  /units/browse:
+    get:
+      operationId: browseUnits
+      tags: [Units]
+      summary: Browse and filter available storage units with turnover buffer availability
+      description: >
+        Returns list of bookable storage units (immediately available or in turnover buffer cleaning)
+        derived on-read from active reservations and turnover buffer policy rules.
+        Excludes units in RENTED, MAINTENANCE, or RETIRED status.
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by unit type name (e.g. Locker, S, M, L).
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by unit size (e.g. Small, Medium, Large or exact match).
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Desired start date (YYYY-MM-DD).
+        - name: durationMonths
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 120
+            default: 1
+          description: Desired rental duration in months.
+      responses:
+        '200':
+          description: List of units matching filter criteria and total live count.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowseUnitsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /units/{code}:
     get:
       operationId: getUnitDetail
@@ -746,6 +794,108 @@ components:
             - 'Individually Alarmed Unit'
             - 'Climate & Humidity Controlled'
             - 'Fire Protection & Sprinklers'
+
+    BrowseUnitDto:
+      type: object
+      description: Unit card summary for discovery grid with turnover buffer availability.
+      required:
+        - id
+        - code
+        - typeName
+        - zoneCode
+        - floor
+        - sizeM2
+        - accessType
+        - status
+        - imageUrl
+        - monthlyRate
+        - depositRate
+        - availabilityStatus
+        - availableFromDate
+        - isImmediatelyAvailable
+        - isInCleaningBuffer
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+          example: 'S-3'
+        typeName:
+          type: string
+          example: 'S'
+        typeDescription:
+          type: string
+          nullable: true
+          example: 'Small unit around 5 m2'
+        zoneCode:
+          type: string
+          example: 'A'
+        facilityName:
+          type: string
+          example: 'Tan Binh Depot'
+        floor:
+          type: integer
+          example: 1
+        sizeM2:
+          type: number
+          format: double
+          example: 5.0
+        accessType:
+          type: string
+          example: 'PIN'
+        status:
+          type: string
+          example: 'PREPARING'
+        imageUrl:
+          type: string
+          example: '/units/S-3.jpg'
+        monthlyRate:
+          type: integer
+          description: Monthly rate in VND.
+          example: 345000
+        depositRate:
+          type: integer
+          description: Deposit rate percentage (e.g. 10 for 10%).
+          example: 10
+        availabilityStatus:
+          type: string
+          description: Human-readable availability label (e.g. "Available now" or "Available Oct 5 · cleaning buffer").
+          example: 'Available Oct 5 · cleaning buffer'
+        availableFromDate:
+          type: string
+          format: date
+          description: Earliest date the unit can be occupied.
+          example: '2026-10-05'
+        isImmediatelyAvailable:
+          type: boolean
+          example: false
+        isInCleaningBuffer:
+          type: boolean
+          example: true
+
+    BrowseUnitsResponse:
+      type: object
+      description: Response payload for unit discovery catalog.
+      required:
+        - items
+        - totalAvailable
+        - totalUnits
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseUnitDto'
+        totalAvailable:
+          type: integer
+          description: Total number of bookable units currently matching filter.
+          example: 2
+        totalUnits:
+          type: integer
+          description: Total number of bookable units (available + buffer) in facility.
+          example: 2
 
     SurchargeItemDto:
       type: object

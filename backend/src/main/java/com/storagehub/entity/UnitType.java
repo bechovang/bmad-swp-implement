@@ -30,6 +30,12 @@ public class UnitType {
         this.description = description;
     }
 
+    public UnitType(Integer id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
+
     public Integer getId() {
         return id;
     }

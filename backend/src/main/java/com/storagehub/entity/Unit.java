@@ -64,6 +64,17 @@ public class Unit {
         this.status = status;
     }
 
+    public Unit(Long id, String code, UnitType unitType, Zone zone, BigDecimal sizeM2, Integer floor, String accessType, UnitStatus status) {
+        this.id = id;
+        this.code = code;
+        this.unitType = unitType;
+        this.zone = zone;
+        this.sizeM2 = sizeM2;
+        this.floor = floor;
+        this.accessType = accessType;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }

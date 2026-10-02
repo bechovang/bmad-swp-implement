@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-02-2026 01:21
-last_updated: 10-02-2026 22:36
+last_updated: 10-02-2026 23:36
 project: bmad swp
 project_key: NOKEY
 tracking_system: file-system
@@ -46,7 +46,7 @@ development_status:
 
   epic-2: in-progress
   2-1-pricingengine-unit-detail-bảng-giá-minh-bạch: review
-  2-2-browse-units-availability-theo-turnover-buffer: backlog
+  2-2-browse-units-availability-theo-turnover-buffer: review
   2-3-reserve-re-check-booking-summary: backlog
   2-4-payment-backend-payospaymentgateway: backlog
   2-5-my-rentals-check-in-pass-rental-detail-cơ-bản: backlog
