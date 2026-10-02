@@ -4,6 +4,8 @@ import com.storagehub.entity.PaymentMethod;
 import com.storagehub.entity.PaymentPurpose;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
+
 public record CreatePaymentRequest(
         @NotNull(message = "reservationId is required")
         Long reservationId,
@@ -14,6 +16,11 @@ public record CreatePaymentRequest(
         @NotNull(message = "method is required")
         PaymentMethod method,
 
-        Long amount
+        Long amount,
+
+        LocalDate newEndDate
 ) {
+    public CreatePaymentRequest(Long reservationId, PaymentPurpose purpose, PaymentMethod method, Long amount) {
+        this(reservationId, purpose, method, amount, null);
+    }
 }

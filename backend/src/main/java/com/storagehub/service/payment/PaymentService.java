@@ -34,9 +34,13 @@ import vn.payos.PayOS;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
 
+import com.storagehub.dto.ContractDto;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Transactional
@@ -97,6 +101,34 @@ public class PaymentService {
                 throw new BusinessRuleException("PAYMENT_NOT_ALLOWED",
                         "Reservation " + reservation.getCode() + " is currently " + reservation.getStatus() + ", expected RESERVED for rent payment");
             }
+        } else if (request.purpose() == PaymentPurpose.EXTENSION_FEE) {
+            if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+                throw new BusinessRuleException("PAYMENT_NOT_ALLOWED",
+                        "Reservation " + reservation.getCode() + " is currently " + reservation.getStatus() + ", expected CHECKED_IN for extension fee payment");
+            }
+            if (request.newEndDate() == null) {
+                throw new BusinessRuleException("INVALID_EXTENSION_DATE", "newEndDate is required for extension fee payment");
+            }
+            if (reservation.getEndDate() != null && !request.newEndDate().isAfter(reservation.getEndDate())) {
+                throw new BusinessRuleException("INVALID_EXTENSION_DATE", "newEndDate must be after current endDate (" + reservation.getEndDate() + ")");
+            }
+
+            // Conflict boundary check
+            List<Reservation> upcoming = reservationRepository.findUpcomingReservationsForUnit(
+                    reservation.getUnit().getId(),
+                    reservation.getId(),
+                    List.of(ReservationStatus.RESERVED, ReservationStatus.CHECKED_IN),
+                    reservation.getEndDate()
+            );
+            if (!upcoming.isEmpty()) {
+                LocalDate conflictStart = upcoming.get(0).getStartDate();
+                if (!request.newEndDate().isBefore(conflictStart)) {
+                    LocalDate latestPossible = conflictStart.minusDays(1);
+                    throw new BusinessRuleException("EXTENSION_DATE_CONFLICT",
+                            "Can't extend to " + request.newEndDate() + " — " + reservation.getUnit().getCode() +
+                                    " has a reservation starting " + conflictStart + ". Latest possible checkout is " + latestPossible + ". Pick another date.");
+                }
+            }
         }
 
         User payer = userRepository.findById(currentUserId)
@@ -107,6 +139,18 @@ public class PaymentService {
             amount = request.amount();
         } else if (request.purpose() == PaymentPurpose.RENT) {
             amount = reservation.getDepositAmount() != null ? reservation.getDepositAmount().longValue() * 10L : 0L;
+        } else if (request.purpose() == PaymentPurpose.EXTENSION_FEE) {
+            long additionalDays = ChronoUnit.DAYS.between(reservation.getEndDate(), request.newEndDate());
+            BigDecimal monthlyRate = reservation.getMonthlyRate() != null ? reservation.getMonthlyRate() : BigDecimal.valueOf(690000);
+            BigDecimal dailyRate = monthlyRate.divide(BigDecimal.valueOf(30), 2, RoundingMode.HALF_UP);
+            BigDecimal additionalRent = dailyRate.multiply(BigDecimal.valueOf(additionalDays)).setScale(0, RoundingMode.HALF_UP);
+
+            BigDecimal currentHeldDeposit = reservation.getDepositAmount() != null ? reservation.getDepositAmount() : BigDecimal.ZERO;
+            BigDecimal baseRent = reservation.getBaseRent() != null ? reservation.getBaseRent() : BigDecimal.ZERO;
+            BigDecimal totalRentAfter = baseRent.add(additionalRent);
+            BigDecimal newTotalDeposit = totalRentAfter.multiply(BigDecimal.valueOf(0.10)).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal depositTopUp = newTotalDeposit.subtract(currentHeldDeposit).max(BigDecimal.ZERO);
+            amount = additionalRent.add(depositTopUp).longValue();
         } else {
             amount = reservation.getDepositAmount() != null ? reservation.getDepositAmount().longValue() : 0L;
         }
@@ -128,9 +172,14 @@ public class PaymentService {
                 request.purpose(),
                 request.method(),
                 BigDecimal.valueOf(amount),
-                initialStatus
+                initialStatus,
+                request.newEndDate()
         );
         payment = paymentRepository.save(payment);
+
+        if (request.method() == PaymentMethod.CASH && request.purpose() == PaymentPurpose.EXTENSION_FEE) {
+            taskService.createContractSignatureTask(reservation, null, "Collect extension cash (" + amount + " VND) + sign addendum for unit " + reservation.getUnit().getCode());
+        }
 
         String checkoutUrl = null;
         String qrCode = null;
@@ -305,6 +354,54 @@ public class PaymentService {
                     notifTitle,
                     "/rentals/" + reservation.getId()
             );
+        } else if (reservation != null && payment.getPurpose() == PaymentPurpose.EXTENSION_FEE) {
+            LocalDate newEndDate = payment.getNewEndDate();
+            if (newEndDate != null && reservation.getEndDate() != null) {
+                long additionalDays = ChronoUnit.DAYS.between(reservation.getEndDate(), newEndDate);
+                BigDecimal monthlyRate = reservation.getMonthlyRate() != null ? reservation.getMonthlyRate() : BigDecimal.valueOf(690000);
+                BigDecimal dailyRate = monthlyRate.divide(BigDecimal.valueOf(30), 2, RoundingMode.HALF_UP);
+                BigDecimal additionalRent = dailyRate.multiply(BigDecimal.valueOf(additionalDays)).setScale(0, RoundingMode.HALF_UP);
+
+                BigDecimal currentHeldDeposit = reservation.getDepositAmount() != null ? reservation.getDepositAmount() : BigDecimal.ZERO;
+                BigDecimal baseRent = reservation.getBaseRent() != null ? reservation.getBaseRent() : BigDecimal.ZERO;
+                BigDecimal totalRentAfter = baseRent.add(additionalRent);
+                BigDecimal newTotalDeposit = totalRentAfter.multiply(BigDecimal.valueOf(0.10)).setScale(0, RoundingMode.HALF_UP);
+                BigDecimal depositTopUp = newTotalDeposit.subtract(currentHeldDeposit).max(BigDecimal.ZERO);
+
+                // 1. Shift endDate and adjust deposit and rent totals
+                LocalDate previousEnd = reservation.getEndDate();
+                reservation.setEndDate(newEndDate);
+                reservation.setDepositAmount(currentHeldDeposit.add(depositTopUp));
+                reservation.setBaseRent(totalRentAfter);
+                reservation.setTotalRent(totalRentAfter);
+                reservationRepository.save(reservation);
+
+                // 2. Append audit logs
+                logService.append(payment.getPayer().getId(), EntityType.RESERVATION, reservation.getId(),
+                        Action.STATUS_CHANGE, previousEnd.toString(), newEndDate.toString(),
+                        "Rental extended to " + newEndDate + " (+" + additionalDays + " days)");
+
+                logService.append(payment.getPayer().getId(), EntityType.PAYMENT, payment.getId(),
+                        Action.STATUS_CHANGE, previousStatus.name(), PaymentStatus.SUCCEEDED.name(),
+                        "Extension fee payment succeeded via " + method.name());
+
+                // 3. Auto-draft Addendum CT-...-A1
+                ContractDto addendum = contractService.createAddendumDraft(reservation, newEndDate, additionalRent, depositTopUp);
+
+                // 4. Create CONTRACT task on Board
+                taskService.createContractSignatureTask(reservation, addendum.code(), "Sign addendum " + addendum.code() + " at front desk by " + LocalDate.now().plusDays(7));
+
+                // 5. Dispatch notification
+                String notifTitle = "Extension paid — " + additionalRent + " VND rent + " + depositTopUp +
+                        " VND deposit top-up (held deposit now " + reservation.getDepositAmount() + " VND). New checkout date: " +
+                        newEndDate + ". Sign addendum " + addendum.code() + " at the desk by " + LocalDate.now().plusDays(7) + ".";
+                notificationService.send(
+                        payment.getPayer().getId(),
+                        "PAYMENT_SUCCEEDED",
+                        notifTitle,
+                        "/rentals/" + reservation.getId()
+                );
+            }
         }
     }
 

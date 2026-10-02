@@ -5,6 +5,7 @@ import { getRentalDetail } from '../../api/rental'
 import { getContractByReservation, getContractChain } from '../../api/contract'
 import type { ReservationStatus, PaymentStatus } from '../../types/rental'
 import type { ContractDto } from '../../types/contract'
+import type { ExtensionQuoteDto } from '../../types/extension'
 import { Card } from '../../components/ui/Card'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -78,6 +79,8 @@ export function RentalDetailPage() {
   const [showPassModal, setShowPassModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showExtensionModal, setShowExtensionModal] = useState(false)
+  const [showExtensionPaymentModal, setShowExtensionPaymentModal] = useState(false)
+  const [extensionQuote, setExtensionQuote] = useState<ExtensionQuoteDto | null>(null)
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
 
   const { data: reservation, isLoading, isError, refetch } = useQuery({
@@ -490,9 +493,29 @@ export function RentalDetailPage() {
           open={showExtensionModal}
           onOpenChange={setShowExtensionModal}
           reservation={reservation}
-          onProceedToPayment={() => {
+          onProceedToPayment={(quote) => {
+            setExtensionQuote(quote)
             setShowExtensionModal(false)
+            setShowExtensionPaymentModal(true)
+          }}
+        />
+      )}
+
+      {/* Extension Payment Modal (Story 4.2) */}
+      {reservation && extensionQuote && (
+        <PaymentModal
+          open={showExtensionPaymentModal}
+          onOpenChange={setShowExtensionPaymentModal}
+          reservationId={reservation.id}
+          unitCode={reservation.unitCode}
+          amount={extensionQuote.totalFee}
+          purpose="EXTENSION_FEE"
+          newEndDate={extensionQuote.newEndDate}
+          allowedMethods={['PAYOS', 'CASH']}
+          onSuccess={() => {
             refetch()
+            refetchLatestContract()
+            refetchContractChain()
           }}
         />
       )}

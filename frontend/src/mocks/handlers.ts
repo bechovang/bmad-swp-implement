@@ -494,9 +494,33 @@ export const handlers = [
       amount,
       status: body.method === 'CASH' ? 'PENDING_CASH' : 'PENDING',
       createdAt: new Date().toISOString(),
+      newEndDate: body.newEndDate || null,
     }
 
     mockPaymentsList.push(newPayment)
+
+    if (body.method === 'CASH' && body.purpose === 'EXTENSION_FEE' && res) {
+      const existingTask = mockTasksList.find(
+        (t) => t.type === 'CONTRACT' && t.refCode?.startsWith('CT-')
+      )
+      if (!existingTask) {
+        mockTasksList.push({
+          id: mockTasksList.length + 1,
+          type: 'CONTRACT',
+          refCode: `CT-${res.code}-A1`,
+          assignedStaffId: 2,
+          assignedStaffName: 'Minh Tran',
+          workDate: new Date().toISOString().split('T')[0],
+          status: 'TODO',
+          unitCode: res.unitCode,
+          customerName: res.customerName,
+          dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+          timeSlot: 'Morning',
+          title: `Contract Signature CT-${res.code}-A1`,
+          description: `Collect extension cash (${amount} VND) and sign addendum`,
+        })
+      }
+    }
 
     const response: PaymentResponseDto = {
       paymentId: newPayment.id,
@@ -555,7 +579,42 @@ export const handlers = [
     if (payment.reservationId) {
       const res = mockReservationsList.find((r) => r.id === payment.reservationId)
       if (res) {
-        res.status = 'RESERVED'
+        if (payment.purpose === 'EXTENSION_FEE' && payment.newEndDate) {
+          res.endDate = payment.newEndDate
+          res.depositAmount = (res.depositAmount || 207000) + 71300
+          res.totalRent = (res.totalRent || 2070000) + 713000
+          if (!res.payments) res.payments = []
+          if (!res.payments.find((x) => x.id === payment.id)) {
+            res.payments.push(payment)
+          }
+
+          // Draft addendum in mockContractsList
+          const addendumCode = `CT-${res.code}-A1`
+          if (!mockContractsList.find((c) => c.code === addendumCode)) {
+            mockContractsList.push({
+              id: mockContractsList.length + 1,
+              code: addendumCode,
+              reservationId: res.id,
+              reservationCode: res.code,
+              policyId: 1,
+              policyVersion: 'v3',
+              contentSnapshot: JSON.stringify({
+                code: addendumCode,
+                reservationCode: res.code,
+                unitCode: res.unitCode,
+                newEndDate: payment.newEndDate,
+                monthlyRate: res.monthlyRate,
+                totalRent: res.totalRent,
+                depositAmount: res.depositAmount,
+              }),
+              status: 'AWAITING_SIGNATURE',
+              supersedesContractId: 2,
+              isLatest: 1,
+            })
+          }
+        } else {
+          res.status = 'RESERVED'
+        }
       }
     }
 
@@ -1313,7 +1372,36 @@ export function setMockPaymentStatus(
     if (targetStatus === 'SUCCEEDED' && targetPayment.reservationId) {
       const res = mockReservationsList.find((r) => r.id === targetPayment.reservationId)
       if (res) {
-        res.status = 'RESERVED'
+        if (targetPayment.purpose === 'EXTENSION_FEE' && targetPayment.newEndDate) {
+          res.endDate = targetPayment.newEndDate
+          res.depositAmount = (res.depositAmount || 207000) + 71300
+          res.totalRent = (res.totalRent || 2070000) + 713000
+          const addendumCode = `CT-${res.code}-A1`
+          if (!mockContractsList.find((c) => c.code === addendumCode)) {
+            mockContractsList.push({
+              id: mockContractsList.length + 1,
+              code: addendumCode,
+              reservationId: res.id,
+              reservationCode: res.code,
+              policyId: 1,
+              policyVersion: 'v3',
+              contentSnapshot: JSON.stringify({
+                code: addendumCode,
+                reservationCode: res.code,
+                unitCode: res.unitCode,
+                newEndDate: targetPayment.newEndDate,
+                monthlyRate: res.monthlyRate,
+                totalRent: res.totalRent,
+                depositAmount: res.depositAmount,
+              }),
+              status: 'AWAITING_SIGNATURE',
+              supersedesContractId: 2,
+              isLatest: 1,
+            })
+          }
+        } else {
+          res.status = 'RESERVED'
+        }
         if (!res.payments) res.payments = []
         if (!res.payments.find((x) => x.id === targetPayment.id)) {
           res.payments.push(targetPayment)

@@ -8,6 +8,9 @@ public enum ContractStatus {
     PRINTED,
     SIGNED,
     ACTIVE,
+    AWAITING_SIGNATURE,
     CLOSED,
-    SUPERSEDED
+    SUPERSEDED,
+    EXPIRED,
+    VOIDED
 }

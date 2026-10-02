@@ -27,6 +27,7 @@ export function PaymentModal({
   unitCode,
   amount,
   purpose = 'DEPOSIT',
+  newEndDate,
   allowedMethods,
   onSuccess,
 }: PaymentModalProps) {
@@ -156,6 +157,7 @@ export function PaymentModal({
         purpose,
         method: methodToUse,
         amount,
+        newEndDate,
       }),
     onSuccess: (data) => {
       setCurrentPayment(data)
@@ -391,7 +393,7 @@ export function PaymentModal({
               </ModalDescription>
             </ModalHeader>
 
-            <div className="space-y-4 text-center">
+            <div className="space-y-4 text-center" data-testid="desk-cash-panel">
               <div className="p-5 bg-sh-surface-muted border border-sh-border rounded-sh-md space-y-2 text-center">
                 <span className="text-xs text-sh-muted uppercase tracking-wider block">
                   Amount to Collect

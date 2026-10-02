@@ -2011,6 +2011,12 @@ components:
           type: integer
           description: Optional override amount in VND; defaults to deposit/rent from reservation snapshot.
           example: 69000
+        newEndDate:
+          type: string
+          format: date
+          nullable: true
+          description: Target checkout date for extension fee payments.
+          example: '2027-02-05'
 
     PaymentResponseDto:
       type: object
@@ -2188,8 +2194,11 @@ components:
         - PRINTED
         - SIGNED
         - ACTIVE
+        - AWAITING_SIGNATURE
         - CLOSED
         - SUPERSEDED
+        - EXPIRED
+        - VOIDED
 
     ContractContentSnapshot:
       type: object

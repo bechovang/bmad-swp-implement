@@ -44,6 +44,15 @@ public class Reservation {
     @Column(name = "DepositAmount", nullable = false, precision = 15, scale = 0)
     private BigDecimal depositAmount;
 
+    @Column(name = "MonthlyRate", precision = 15, scale = 0)
+    private BigDecimal monthlyRate;
+
+    @Column(name = "BaseRent", precision = 15, scale = 0)
+    private BigDecimal baseRent;
+
+    @Column(name = "TotalRent", precision = 15, scale = 0)
+    private BigDecimal totalRent;
+
     @Column(name = "AccessCode", length = 10)
     private String accessCode;
 
@@ -107,6 +116,30 @@ public class Reservation {
 
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
+    }
+
+    public BigDecimal getMonthlyRate() {
+        return monthlyRate;
+    }
+
+    public void setMonthlyRate(BigDecimal monthlyRate) {
+        this.monthlyRate = monthlyRate;
+    }
+
+    public BigDecimal getBaseRent() {
+        return baseRent;
+    }
+
+    public void setBaseRent(BigDecimal baseRent) {
+        this.baseRent = baseRent;
+    }
+
+    public BigDecimal getTotalRent() {
+        return totalRent;
+    }
+
+    public void setTotalRent(BigDecimal totalRent) {
+        this.totalRent = totalRent;
     }
 
     public ReservationStatus getStatus() {

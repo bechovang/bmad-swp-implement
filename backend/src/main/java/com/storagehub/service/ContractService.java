@@ -433,6 +433,70 @@ public class ContractService {
         }
     }
 
+    /**
+     * Auto-drafts an Addendum contract (CT-...-A1) upon confirmed extension payment (Story 4.2 & 4.3).
+     */
+    public ContractDto createAddendumDraft(Reservation reservation, LocalDate newEndDate, java.math.BigDecimal additionalRent, java.math.BigDecimal depositTopUp) {
+        Contract baseContract = contractRepository.findLatestByReservationId(reservation.getId())
+                .orElse(null);
+
+        long addendumIndex = contractRepository.countByReservationId(reservation.getId());
+        String baseCode = (baseContract != null) ? baseContract.getCode().replaceAll("-A\\d+$", "") : generateContractCode(reservation.getCode());
+        String addendumCode = baseCode + "-A" + addendumIndex;
+
+        Unit unit = reservation.getUnit();
+        User customer = reservation.getCustomer();
+        RentalPolicy activePolicy = (baseContract != null && baseContract.getPolicy() != null)
+                ? baseContract.getPolicy()
+                : pricingEngine.resolveActivePolicy(reservation.getStartDate());
+
+        Map<String, Object> snapshot = new HashMap<>();
+        snapshot.put("code", addendumCode);
+        snapshot.put("baseContractCode", baseContract != null ? baseContract.getCode() : baseCode);
+        snapshot.put("reservationCode", reservation.getCode());
+        snapshot.put("unitCode", unit != null ? unit.getCode() : "");
+        snapshot.put("newEndDate", newEndDate != null ? newEndDate.toString() : "");
+        snapshot.put("additionalRent", additionalRent != null ? additionalRent.longValue() : 0L);
+        snapshot.put("depositTopUp", depositTopUp != null ? depositTopUp.longValue() : 0L);
+        snapshot.put("monthlyRate", reservation.getMonthlyRate() != null ? reservation.getMonthlyRate().longValue() : 0L);
+        snapshot.put("totalRentAfterExtension", reservation.getTotalRent() != null ? reservation.getTotalRent().longValue() : 0L);
+        snapshot.put("totalDepositAfterExtension", reservation.getDepositAmount() != null ? reservation.getDepositAmount().longValue() : 0L);
+        snapshot.put("signingDeadline", LocalDate.now().plusDays(7).toString());
+        snapshot.put("customerName", customer != null ? customer.getFullName() : "");
+        snapshot.put("policyVersion", activePolicy != null ? activePolicy.getVersion() : "v3");
+
+        String snapshotJson;
+        try {
+            snapshotJson = objectMapper.writeValueAsString(snapshot);
+        } catch (JsonProcessingException e) {
+            snapshotJson = "{}";
+        }
+
+        Contract addendum = new Contract(
+                addendumCode,
+                reservation,
+                activePolicy,
+                snapshotJson,
+                null,
+                ContractStatus.AWAITING_SIGNATURE,
+                baseContract,
+                1
+        );
+        addendum = contractRepository.save(addendum);
+
+        logService.append(
+                customer.getId(),
+                EntityType.CONTRACT,
+                addendum.getId(),
+                Action.STATUS_CHANGE,
+                null,
+                ContractStatus.AWAITING_SIGNATURE.name(),
+                "Addendum draft auto-generated for extension: " + addendumCode
+        );
+
+        return mapToDto(addendum);
+    }
+
     public ContractDto mapToDto(Contract contract) {
         ContractContentSnapshotDto snapshotDto = null;
         if (contract.getContentSnapshot() != null) {

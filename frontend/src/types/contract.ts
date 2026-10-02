@@ -1,10 +1,13 @@
 export type ContractStatus =
   | 'DRAFT'
   | 'PRINTED'
+  | 'AWAITING_SIGNATURE'
   | 'SIGNED'
   | 'ACTIVE'
   | 'CLOSED'
   | 'SUPERSEDED'
+  | 'EXPIRED'
+  | 'VOIDED'
 
 export interface ContractContentSnapshot {
   code: string

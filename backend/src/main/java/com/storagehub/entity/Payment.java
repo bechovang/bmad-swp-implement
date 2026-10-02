@@ -55,6 +55,9 @@ public class Payment {
     @Column(name = "Status", nullable = false)
     private PaymentStatus status;
 
+    @Column(name = "NewEndDate")
+    private java.time.LocalDate newEndDate;
+
     protected Payment() {
     }
 
@@ -70,6 +73,13 @@ public class Payment {
         this.method = method;
         this.amount = amount;
         this.status = status;
+    }
+
+    public Payment(String receiptCode, User payer, Reservation reservation, Long extensionId,
+                   Long settlementId, PaymentPurpose purpose, PaymentMethod method,
+                   BigDecimal amount, PaymentStatus status, java.time.LocalDate newEndDate) {
+        this(receiptCode, payer, reservation, extensionId, settlementId, purpose, method, amount, status);
+        this.newEndDate = newEndDate;
     }
 
     public Long getId() {
@@ -122,5 +132,13 @@ public class Payment {
 
     public void setStatus(PaymentStatus status) {
         this.status = status;
+    }
+
+    public java.time.LocalDate getNewEndDate() {
+        return newEndDate;
+    }
+
+    public void setNewEndDate(java.time.LocalDate newEndDate) {
+        this.newEndDate = newEndDate;
     }
 }

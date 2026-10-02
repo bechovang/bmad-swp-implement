@@ -133,6 +133,59 @@ public class TaskService {
     }
 
     /**
+     * Creates a CONTRACT signature task on the Kanban board for desk staff (Story 4.2 / 4.3).
+     */
+    public Task createContractSignatureTask(Reservation reservation, String addendumCode, String description) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null for contract task creation");
+        }
+
+        String refCode = (addendumCode != null && !addendumCode.isBlank()) ? addendumCode : reservation.getCode();
+        Optional<Task> existing = taskRepository.findByRefCodeAndType(refCode, TaskType.CONTRACT);
+        if (existing.isPresent()) {
+            log.info("Contract signature task already exists for {}", refCode);
+            return existing.get();
+        }
+
+        User assignedStaff = resolveDefaultStaffUser();
+        LocalDate workDate = LocalDate.now();
+        LocalDate dueDate = workDate.plusDays(7);
+        String unitCode = reservation.getUnit() != null ? reservation.getUnit().getCode() : null;
+        String customerName = reservation.getCustomer() != null ? reservation.getCustomer().getFullName() : null;
+
+        Task task = new Task(
+                TaskType.CONTRACT,
+                refCode,
+                assignedStaff,
+                workDate,
+                TaskStatus.TODO
+        );
+        task = taskRepository.save(task);
+
+        if (assignedStaff != null) {
+            logService.append(
+                    assignedStaff.getId(),
+                    EntityType.TASK,
+                    task.getId(),
+                    Action.STATUS_CHANGE,
+                    null,
+                    TaskStatus.TODO.name(),
+                    "Contract signature task auto-generated for " + refCode
+            );
+
+            notificationService.send(
+                    assignedStaff.getId(),
+                    "TASK_ASSIGNED",
+                    "New contract signature task assigned for " + refCode,
+                    "/tasks/" + task.getId()
+            );
+        }
+
+        log.info("Created CONTRACT task {} for refCode {}", task.getId(), refCode);
+        return task;
+    }
+
+    /**
      * Create task from manual or programmatic request.
      */
     public TaskDto createTask(CreateTaskRequest request, Long creatorUserId) {

@@ -2,8 +2,8 @@
 title: 'Story 4.2: Extension fee + top-up cọc + payment + ngày hiệu lực'
 type: 'feature'
 created: '2026-10-03'
-status: 'ready-for-dev'
-baseline_commit: 'd3e4f5012370cb315dca5839db7b7aaf81'
+status: 'done'
+baseline_commit: '0b4ef5f'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -76,13 +76,13 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] Update `contracts/openapi.yaml` with `EXTENSION_FEE` payment purpose and extension parameters.
-- [ ] Implement backend `EXTENSION_FEE` processing in `PaymentService` for both QR and Cash confirmation paths.
-- [ ] Implement addendum draft creation in `ContractService`.
-- [ ] Write backend integration tests in `RentalExtensionPaymentTests.java`.
-- [ ] Update frontend `ExtensionModal` and `RentalDetailPage` to trigger `PaymentModal` for extension fee.
-- [ ] Update MSW mock handlers in `handlers.ts`.
-- [ ] Write frontend tests in `rental-extension-payment.test.tsx`.
+- [x] Update `contracts/openapi.yaml` with `EXTENSION_FEE` payment purpose and extension parameters.
+- [x] Implement backend `EXTENSION_FEE` processing in `PaymentService` for both QR and Cash confirmation paths.
+- [x] Implement addendum draft creation in `ContractService`.
+- [x] Write backend integration tests in `RentalExtensionPaymentTests.java`.
+- [x] Update frontend `ExtensionModal` and `RentalDetailPage` to trigger `PaymentModal` for extension fee.
+- [x] Update MSW mock handlers in `handlers.ts`.
+- [x] Write frontend tests in `rental-extension-payment.test.tsx`.
 
 **Acceptance Criteria:**
 - Given an extension quote, when customer clicks "Proceed to Payment", then `PaymentModal` opens with PayOS QR and Cash at desk options.

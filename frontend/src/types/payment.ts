@@ -25,6 +25,7 @@ export interface CreatePaymentRequest {
   purpose: PaymentPurpose
   method: PaymentMethod
   amount?: number
+  newEndDate?: string
 }
 
 export interface PaymentResponseDto {
@@ -50,6 +51,7 @@ export interface PaymentDto {
   amount: number
   status: PaymentStatus
   createdAt?: string | null
+  newEndDate?: string | null
 }
 
 export type PaymentModalState =
@@ -66,6 +68,7 @@ export interface PaymentModalProps {
   unitCode: string
   amount: number
   purpose?: PaymentPurpose
+  newEndDate?: string
   allowedMethods?: PaymentMethod[]
   onSuccess?: (payment: PaymentDto | PaymentResponseDto) => void
 }
