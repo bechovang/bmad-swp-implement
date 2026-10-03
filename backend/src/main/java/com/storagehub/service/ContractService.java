@@ -316,10 +316,91 @@ public class ContractService {
         // Notify customer
         Reservation reservation = contract.getReservation();
         if (reservation.getCustomer() != null) {
+            boolean isAddendum = contract.getCode() != null && contract.getCode().matches(".*-A\\d+$");
+            String notifTitle = isAddendum
+                    ? "Addendum " + contract.getCode() + " signed and filed."
+                    : "Contract " + contract.getCode() + " has been signed and recorded.";
             notificationService.send(
                     reservation.getCustomer().getId(),
                     "CONTRACT_SIGNED",
-                    "Contract " + contract.getCode() + " has been signed and recorded.",
+                    notifTitle,
+                    "/rentals/" + reservation.getId()
+            );
+        }
+
+        return mapToDto(contract);
+    }
+
+    /**
+     * Mark unsigned contract/addendum as EXPIRED (Story 4.3).
+     */
+    public ContractDto expireContract(Long contractId, String reason, Long staffUserId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
+
+        if (contract.getStatus() == ContractStatus.SIGNED || contract.getStatus() == ContractStatus.ACTIVE) {
+            throw new BusinessRuleException("INVALID_CONTRACT_STATUS", "Cannot expire an already signed/active contract");
+        }
+
+        String fromStatus = contract.getStatus().name();
+        contract.setStatus(ContractStatus.EXPIRED);
+        contract = contractRepository.save(contract);
+
+        String logReason = (reason != null && !reason.isBlank()) ? reason : "Contract/Addendum expired after 7-day signing window";
+        logService.append(
+                staffUserId,
+                EntityType.CONTRACT,
+                contract.getId(),
+                Action.STATUS_CHANGE,
+                fromStatus,
+                ContractStatus.EXPIRED.name(),
+                logReason
+        );
+
+        Reservation reservation = contract.getReservation();
+        if (reservation.getCustomer() != null) {
+            notificationService.send(
+                    reservation.getCustomer().getId(),
+                    "CONTRACT_EXPIRED",
+                    "Addendum " + contract.getCode() + " has expired without physical signature.",
+                    "/rentals/" + reservation.getId()
+            );
+        }
+
+        return mapToDto(contract);
+    }
+
+    /**
+     * Void contract/addendum with mandatory reason (Story 4.3).
+     */
+    public ContractDto voidContract(Long contractId, String reason, Long staffUserId) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new BusinessRuleException("REASON_REQUIRED", "Void reason is mandatory");
+        }
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contract not found: " + contractId));
+
+        String fromStatus = contract.getStatus().name();
+        contract.setStatus(ContractStatus.VOIDED);
+        contract = contractRepository.save(contract);
+
+        logService.append(
+                staffUserId,
+                EntityType.CONTRACT,
+                contract.getId(),
+                Action.STATUS_CHANGE,
+                fromStatus,
+                ContractStatus.VOIDED.name(),
+                "Voided: " + reason.trim()
+        );
+
+        Reservation reservation = contract.getReservation();
+        if (reservation.getCustomer() != null) {
+            notificationService.send(
+                    reservation.getCustomer().getId(),
+                    "CONTRACT_VOIDED",
+                    "Addendum " + contract.getCode() + " has been voided: " + reason.trim(),
                     "/rentals/" + reservation.getId()
             );
         }

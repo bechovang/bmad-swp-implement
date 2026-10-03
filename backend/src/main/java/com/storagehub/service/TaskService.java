@@ -356,9 +356,19 @@ public class TaskService {
         String refCode = task.getRefCode();
         if (refCode != null && !refCode.isBlank()) {
             Optional<Contract> contractOpt = contractRepository.findByCode(refCode.trim());
+            if (contractOpt.isEmpty()) {
+                Optional<Reservation> resOpt = reservationRepository.findByCode(refCode.trim());
+                if (resOpt.isPresent()) {
+                    contractOpt = contractRepository.findLatestByReservationId(resOpt.get().getId());
+                }
+            }
+
             if (contractOpt.isPresent()) {
                 Contract c = contractOpt.get();
-                if (c.getStatus() != ContractStatus.SIGNED && c.getStatus() != ContractStatus.ACTIVE) {
+                if (c.getStatus() != ContractStatus.SIGNED &&
+                    c.getStatus() != ContractStatus.ACTIVE &&
+                    c.getStatus() != ContractStatus.EXPIRED &&
+                    c.getStatus() != ContractStatus.VOIDED) {
                     throw new BusinessRuleException(
                             "CLOSING_STEP_MISSING",
                             "Contract signature is required before completing contract task.",

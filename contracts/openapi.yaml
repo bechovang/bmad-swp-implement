@@ -847,7 +847,84 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ContractDto'
+  /contracts/{id}/expire:
+    post:
+      operationId: expireContract
+      tags: [Contracts]
+      summary: Staff close unsigned contract or addendum as expired
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Transitions contract/addendum status to EXPIRED after signing deadline elapsed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Contract ID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: Customer did not sign within 7-day window
+      responses:
+        '200':
+          description: Contract marked as expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /contracts/{id}/void:
+    post:
+      operationId: voidContract
+      tags: [Contracts]
+      summary: Staff void contract or addendum with mandatory reason
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Transitions contract/addendum status to VOIDED with mandatory reason in audit log.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Contract ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  example: Rental terminated early before addendum execution
+      responses:
+        '200':
+          description: Contract voided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

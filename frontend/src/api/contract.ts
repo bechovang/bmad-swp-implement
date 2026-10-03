@@ -46,3 +46,13 @@ export async function reDraftContract(id: number | string): Promise<ContractDto>
   return response.data
 }
 
+export async function expireContract(id: number | string, reason?: string): Promise<ContractDto> {
+  const response = await apiClient.post<ContractDto>(`/contracts/${id}/expire`, { reason })
+  return response.data
+}
+
+export async function voidContract(id: number | string, reason: string): Promise<ContractDto> {
+  const response = await apiClient.post<ContractDto>(`/contracts/${id}/void`, { reason })
+  return response.data
+}
+

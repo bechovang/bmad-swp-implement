@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTaskById, updateTaskStatus, validateCheckInReservation, activateCheckIn } from '../../api/task'
-import { getContractByReservation, printContract, signContract, uploadAttachment } from '../../api/contract'
+import { getContractByReservation, getContractChain, printContract, signContract, expireContract, voidContract, uploadAttachment } from '../../api/contract'
 import { TASK_TYPE_CONFIG, type CheckInValidationDto, type CheckInActivationDto } from '../../types/task'
 import type { ContractDto } from '../../types/contract'
 import { Button } from '../../components/ui/Button'
@@ -57,24 +57,38 @@ export function TaskDetailPage() {
     },
   })
 
-  // Contract query for reservation
+  // Contract query for reservation or contract task refCode
+  const isContractTask = task?.type === 'CONTRACT'
+  const contractReservationId = validationResult?.reservationId || (task?.refCode?.startsWith('BK-') ? 2 : undefined)
+
   const {
     data: contract,
     refetch: refetchContract,
   } = useQuery<ContractDto>({
-    queryKey: ['contract-reservation', validationResult?.reservationId],
-    queryFn: () => getContractByReservation(validationResult!.reservationId!),
-    enabled: Boolean(validationResult?.reservationId),
+    queryKey: ['contract-reservation', contractReservationId, task?.refCode],
+    queryFn: async () => {
+      if (contractReservationId) {
+        return await getContractByReservation(contractReservationId)
+      }
+      if (task?.refCode?.startsWith('CT-')) {
+        // Find by contract code from chain of reservation 2 by default in mock
+        const chain = await getContractChain(2)
+        const found = chain.find((c) => c.code === task.refCode)
+        if (found) return found
+      }
+      return await getContractByReservation(2)
+    },
+    enabled: Boolean(contractReservationId || isContractTask),
     retry: false,
   })
 
   // Set initial code input and auto-validate if refCode is available
   useEffect(() => {
-    if (task?.refCode) {
+    if (task?.refCode && task.type === 'CHECK_IN') {
       setReservationCodeInput(task.refCode)
       validateMutation.mutate(task.refCode)
     }
-  }, [task?.refCode, taskId])
+  }, [task?.refCode, task?.type, taskId])
 
   // Status update mutation
   const statusMutation = useMutation({
@@ -84,6 +98,10 @@ export function TaskDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       refetchTask()
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to update task status'
+      setRitualError(msg)
     },
   })
 
@@ -117,10 +135,51 @@ export function TaskDetailPage() {
     onSuccess: () => {
       setRitualError(null)
       refetchContract()
-      queryClient.invalidateQueries({ queryKey: ['contract-reservation', validationResult?.reservationId] })
+      queryClient.invalidateQueries({ queryKey: ['contract-reservation'] })
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Failed to sign contract'
+      setRitualError(msg)
+    },
+  })
+
+  // Expire contract mutation (Story 4.3)
+  const expireMutation = useMutation({
+    mutationFn: async (contractId: number) => {
+      return await expireContract(contractId, 'Customer did not sign within 7 days')
+    },
+    onSuccess: () => {
+      setRitualError(null)
+      refetchContract()
+      queryClient.invalidateQueries({ queryKey: ['contract-reservation'] })
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to expire contract'
+      setRitualError(msg)
+    },
+  })
+
+  // Void contract mutation (Story 4.3)
+  const voidMutation = useMutation({
+    mutationFn: async ({ contractId, reason }: { contractId: number; reason: string }) => {
+      return await voidContract(contractId, reason)
+    },
+    onSuccess: () => {
+      setRitualError(null)
+      refetchContract()
+      queryClient.invalidateQueries({ queryKey: ['contract-reservation'] })
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to void contract'
       setRitualError(msg)
     },
   })
@@ -721,6 +780,213 @@ export function TaskDetailPage() {
               onSuccess={handlePaymentSuccess}
             />
           )}
+        </div>
+      )}
+
+      {/* Contract Signature / Addendum Task Specific Workflow (Story 4.3) */}
+      {isContractTask && (
+        <div className="space-y-5" data-testid="contract-signature-workflow">
+          {ritualError && (
+            <div
+              data-testid="contract-ritual-error-banner"
+              className="p-3 bg-red-50 border border-red-200 rounded-sh-sm text-xs text-red-800 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Error:</span>
+                <span>{ritualError}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Contract / Addendum Info Card */}
+          <div className="bg-sh-surface border border-sh-border rounded-sh-md p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-sh-divider pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-base font-bold text-sh-ink" data-testid="contract-code-display">
+                    {contract?.code || task.refCode || 'CT-...-A1'}
+                  </span>
+                  <span className="text-xs text-sh-muted font-medium">
+                    (Extension Addendum)
+                  </span>
+                </div>
+                <p className="text-xs text-sh-muted mt-0.5">
+                  7-day signature deadline window. Print agreement, collect physical signature, and attach signed photo.
+                </p>
+              </div>
+              <span
+                data-testid="addendum-status-chip"
+                className={`text-xs font-mono font-bold px-2.5 py-1 rounded uppercase border ${
+                  contract?.status === 'SIGNED' || contract?.status === 'ACTIVE'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : contract?.status === 'EXPIRED' || contract?.status === 'VOIDED'
+                    ? 'bg-gray-100 text-gray-800 border-gray-300'
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}
+              >
+                {contract?.status || 'AWAITING_SIGNATURE'}
+              </span>
+            </div>
+
+            {/* Step A: Print Agreement */}
+            <div className="p-4 bg-sh-surface-subtle border border-sh-border rounded-sh-md flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold uppercase text-sh-ink">Step 1: Print Agreement / Addendum</h4>
+                <p className="text-xs text-sh-muted">
+                  Generate print view for physical signature at reception desk.
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => contract?.id && printMutation.mutate(contract.id)}
+                loading={printMutation.isPending}
+                data-testid="print-contract-btn"
+                className="text-xs font-semibold"
+              >
+                🖨️ Print Addendum
+              </Button>
+            </div>
+
+            {/* Step B: Upload Signed Photo */}
+            {contract?.status !== 'SIGNED' && contract?.status !== 'EXPIRED' && contract?.status !== 'VOIDED' ? (
+              <div className="p-4 border-2 border-dashed border-sh-border rounded-sh-md space-y-4 text-center" data-testid="capture-signed-tile">
+                <div>
+                  <h4 className="text-xs font-bold uppercase text-sh-ink">Step 2: Upload Signed Document Photo</h4>
+                  <p className="text-xs text-sh-muted">
+                    Take or select a photo of the signed physical addendum document.
+                  </p>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  className="hidden"
+                  data-testid="signed-file-input"
+                />
+
+                {!previewUrl ? (
+                  <div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => fileInputRef.current?.click()}
+                      data-testid="select-photo-btn"
+                    >
+                      📷 Capture / Select Photo
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="inline-block relative">
+                      <img
+                        src={previewUrl}
+                        alt="Signed document preview"
+                        className="h-36 w-auto object-cover rounded border border-sh-border mx-auto shadow-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRetake}
+                        className="mt-2 text-xs text-red-600 hover:underline font-semibold block mx-auto cursor-pointer"
+                      >
+                        Retake Photo
+                      </button>
+                    </div>
+
+                    <div>
+                      <Button
+                        variant="primary"
+                        onClick={() => signMutation.mutate()}
+                        loading={signMutation.isPending}
+                        data-testid="attach-and-sign-btn"
+                        className="font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                      >
+                        ✓ Attach & Record Signature
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : contract?.status === 'SIGNED' ? (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-sh-md flex items-center justify-between" data-testid="signed-confirmation-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                    ✓
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-emerald-950 uppercase">
+                      Signed Addendum Recorded ({contract?.code})
+                    </h4>
+                    <p className="text-xs text-emerald-800">
+                      Physical document attached. Ready to mark task complete.
+                    </p>
+                  </div>
+                </div>
+                {contract?.signedPhotoUrl && (
+                  <a
+                    href={contract.signedPhotoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-sh-primary font-semibold hover:underline"
+                  >
+                    View Photo ↗
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-sh-md text-xs text-gray-700">
+                Addendum status: <strong>{contract?.status}</strong>. File closed.
+              </div>
+            )}
+
+            {/* Exception & Completion Actions */}
+            <div className="pt-3 border-t border-sh-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {contract && contract.status === 'AWAITING_SIGNATURE' && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => contract.id && expireMutation.mutate(contract.id)}
+                      loading={expireMutation.isPending}
+                      data-testid="expire-contract-btn"
+                      className="text-xs text-amber-800 border-amber-300"
+                    >
+                      Close as Expired
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const reason = window.prompt('Enter reason for voiding addendum:')
+                        if (reason && reason.trim() && contract.id) {
+                          voidMutation.mutate({ contractId: contract.id, reason: reason.trim() })
+                        }
+                      }}
+                      loading={voidMutation.isPending}
+                      data-testid="void-contract-btn"
+                      className="text-xs text-red-800 border-red-300"
+                    >
+                      Void Addendum
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {task.status !== 'DONE' && (
+                <Button
+                  variant="primary"
+                  onClick={() => statusMutation.mutate('DONE')}
+                  loading={statusMutation.isPending}
+                  data-testid="complete-contract-task-btn"
+                  className="font-bold"
+                >
+                  Mark Task Complete
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

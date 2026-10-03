@@ -727,6 +727,30 @@ export const handlers = [
     return HttpResponse.json(contract, { status: 200 })
   }),
 
+  http.post('/api/v1/contracts/:id/expire', async ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const contract = mockContractsList.find((c) => c.id === id)
+    if (!contract) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Contract ${id} not found` }, { status: 404 })
+    }
+    contract.status = 'EXPIRED'
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
+  http.post('/api/v1/contracts/:id/void', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const contract = mockContractsList.find((c) => c.id === id)
+    if (!contract) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Contract ${id} not found` }, { status: 404 })
+    }
+    const body = (await request.json().catch(() => ({}))) as { reason?: string }
+    if (!body?.reason || !body.reason.trim()) {
+      return HttpResponse.json({ code: 'REASON_REQUIRED', message: 'Void reason is mandatory' }, { status: 400 })
+    }
+    contract.status = 'VOIDED'
+    return HttpResponse.json(contract, { status: 200 })
+  }),
+
   http.get('/api/v1/contracts/reservation/:reservationId/chain', ({ params }) => {
     const reservationId = parseInt(params.reservationId as string, 10)
     const contracts = mockContractsList
@@ -1297,6 +1321,56 @@ export const INITIAL_CONTRACTS: ContractDto[] = [
     signedPhotoUrl: null,
     status: 'DRAFT',
     supersedesContractId: null,
+    isLatest: 1,
+  },
+  {
+    id: 2,
+    code: 'CT-BK-2026-0002',
+    reservationId: 2,
+    reservationCode: 'BK-2026-0002',
+    policyId: 1,
+    policyVersion: 'v3',
+    contentSnapshot: JSON.stringify({
+      code: 'CT-BK-2026-0002',
+      reservationCode: 'BK-2026-0002',
+      unitCode: 'M-5',
+      monthlyRate: 690000,
+      baseRent: 2070000,
+      totalRent: 2070000,
+      depositAmount: 207000,
+      depositRate: 10,
+      durationMonths: 3,
+      policyVersion: 'v3',
+      currency: 'VND',
+      startDate: '2026-09-01',
+      endDate: '2026-12-01',
+      customerName: 'Lan Nguyen',
+    }),
+    signedPhotoUrl: '/api/v1/attachments/signed-base-2.jpg',
+    status: 'SIGNED',
+    supersedesContractId: null,
+    isLatest: 0,
+  },
+  {
+    id: 3,
+    code: 'CT-1042-A1',
+    reservationId: 2,
+    reservationCode: 'BK-2026-0002',
+    policyId: 1,
+    policyVersion: 'v3',
+    contentSnapshot: JSON.stringify({
+      code: 'CT-1042-A1',
+      baseContractCode: 'CT-BK-2026-0002',
+      reservationCode: 'BK-2026-0002',
+      unitCode: 'M-5',
+      monthlyRate: 690000,
+      totalRent: 2783000,
+      depositAmount: 278300,
+      signingDeadline: '2026-10-10',
+    }),
+    signedPhotoUrl: null,
+    status: 'AWAITING_SIGNATURE',
+    supersedesContractId: 2,
     isLatest: 1,
   },
 ]

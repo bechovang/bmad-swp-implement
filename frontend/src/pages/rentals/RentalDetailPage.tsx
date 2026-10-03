@@ -206,6 +206,34 @@ export function RentalDetailPage() {
         </div>
       </div>
 
+      {/* Addendum 7-Day Signing Reminder Banner (Story 4.3) */}
+      {contractChain?.some((c) => c.status === 'AWAITING_SIGNATURE') && (
+        <Card className="p-5 bg-amber-50 border-l-4 border-l-amber-500 border-amber-200 rounded-sh-md shadow-sm" data-testid="addendum-reminder-banner">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                  Action Required: Extension Addendum Signing (7-Day Window)
+                </h3>
+              </div>
+              <p className="text-xs text-amber-800">
+                Your extension is active! Please visit the reception desk to sign Addendum{' '}
+                <span className="font-mono font-bold">
+                  {contractChain.find((c) => c.status === 'AWAITING_SIGNATURE')?.code || 'CT-...-A1'}
+                </span>{' '}
+                within 7 days of payment.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <span className="text-xs font-mono font-bold px-2.5 py-1 bg-amber-200/80 text-amber-950 border border-amber-300 rounded">
+                Awaiting Desk Signature
+              </span>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Pending Payment Banner */}
       {isPendingPayment && (
         <Card className="p-5 bg-sh-warning-tint border-l-4 border-l-sh-warning border-sh-status-buffer-border rounded-sh-md shadow-sm">

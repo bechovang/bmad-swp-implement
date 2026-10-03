@@ -89,6 +89,31 @@ public class ContractController {
         return ResponseEntity.ok(contractDto);
     }
 
+    @PostMapping("/{id}/expire")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<ContractDto> expireContract(
+            @PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestBody(required = false) com.storagehub.dto.ExpireContractRequest request,
+            Authentication authentication
+    ) {
+        Long staffUserId = getCurrentUserId(authentication);
+        String reason = request != null ? request.reason() : null;
+        ContractDto contractDto = contractService.expireContract(id, reason, staffUserId);
+        return ResponseEntity.ok(contractDto);
+    }
+
+    @PostMapping("/{id}/void")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'BUSINESS_OPS', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<ContractDto> voidContract(
+            @PathVariable Long id,
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.storagehub.dto.VoidContractRequest request,
+            Authentication authentication
+    ) {
+        Long staffUserId = getCurrentUserId(authentication);
+        ContractDto contractDto = contractService.voidContract(id, request.reason(), staffUserId);
+        return ResponseEntity.ok(contractDto);
+    }
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new org.springframework.security.authentication.InsufficientAuthenticationException("User is not authenticated");
