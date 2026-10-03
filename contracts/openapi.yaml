@@ -690,6 +690,130 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /reservations/{id}/settlement-preview:
+    get:
+      operationId: getSettlementPreview
+      tags: [Settlement]
+      summary: Calculate settlement preview for reservation (Story 6.3)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: damageFee
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: damageReason
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: checkoutDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Settlement preview calculation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementPreviewDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: postSettlementPreview
+      tags: [Settlement]
+      summary: Calculate settlement preview with request body (Story 6.3)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeSettlementRequest'
+      responses:
+        '200':
+          description: Settlement preview calculation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementPreviewDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reservations/{id}/settlement:
+    get:
+      operationId: getSettlementReceipt
+      tags: [Settlement]
+      summary: Get immutable settlement receipt for reservation (Story 6.3)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Settlement receipt record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementReceiptDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: finalizeSettlement
+      tags: [Settlement]
+      summary: Finalize settlement and close rental (Story 6.3)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeSettlementRequest'
+      responses:
+        '200':
+          description: Settlement finalized and rental closed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementReceiptDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # -------------------------------------------------------- payments (2.4)
   /payments/create:
     post:
@@ -3753,6 +3877,145 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InspectionItem'
+
+    SettlementPreviewDto:
+      type: object
+      required:
+        - reservationId
+        - reservationCode
+        - depositHeld
+        - damageFee
+        - lateFee
+        - totalCharges
+        - refundAmount
+        - extraFeeAmount
+        - extraFeeRequired
+        - extraFeePaid
+        - damageReasonRequired
+        - canFinalize
+      properties:
+        reservationId:
+          type: integer
+          format: int64
+        reservationCode:
+          type: string
+        unitCode:
+          type: string
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        depositHeld:
+          type: number
+        damageFee:
+          type: number
+        damageReason:
+          type: string
+          nullable: true
+        lateFee:
+          type: number
+        daysLate:
+          type: integer
+        totalCharges:
+          type: number
+        refundAmount:
+          type: number
+        extraFeeAmount:
+          type: number
+        extraFeeRequired:
+          type: boolean
+        extraFeePaid:
+          type: boolean
+        damageReasonRequired:
+          type: boolean
+        canFinalize:
+          type: boolean
+        summaryMessage:
+          type: string
+
+    FinalizeSettlementRequest:
+      type: object
+      properties:
+        damageFee:
+          type: number
+          default: 0
+        damageReason:
+          type: string
+          nullable: true
+        lateFee:
+          type: number
+          default: 0
+        paymentMethod:
+          type: string
+          nullable: true
+        cashReceived:
+          type: boolean
+          default: false
+        notes:
+          type: string
+          nullable: true
+
+    SettlementReceiptDto:
+      type: object
+      required:
+        - id
+        - receiptCode
+        - reservationId
+        - depositHeld
+        - damageFee
+        - lateFee
+        - totalCharges
+        - refundAmount
+        - extraFeeAmount
+        - status
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+        receiptCode:
+          type: string
+        reservationId:
+          type: integer
+          format: int64
+        reservationCode:
+          type: string
+          nullable: true
+        unitCode:
+          type: string
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        staffName:
+          type: string
+          nullable: true
+        depositHeld:
+          type: number
+        damageFee:
+          type: number
+        damageReason:
+          type: string
+          nullable: true
+        lateFee:
+          type: number
+        totalCharges:
+          type: number
+        refundAmount:
+          type: number
+        extraFeeAmount:
+          type: number
+        status:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        summaryMessage:
+          type: string
+
 
 
 

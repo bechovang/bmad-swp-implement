@@ -44,6 +44,11 @@ import type {
   SubmitInspectionRequest,
   InspectionItemDto,
 } from '../types/checkout'
+import type {
+  SettlementPreviewDto,
+  FinalizeSettlementRequest,
+  SettlementReceiptDto,
+} from '../types/settlement'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -1424,6 +1429,199 @@ export const handlers = [
     return HttpResponse.json(dto, { status: 200 })
   }),
 
+  // ------------------------------------------------------------ Settlement (Story 6.3)
+  http.get('/api/v1/reservations/:id/settlement-preview', ({ params, request }) => {
+    const resId = parseInt(params.id as string, 10)
+    const url = new URL(request.url)
+    const damageFee = Math.max(0, parseFloat(url.searchParams.get('damageFee') || '0') || 0)
+    const damageReason = url.searchParams.get('damageReason') || null
+    const checkoutDate = url.searchParams.get('checkoutDate') || null
+
+    const res = mockReservationsList.find((r) => r.id === resId)
+    const depositHeld = res ? res.depositAmount : 172500
+
+    let daysLate = 0
+    let lateFee = 0
+    if (res?.endDate && checkoutDate && checkoutDate > res.endDate) {
+      const diff = new Date(checkoutDate).getTime() - new Date(res.endDate).getTime()
+      daysLate = Math.max(1, Math.round(diff / (1000 * 60 * 60 * 24)))
+      const dailyRate = Math.round((res.monthlyRate || 690000) / 30)
+      lateFee = dailyRate * daysLate
+    }
+
+    const totalCharges = damageFee + lateFee
+    let refundAmount = 0
+    let extraFeeAmount = 0
+
+    if (depositHeld >= totalCharges) {
+      refundAmount = depositHeld - totalCharges
+    } else {
+      extraFeeAmount = totalCharges - depositHeld
+    }
+
+    const extraFeeRequired = extraFeeAmount > 0
+    const damageReasonRequired = damageFee > 0
+    const hasValidReason = !damageReasonRequired || (damageReason !== null && damageReason.trim() !== '')
+    const canFinalize = hasValidReason && !extraFeeRequired
+
+    const dto: SettlementPreviewDto = {
+      reservationId: res?.id || resId,
+      reservationCode: res?.code || 'BK-2026-00871',
+      unitCode: res?.unitCode || 'S-3',
+      customerName: res?.customerName || 'Lan Nguyen',
+      depositHeld,
+      damageFee,
+      damageReason,
+      lateFee,
+      daysLate,
+      totalCharges,
+      refundAmount,
+      extraFeeAmount,
+      extraFeeRequired,
+      extraFeePaid: false,
+      damageReasonRequired,
+      canFinalize,
+      summaryMessage: damageFee > 0
+        ? `Refund ${refundAmount.toLocaleString()} ₫ after damage fee ${damageFee.toLocaleString()} ₫`
+        : `Full refund of ${refundAmount.toLocaleString()} ₫`,
+    }
+
+    return HttpResponse.json(dto, { status: 200 })
+  }),
+
+  http.post('/api/v1/reservations/:id/settlement', async ({ params, request }) => {
+    const resId = parseInt(params.id as string, 10)
+    const body = (await request.json().catch(() => ({}))) as FinalizeSettlementRequest
+
+    const damageFee = Math.max(0, body.damageFee || 0)
+    const damageReason = body.damageReason || null
+
+    if (damageFee > 0 && (!damageReason || !damageReason.trim())) {
+      return HttpResponse.json(
+        {
+          code: 'DAMAGE_REASON_REQUIRED',
+          message: 'A specific damage reason is mandatory when assessing damage fees.',
+        },
+        { status: 400 }
+      )
+    }
+
+    const res = mockReservationsList.find((r) => r.id === resId)
+    const depositHeld = res ? res.depositAmount : 172500
+    const lateFee = Math.max(0, body.lateFee || 0)
+    const totalCharges = damageFee + lateFee
+
+    let refundAmount = 0
+    let extraFeeAmount = 0
+    if (depositHeld >= totalCharges) {
+      refundAmount = depositHeld - totalCharges
+    } else {
+      extraFeeAmount = totalCharges - depositHeld
+    }
+
+    if (extraFeeAmount > 0 && !body.cashReceived) {
+      return HttpResponse.json(
+        {
+          code: 'EXTRA_FEE_UNPAID',
+          message: `Outstanding extra fee of ${extraFeeAmount} ₫ must be paid before closing rental.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    // Flip statuses in mock state
+    if (res) {
+      res.status = 'CLOSED'
+    }
+
+    // Flip unit to PREPARING
+    if (res && res.unitCode && MOCK_UNITS[res.unitCode]) {
+      MOCK_UNITS[res.unitCode].status = 'PREPARING'
+    }
+
+    // Spawn cleaning task
+    mockTasksList.push({
+      id: mockTasksList.length + 1,
+      type: 'CLEANING',
+      refCode: res ? res.unitCode : 'S-3',
+      assignedStaffId: 2,
+      assignedStaffName: 'Minh Tran',
+      workDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date().toISOString().split('T')[0],
+      status: 'TODO',
+      unitCode: res ? res.unitCode : 'S-3',
+      customerName: null,
+      timeSlot: 'Morning',
+      title: `Cleaning ${res ? res.unitCode : 'S-3'}`,
+      description: `Turnover buffer cleaning and inspection for unit ${res ? res.unitCode : 'S-3'}`,
+    })
+
+    // Complete checkout task
+    const checkoutTask = mockTasksList.find((t) => t.type === 'CHECKOUT' && (t.refCode === res?.code || t.id === 3))
+    if (checkoutTask) {
+      checkoutTask.status = 'DONE'
+    }
+
+    const receipt: SettlementReceiptDto = {
+      id: mockSettlementsList.length + 1,
+      receiptCode: `STL-2026-${String(Math.floor(Math.random() * 90000 + 10000))}`,
+      reservationId: res?.id || resId,
+      reservationCode: res?.code || 'BK-2026-00871',
+      unitCode: res?.unitCode || 'S-3',
+      customerName: res?.customerName || 'Lan Nguyen',
+      staffName: 'Minh Tran',
+      depositHeld,
+      damageFee,
+      damageReason,
+      lateFee,
+      totalCharges,
+      refundAmount,
+      extraFeeAmount,
+      status: 'FINALIZED',
+      notes: body.notes || null,
+      createdAt: new Date().toISOString(),
+      summaryMessage: damageFee > 0
+        ? `Refund ${refundAmount.toLocaleString()} ₫ after damage fee ${damageFee.toLocaleString()} ₫`
+        : `Full refund of ${refundAmount.toLocaleString()} ₫`,
+    }
+
+    mockSettlementsList.push(receipt)
+    return HttpResponse.json(receipt, { status: 200 })
+  }),
+
+  http.get('/api/v1/reservations/:id/settlement', ({ params }) => {
+    const resId = parseInt(params.id as string, 10)
+    const existing = mockSettlementsList.find((s) => s.reservationId === resId)
+
+    if (existing) {
+      return HttpResponse.json(existing, { status: 200 })
+    }
+
+    // Default demo receipt for test queries
+    const demoReceipt: SettlementReceiptDto = {
+      id: 1,
+      receiptCode: 'STL-2026-00871',
+      reservationId: resId,
+      reservationCode: 'BK-2026-00871',
+      unitCode: 'S-3',
+      customerName: 'Lan Nguyen',
+      staffName: 'Minh Tran',
+      depositHeld: 172500,
+      damageFee: 40000,
+      damageReason: 'Scratched door panel and lost key badge',
+      lateFee: 0,
+      totalCharges: 40000,
+      refundAmount: 132500,
+      extraFeeAmount: 0,
+      status: 'FINALIZED',
+      notes: 'Customer agreed with deduction',
+      createdAt: '2026-10-03T10:00:00Z',
+      summaryMessage: 'Refund 132.500 ₫ after damage fee 40.000 ₫',
+    }
+
+    return HttpResponse.json(demoReceipt, { status: 200 })
+  }),
+
   // ------------------------------------------------------------ Support (Story 5.1)
   http.get('/api/v1/support-tickets', ({ request }) => {
     const url = new URL(request.url)
@@ -2284,6 +2482,14 @@ let mockInspectionsList: InspectionItemDto[] = JSON.parse(JSON.stringify(INITIAL
 
 export function resetMockInspections(custom?: InspectionItemDto[]) {
   mockInspectionsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_INSPECTIONS))
+}
+
+export const INITIAL_SETTLEMENTS: SettlementReceiptDto[] = []
+
+export let mockSettlementsList: SettlementReceiptDto[] = JSON.parse(JSON.stringify(INITIAL_SETTLEMENTS))
+
+export function resetMockSettlements(custom?: SettlementReceiptDto[]) {
+  mockSettlementsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_SETTLEMENTS))
 }
 
 export const INITIAL_MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {

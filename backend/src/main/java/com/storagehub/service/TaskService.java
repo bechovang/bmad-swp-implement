@@ -303,6 +303,67 @@ public class TaskService {
     }
 
     /**
+     * Creates a CLEANING task on the Kanban board when a rental is closed and unit enters PREPARING (Story 6.3 / 6.5).
+     */
+    public Task createCleaningTask(Unit unit) {
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null for cleaning task creation");
+        }
+
+        String refCode = unit.getCode();
+        Optional<Task> existing = taskRepository.findByRefCodeAndType(refCode, TaskType.CLEANING);
+        if (existing.isPresent()) {
+            Task task = existing.get();
+            if (task.getStatus() != TaskStatus.DONE) {
+                log.info("Cleaning task {} already open for unit {}", task.getId(), refCode);
+                return task;
+            }
+        }
+
+        User assignedStaff = resolveDefaultStaffUser();
+        LocalDate workDate = LocalDate.now();
+
+        Task task = new Task(
+                TaskType.CLEANING,
+                refCode,
+                assignedStaff,
+                workDate,
+                TaskStatus.TODO
+        );
+
+        task = taskRepository.save(task);
+
+        if (assignedStaff != null) {
+            logService.append(
+                    assignedStaff.getId(),
+                    EntityType.TASK,
+                    task.getId(),
+                    Action.STATUS_CHANGE,
+                    null,
+                    TaskStatus.TODO.name(),
+                    "Cleaning task auto-generated for unit " + refCode
+            );
+
+            notificationService.send(
+                    assignedStaff.getId(),
+                    "TASK_ASSIGNED",
+                    "Cleaning task assigned for unit " + refCode,
+                    "/tasks/" + task.getId()
+            );
+        }
+
+        log.info("Created CLEANING task {} for unit {} on {}", task.getId(), refCode, workDate);
+        return task;
+    }
+
+    public Task createCleaningTask(Reservation reservation) {
+        if (reservation == null || reservation.getUnit() == null) {
+            throw new IllegalArgumentException("Reservation with valid unit required for cleaning task creation");
+        }
+        return createCleaningTask(reservation.getUnit());
+    }
+
+    /**
      * Create task from manual or programmatic request.
      */
     public TaskDto createTask(CreateTaskRequest request, Long creatorUserId) {

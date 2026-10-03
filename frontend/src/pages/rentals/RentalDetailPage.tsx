@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getRentalDetail } from '../../api/rental'
 import { getContractByReservation, getContractChain } from '../../api/contract'
+import { getSettlementReceipt } from '../../api/settlement'
 import type { ReservationStatus, PaymentStatus } from '../../types/rental'
 import type { ContractDto } from '../../types/contract'
 import type { ExtensionQuoteDto } from '../../types/extension'
+import type { SettlementReceiptDto } from '../../types/settlement'
 import { Card } from '../../components/ui/Card'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -104,6 +106,13 @@ export function RentalDetailPage() {
     queryKey: ['contract-reservation', reservation?.id],
     queryFn: () => getContractByReservation(reservation!.id),
     enabled: Boolean(reservation?.id),
+    retry: false,
+  })
+
+  const { data: settlementReceipt } = useQuery<SettlementReceiptDto>({
+    queryKey: ['settlement-receipt', reservation?.id],
+    queryFn: () => getSettlementReceipt(reservation!.id),
+    enabled: Boolean(reservation?.id && reservation?.status === 'CLOSED'),
     retry: false,
   })
 
@@ -239,6 +248,30 @@ export function RentalDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Permanent Settlement Receipt Banner (Story 6.3) */}
+      {reservation.status === 'CLOSED' && settlementReceipt && (
+        <Card className="p-5 bg-emerald-50 border-l-4 border-l-emerald-500 border-emerald-200 rounded-sh-md shadow-xs" data-testid="settlement-receipt-banner">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                  Rental Closed · Settlement Finalized
+                </h3>
+              </div>
+              <p className="text-xs text-emerald-800 font-medium">
+                {settlementReceipt.summaryMessage || `Refund ${formatMoney(settlementReceipt.refundAmount)} after deductions`} · Receipt <span className="font-mono font-bold" data-testid="receipt-code-display">{settlementReceipt.receiptCode}</span>
+              </p>
+            </div>
+            <div className="shrink-0">
+              <span className="text-xs font-mono font-bold px-2.5 py-1 bg-emerald-200 text-emerald-950 border border-emerald-300 rounded">
+                Settled
+              </span>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Checkout Requested Banner (Story 6.1) */}
       {reservation.status === 'CHECKOUT_REQUESTED' && (

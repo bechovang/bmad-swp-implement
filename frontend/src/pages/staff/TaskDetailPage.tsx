@@ -16,6 +16,7 @@ import type {
 } from '../../types/checkout'
 import { Button } from '../../components/ui/Button'
 import { PaymentModal } from '../../components/payment/PaymentModal'
+import { CheckoutSettlementSection } from '../../components/checkout/CheckoutSettlementSection'
 import { formatMoney, formatUnitCode } from '../../lib/format'
 
 export function TaskDetailPage() {
@@ -1632,6 +1633,27 @@ export function TaskDetailPage() {
                   Save Inspection & Record Findings →
                 </Button>
               </div>
+            </div>
+
+            {/* Step 3: Settlement Calculation & Rental Closure */}
+            <div className="pt-4 border-t border-sh-border">
+              <CheckoutSettlementSection
+                reservationId={checkoutDetail?.reservationId || 871}
+                reservationCode={checkoutDetail?.reservationCode || task.refCode || 'BK-2026-00871'}
+                unitCode={checkoutDetail?.unitCode || task.unitCode || undefined}
+                customerName={checkoutDetail?.customerName || task.customerName || undefined}
+                depositHeld={172500}
+                hasMajorDamage={(Object.keys(inspectionItems) as InspectionItem[]).some(
+                  (k) => inspectionItems[k].result === 'MAJOR'
+                )}
+                majorItems={(Object.keys(inspectionItems) as InspectionItem[]).filter(
+                  (k) => inspectionItems[k].result === 'MAJOR'
+                )}
+                onSettlementCompleted={() => {
+                  refetchTask()
+                  refetchCheckoutDetail()
+                }}
+              />
             </div>
           </div>
         </div>
