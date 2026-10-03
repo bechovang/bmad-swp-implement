@@ -247,6 +247,62 @@ public class TaskService {
     }
 
     /**
+     * Creates or updates a CHECKOUT task on the Kanban board (Story 6.1).
+     */
+    public Task createCheckoutTask(Reservation reservation, LocalDate requestedDate) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null for checkout task creation");
+        }
+
+        String refCode = reservation.getCode();
+        Optional<Task> existing = taskRepository.findByRefCodeAndType(refCode, TaskType.CHECKOUT);
+        if (existing.isPresent()) {
+            Task task = existing.get();
+            task.setWorkDate(requestedDate);
+            task.setStatus(TaskStatus.TODO);
+            task = taskRepository.save(task);
+            log.info("Updated existing checkout task {} for reservation {} with workDate {}", task.getId(), refCode, requestedDate);
+            return task;
+        }
+
+        User assignedStaff = resolveDefaultStaffUser();
+        LocalDate workDate = requestedDate != null ? requestedDate : LocalDate.now();
+
+        Task task = new Task(
+                TaskType.CHECKOUT,
+                refCode,
+                assignedStaff,
+                workDate,
+                TaskStatus.TODO
+        );
+
+        task = taskRepository.save(task);
+
+        if (assignedStaff != null) {
+            logService.append(
+                    assignedStaff.getId(),
+                    EntityType.TASK,
+                    task.getId(),
+                    Action.STATUS_CHANGE,
+                    null,
+                    TaskStatus.TODO.name(),
+                    "Checkout task auto-generated for reservation " + reservation.getCode()
+            );
+
+            String unitCode = reservation.getUnit() != null ? reservation.getUnit().getCode() : "";
+            notificationService.send(
+                    assignedStaff.getId(),
+                    "TASK_ASSIGNED",
+                    "Checkout " + reservation.getCode() + " assigned - unit " + unitCode + ", " + workDate,
+                    "/tasks/" + task.getId()
+            );
+        }
+
+        log.info("Created CHECKOUT task {} for reservation {} on {}", task.getId(), reservation.getCode(), workDate);
+        return task;
+    }
+
+    /**
      * Create task from manual or programmatic request.
      */
     public TaskDto createTask(CreateTaskRequest request, Long creatorUserId) {

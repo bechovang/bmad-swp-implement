@@ -1,0 +1,5 @@
+-- Story 6.1: Checkout Requests enhancements
+ALTER TABLE checkout_requests
+    ADD COLUMN Notes VARCHAR(500) NULL COMMENT 'Optional customer notes for checkout',
+    ADD COLUMN CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;

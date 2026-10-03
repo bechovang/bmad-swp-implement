@@ -13,6 +13,7 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table'
 import { CheckInPassModal } from '../../components/rentals/CheckInPassModal'
 import { ExtensionModal } from '../../components/rentals/ExtensionModal'
+import { CheckoutRequestModal } from '../../components/checkout/CheckoutRequestModal'
 import { PaymentModal } from '../../components/payment/PaymentModal'
 import { NewSupportModal } from '../support/NewSupportModal'
 import { ContractPreviewCard } from '../../components/contract/ContractPreviewCard'
@@ -81,6 +82,7 @@ export function RentalDetailPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showExtensionModal, setShowExtensionModal] = useState(false)
   const [showExtensionPaymentModal, setShowExtensionPaymentModal] = useState(false)
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [showSupportModal, setShowSupportModal] = useState(false)
   const [extensionQuote, setExtensionQuote] = useState<ExtensionQuoteDto | null>(null)
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
@@ -186,6 +188,26 @@ export function RentalDetailPage() {
           <div className="flex items-center gap-2">
             {isCheckedIn && (
               <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCheckoutModal(true)}
+                data-testid="request-checkout-btn"
+              >
+                Request Checkout
+              </Button>
+            )}
+            {reservation.status === 'CHECKOUT_REQUESTED' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCheckoutModal(true)}
+                data-testid="update-checkout-btn"
+              >
+                Reschedule Checkout
+              </Button>
+            )}
+            {isCheckedIn && (
+              <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSupportModal(true)}
@@ -217,6 +239,36 @@ export function RentalDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Checkout Requested Banner (Story 6.1) */}
+      {reservation.status === 'CHECKOUT_REQUESTED' && (
+        <Card className="p-5 bg-blue-50 border-l-4 border-l-blue-500 border-blue-200 rounded-sh-md shadow-xs" data-testid="checkout-requested-banner">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-blue-900">
+                  Checkout Inspection Scheduled
+                </h3>
+              </div>
+              <p className="text-xs text-blue-800">
+                Your checkout request has been registered. Please bring your unit padlock key and personal access card to the depot front desk for the move-out inspection and deposit settlement.
+              </p>
+            </div>
+            <div className="shrink-0 flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCheckoutModal(true)}
+                data-testid="banner-reschedule-checkout-btn"
+                className="bg-white text-blue-900 border-blue-300 hover:bg-blue-50 text-xs font-semibold"
+              >
+                Reschedule Date
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Addendum 7-Day Signing Reminder Banner (Story 4.3) */}
       {contractChain?.some((c) => c.status === 'AWAITING_SIGNATURE') && (
@@ -557,6 +609,16 @@ export function RentalDetailPage() {
             refetchLatestContract()
             refetchContractChain()
           }}
+        />
+      )}
+
+      {/* Checkout Request Modal (Story 6.1) */}
+      {reservation && (
+        <CheckoutRequestModal
+          isOpen={showCheckoutModal}
+          onClose={() => setShowCheckoutModal(false)}
+          onSuccess={() => refetch()}
+          reservation={reservation}
         />
       )}
 

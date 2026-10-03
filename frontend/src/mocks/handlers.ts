@@ -37,6 +37,10 @@ import type {
   EscalationDto,
   SeverityDecisionRequest,
 } from '../types/support'
+import type {
+  CheckoutRequestDto,
+  CreateCheckoutRequest,
+} from '../types/checkout'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -1171,6 +1175,124 @@ export const handlers = [
     return HttpResponse.json(quote, { status: 200 })
   }),
 
+  // ------------------------------------------------------------ Checkout (Story 6.1)
+  http.get('/api/v1/reservations/:id/checkout-request', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${id} not found` }, { status: 404 })
+    }
+
+    const latest = mockCheckoutRequestsList
+      .filter((r) => r.reservationId === id)
+      .slice(-1)[0]
+
+    if (!latest) {
+      return HttpResponse.json(
+        { code: 'NOT_FOUND', message: `No checkout request found for reservation ${id}` },
+        { status: 404 }
+      )
+    }
+
+    return HttpResponse.json(latest, { status: 200 })
+  }),
+
+  http.post('/api/v1/reservations/:id/checkout-request', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === id)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${id} not found` }, { status: 404 })
+    }
+
+    if (res.status !== 'CHECKED_IN' && res.status !== 'CHECKOUT_REQUESTED') {
+      return HttpResponse.json(
+        { code: 'RESERVATION_NOT_ACTIVE', message: 'Reservation is not actively checked in' },
+        { status: 400 }
+      )
+    }
+
+    const body = (await request.json()) as CreateCheckoutRequest
+    const requestedDate = body.requestedDate
+
+    if (!requestedDate) {
+      return HttpResponse.json(
+        { code: 'VALIDATION_FAILED', message: 'Requested date is required' },
+        { status: 400 }
+      )
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0]
+    if (requestedDate < todayStr) {
+      return HttpResponse.json(
+        { code: 'INVALID_CHECKOUT_DATE', message: 'Requested checkout date cannot be in the past' },
+        { status: 400 }
+      )
+    }
+
+    // Check conflict boundary
+    if (res.unitCode === 'CONFLICT_UNIT' || (res.unitCode === 'M-5' && requestedDate > '2027-01-15')) {
+      return HttpResponse.json(
+        {
+          code: 'CHECKOUT_DATE_CONFLICT',
+          message: `Cannot checkout on ${requestedDate} due to upcoming conflicting reservation.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    // Cancel prior pending requests
+    mockCheckoutRequestsList.forEach((req) => {
+      if (req.reservationId === id && req.status === 'PENDING') {
+        req.status = 'CANCELLED'
+      }
+    })
+
+    const newReq: CheckoutRequestDto = {
+      id: mockCheckoutRequestsList.length + 1,
+      reservationId: res.id,
+      reservationCode: res.code,
+      unitId: res.unitId,
+      unitCode: res.unitCode,
+      requestedDate: body.requestedDate,
+      status: 'PENDING',
+      notes: body.notes || (body as any).customerNotes || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    mockCheckoutRequestsList.push(newReq)
+
+    // Update reservation status
+    res.status = 'CHECKOUT_REQUESTED'
+
+    // Update or create CHECKOUT task
+    const existingTask = mockTasksList.find(
+      (t) => t.type === 'CHECKOUT' && t.refCode === res.code
+    )
+    if (existingTask) {
+      existingTask.workDate = body.requestedDate
+      existingTask.dueDate = body.requestedDate
+      existingTask.status = 'TODO'
+    } else {
+      mockTasksList.push({
+        id: mockTasksList.length + 1,
+        type: 'CHECKOUT',
+        refCode: res.code,
+        assignedStaffId: 2,
+        assignedStaffName: 'Minh Tran',
+        workDate: body.requestedDate,
+        dueDate: body.requestedDate,
+        status: 'TODO',
+        unitCode: res.unitCode,
+        customerName: res.customerName,
+        timeSlot: 'Morning',
+        title: `Checkout ${res.code}`,
+        description: `Customer checkout request for Unit ${res.unitCode} on ${body.requestedDate}`,
+      })
+    }
+
+    return HttpResponse.json(newReq, { status: 201 })
+  }),
+
   // ------------------------------------------------------------ Support (Story 5.1)
   http.get('/api/v1/support-tickets', ({ request }) => {
     const url = new URL(request.url)
@@ -2015,6 +2137,14 @@ let mockReservationsList: ReservationDto[] = JSON.parse(JSON.stringify(INITIAL_R
 
 export function resetMockReservations(custom?: ReservationDto[]) {
   mockReservationsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_RESERVATIONS))
+}
+
+export const INITIAL_CHECKOUT_REQUESTS: CheckoutRequestDto[] = []
+
+let mockCheckoutRequestsList: CheckoutRequestDto[] = JSON.parse(JSON.stringify(INITIAL_CHECKOUT_REQUESTS))
+
+export function resetMockCheckoutRequests(custom?: CheckoutRequestDto[]) {
+  mockCheckoutRequestsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_CHECKOUT_REQUESTS))
 }
 
 export const INITIAL_MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {

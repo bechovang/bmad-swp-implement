@@ -75,8 +75,8 @@ development_status:
   5-4-support-list-detail-drawer-khách: done
   epic-5-retrospective: optional
 
-  epic-6: backlog
-  6-1-checkout-request: backlog
+  epic-6: in-progress
+  6-1-checkout-request: done
   6-2-checkout-task-nhận-kho-inspection: backlog
   6-3-settlement-charge-preview-extra-fee-đóng-rental: backlog
   6-4-settlement-waiver-trong-trần-waiver_cap-p2: backlog
