@@ -1236,7 +1236,96 @@ paths:
           content:
             application/json:
               schema:
+  /support-tickets:
+    post:
+      operationId: createSupportTicket
+      tags: [Support]
+      summary: Create and route a new support ticket (Story 5.1)
+      description: >
+        Guarded by ROLE_CUSTOMER.
+        Validates that the selected unit belongs to an active checked-in rental of the customer.
+        Routes the ticket to the on-duty staff member based on unit zone and current shift in Asia/Ho_Chi_Minh.
+        Creates a SUPPORT task on the Kanban board and notifies both staff and customer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupportTicketRequest'
+      responses:
+        '201':
+          description: Support ticket successfully created and routed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicketDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Business block (e.g. unit does not belong to active rental).
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/Error'
+
+    get:
+      operationId: getSupportTickets
+      tags: [Support]
+      summary: List support tickets for current user or staff
+      description: >
+        Returns support tickets created by the authenticated customer or all tickets for staff/manager.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SupportTicketStatus'
+        - name: unitCode
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of support tickets.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupportTicketDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /support-tickets/{id}:
+    get:
+      operationId: getSupportTicketById
+      tags: [Support]
+      summary: Get support ticket details by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Support ticket detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicketDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 components:
   securitySchemes:
@@ -2847,6 +2936,118 @@ components:
           type: string
           nullable: true
           example: 'v3'
+
+    # -------------------------------------------------------- support (Story 5.1)
+    IncidentType:
+      type: string
+      enum:
+        - LOST_ACCESS
+        - DEVICE_ISSUE
+        - SECURITY
+        - CLEANLINESS
+        - OTHER
+      example: LOST_ACCESS
+
+    SupportTicketStatus:
+      type: string
+      enum:
+        - OPEN
+        - IN_PROGRESS
+        - RESOLVED
+        - ESCALATED
+      example: OPEN
+
+    CreateSupportTicketRequest:
+      type: object
+      required:
+        - unitId
+        - incidentType
+        - description
+      additionalProperties: false
+      properties:
+        unitId:
+          type: integer
+          format: int64
+          example: 1
+        incidentType:
+          $ref: '#/components/schemas/IncidentType'
+        description:
+          type: string
+          minLength: 5
+          maxLength: 1000
+          example: 'Keypad not accepting my access PIN.'
+
+    SupportTicketDto:
+      type: object
+      required:
+        - id
+        - code
+        - customerId
+        - customerName
+        - unitId
+        - unitCode
+        - incidentType
+        - status
+        - description
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        code:
+          type: string
+          example: 'SR-0034'
+        customerId:
+          type: integer
+          format: int64
+          example: 1
+        customerName:
+          type: string
+          example: 'Lan Nguyen'
+        unitId:
+          type: integer
+          format: int64
+          example: 1
+        unitCode:
+          type: string
+          example: 'S-3'
+        reservationId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1
+        reservationCode:
+          type: string
+          nullable: true
+          example: 'BK-1042'
+        incidentType:
+          $ref: '#/components/schemas/IncidentType'
+        status:
+          $ref: '#/components/schemas/SupportTicketStatus'
+        description:
+          type: string
+          example: 'Keypad not accepting my access PIN.'
+        assignedStaffId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 2
+        assignedStaffName:
+          type: string
+          nullable: true
+          example: 'Minh Tran'
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-10-03T09:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-10-03T09:30:00Z'
+
 
 
 

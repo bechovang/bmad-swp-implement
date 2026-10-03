@@ -29,6 +29,10 @@ import type {
   ExtensionQuoteRequest,
   ExtensionQuoteDto,
 } from '../types/extension'
+import type {
+  SupportTicketDto,
+  CreateSupportTicketRequest,
+} from '../types/support'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
   'lan@storagehub.dev': {
@@ -1162,7 +1166,132 @@ export const handlers = [
 
     return HttpResponse.json(quote, { status: 200 })
   }),
+
+  // ------------------------------------------------------------ Support (Story 5.1)
+  http.get('/api/v1/support-tickets', ({ request }) => {
+    const url = new URL(request.url)
+    const status = url.searchParams.get('status')
+    const unitCode = url.searchParams.get('unitCode')
+
+    let list = [...mockSupportTicketsList]
+    if (status) {
+      list = list.filter((t) => t.status === status)
+    }
+    if (unitCode) {
+      list = list.filter((t) => t.unitCode === unitCode)
+    }
+    return HttpResponse.json(list, { status: 200 })
+  }),
+
+  http.get('/api/v1/support-tickets/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const ticket = mockSupportTicketsList.find((t) => t.id === id)
+    if (!ticket) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Support ticket ${id} not found` }, { status: 404 })
+    }
+    return HttpResponse.json(ticket, { status: 200 })
+  }),
+
+  http.post('/api/v1/support-tickets', async ({ request }) => {
+    const body = (await request.json()) as CreateSupportTicketRequest
+
+    if (!body.description || !body.description.trim()) {
+      return HttpResponse.json(
+        {
+          code: 'VALIDATION_FAILED',
+          message: 'Validation failed',
+          fieldErrors: [{ field: 'description', message: 'description must not be blank' }],
+        },
+        { status: 400 }
+      )
+    }
+
+    const unit = MOCK_UNITS[body.unitId === 2 ? 'M-2' : body.unitId === 3 ? 'M-5' : 'S-3']
+    const code = `SR-${String(mockSupportTicketsList.length + 34).padStart(4, '0')}`
+
+    const newTicket: SupportTicketDto = {
+      id: mockSupportTicketsList.length + 10,
+      code,
+      customerId: 1,
+      customerName: 'Lan Nguyen',
+      unitId: body.unitId,
+      unitCode: unit ? unit.code : 'S-3',
+      reservationId: 1,
+      reservationCode: 'BK-1042',
+      incidentType: body.incidentType,
+      status: 'OPEN',
+      description: body.description.trim(),
+      assignedStaffId: 2,
+      assignedStaffName: 'Minh Tran',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    mockSupportTicketsList.unshift(newTicket)
+
+    // Also push to mockTasksList
+    mockTasksList.push({
+      id: mockTasksList.length + 1,
+      type: 'SUPPORT',
+      refCode: code,
+      assignedStaffId: 2,
+      assignedStaffName: 'Minh Tran',
+      workDate: new Date().toISOString().split('T')[0],
+      status: 'TODO',
+      unitCode: newTicket.unitCode,
+      customerName: 'Lan Nguyen',
+      dueDate: new Date().toISOString().split('T')[0],
+      timeSlot: 'Morning',
+      title: `Support Ticket ${code}`,
+      description: `${body.incidentType}: ${body.description.trim()}`,
+    })
+
+    return HttpResponse.json(newTicket, { status: 201 })
+  }),
 ]
+
+export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
+  {
+    id: 1,
+    code: 'SR-0032',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 1,
+    unitCode: 'S-3',
+    reservationId: 1,
+    reservationCode: 'BK-1042',
+    incidentType: 'DEVICE_ISSUE',
+    status: 'RESOLVED',
+    description: 'Sticky door latch repaired during morning shift',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    createdAt: '2026-10-06T08:30:00Z',
+    updatedAt: '2026-10-06T10:00:00Z',
+  },
+  {
+    id: 2,
+    code: 'SR-0033',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 2,
+    unitCode: 'M-2',
+    reservationId: null,
+    reservationCode: null,
+    incidentType: 'OTHER',
+    status: 'ESCALATED',
+    description: 'Water ingress from ceiling joint in unit M-2',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    createdAt: '2026-10-18T09:00:00Z',
+    updatedAt: '2026-10-18T09:30:00Z',
+  },
+]
+
+let mockSupportTicketsList: SupportTicketDto[] = JSON.parse(JSON.stringify(INITIAL_SUPPORT_TICKETS))
+
+export function resetMockSupportTickets(custom?: SupportTicketDto[]) {
+  mockSupportTicketsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_SUPPORT_TICKETS))
+}
 
 export const INITIAL_TASKS: TaskDto[] = [
   {

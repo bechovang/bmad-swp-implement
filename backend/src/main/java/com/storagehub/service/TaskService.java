@@ -27,6 +27,7 @@ import com.storagehub.exception.ResourceNotFoundException;
 import com.storagehub.repository.ContractRepository;
 import com.storagehub.repository.PaymentRepository;
 import com.storagehub.repository.ReservationRepository;
+import com.storagehub.repository.SupportTicketRepository;
 import com.storagehub.repository.TaskRepository;
 import com.storagehub.repository.UnitRepository;
 import com.storagehub.repository.UserRepository;
@@ -53,6 +54,7 @@ public class TaskService {
     private final PaymentRepository paymentRepository;
     private final ContractRepository contractRepository;
     private final PricingEngine pricingEngine;
+    private final SupportTicketRepository supportTicketRepository;
     private final LogService logService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
@@ -67,6 +69,21 @@ public class TaskService {
                        LogService logService,
                        NotificationService notificationService,
                        ObjectMapper objectMapper) {
+        this(taskRepository, userRepository, reservationRepository, unitRepository, paymentRepository,
+             contractRepository, pricingEngine, null, logService, notificationService, objectMapper);
+    }
+
+    public TaskService(TaskRepository taskRepository,
+                       UserRepository userRepository,
+                       ReservationRepository reservationRepository,
+                       UnitRepository unitRepository,
+                       PaymentRepository paymentRepository,
+                       ContractRepository contractRepository,
+                       PricingEngine pricingEngine,
+                       SupportTicketRepository supportTicketRepository,
+                       LogService logService,
+                       NotificationService notificationService,
+                       ObjectMapper objectMapper) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
@@ -74,6 +91,7 @@ public class TaskService {
         this.paymentRepository = paymentRepository;
         this.contractRepository = contractRepository;
         this.pricingEngine = pricingEngine;
+        this.supportTicketRepository = supportTicketRepository;
         this.logService = logService;
         this.notificationService = notificationService;
         this.objectMapper = objectMapper;
@@ -182,6 +200,49 @@ public class TaskService {
         }
 
         log.info("Created CONTRACT task {} for refCode {}", task.getId(), refCode);
+        return task;
+    }
+
+    /**
+     * Creates a SUPPORT task on the Kanban board when a customer submits a support ticket (Story 5.1).
+     */
+    public Task createSupportTask(com.storagehub.entity.SupportTicket ticket) {
+        if (ticket == null) {
+            throw new IllegalArgumentException("Support ticket cannot be null for support task creation");
+        }
+
+        String refCode = ticket.getCode();
+        Optional<Task> existing = taskRepository.findByRefCodeAndType(refCode, TaskType.SUPPORT);
+        if (existing.isPresent()) {
+            log.info("Support task already exists for {}", refCode);
+            return existing.get();
+        }
+
+        User assignedStaff = ticket.getAssignedStaff() != null ? ticket.getAssignedStaff() : resolveDefaultStaffUser();
+        LocalDate workDate = LocalDate.now();
+
+        Task task = new Task(
+                TaskType.SUPPORT,
+                refCode,
+                assignedStaff,
+                workDate,
+                TaskStatus.TODO
+        );
+        task = taskRepository.save(task);
+
+        if (assignedStaff != null) {
+            logService.append(
+                    assignedStaff.getId(),
+                    EntityType.TASK,
+                    task.getId(),
+                    Action.STATUS_CHANGE,
+                    null,
+                    TaskStatus.TODO.name(),
+                    "Support task auto-generated for " + refCode
+            );
+        }
+
+        log.info("Created SUPPORT task {} for ticket {}", task.getId(), refCode);
         return task;
     }
 
@@ -690,12 +751,36 @@ public class TaskService {
             } else if (refCode.startsWith("SR-")) {
                 title = "Support Ticket " + refCode;
                 description = "On-site support and maintenance inspection";
-                if (refCode.contains("0032")) {
-                    unitCode = "S-3";
-                    customerName = "Lan Nguyen";
-                } else if (refCode.contains("0033")) {
-                    unitCode = "M-2";
-                    customerName = "Lan Nguyen";
+                if (supportTicketRepository != null) {
+                    Optional<com.storagehub.entity.SupportTicket> ticketOpt = supportTicketRepository.findByCode(refCode);
+                    if (ticketOpt.isPresent()) {
+                        com.storagehub.entity.SupportTicket ticket = ticketOpt.get();
+                        if (ticket.getUnit() != null) {
+                            unitCode = ticket.getUnit().getCode();
+                        }
+                        if (ticket.getCustomer() != null) {
+                            customerName = ticket.getCustomer().getFullName();
+                        }
+                        if (ticket.getIncidentType() != null) {
+                            description = ticket.getIncidentType().name() + ": " + (ticket.getDescription() != null ? ticket.getDescription() : "");
+                        }
+                    } else {
+                        if (refCode.contains("0032")) {
+                            unitCode = "S-3";
+                            customerName = "Lan Nguyen";
+                        } else if (refCode.contains("0033")) {
+                            unitCode = "M-2";
+                            customerName = "Lan Nguyen";
+                        }
+                    }
+                } else {
+                    if (refCode.contains("0032")) {
+                        unitCode = "S-3";
+                        customerName = "Lan Nguyen";
+                    } else if (refCode.contains("0033")) {
+                        unitCode = "M-2";
+                        customerName = "Lan Nguyen";
+                    }
                 }
             } else {
                 // Assume unit code directly (e.g. S-3 for Cleaning)

@@ -22,6 +22,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByCustomer_IdOrderByIdDesc(Long customerId);
 
+    @Query("SELECT r FROM Reservation r WHERE r.customer.id = :customerId AND r.status IN :statuses")
+    List<Reservation> findByCustomerIdAndStatusIn(@Param("customerId") Long customerId, @Param("statuses") Collection<ReservationStatus> statuses);
+
     List<Reservation> findByUnit_IdAndStatusIn(Long unitId, Collection<ReservationStatus> statuses);
 
     @Query("SELECT r FROM Reservation r WHERE r.unit.id = :unitId ORDER BY r.endDate DESC")

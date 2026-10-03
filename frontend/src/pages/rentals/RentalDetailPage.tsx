@@ -14,6 +14,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '.
 import { CheckInPassModal } from '../../components/rentals/CheckInPassModal'
 import { ExtensionModal } from '../../components/rentals/ExtensionModal'
 import { PaymentModal } from '../../components/payment/PaymentModal'
+import { NewSupportModal } from '../support/NewSupportModal'
 import { ContractPreviewCard } from '../../components/contract/ContractPreviewCard'
 import { formatMoney, formatUnitCode } from '../../lib/format'
 
@@ -80,6 +81,7 @@ export function RentalDetailPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showExtensionModal, setShowExtensionModal] = useState(false)
   const [showExtensionPaymentModal, setShowExtensionPaymentModal] = useState(false)
+  const [showSupportModal, setShowSupportModal] = useState(false)
   const [extensionQuote, setExtensionQuote] = useState<ExtensionQuoteDto | null>(null)
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null)
 
@@ -182,6 +184,16 @@ export function RentalDetailPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            {isCheckedIn && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSupportModal(true)}
+                data-testid="report-issue-btn"
+              >
+                Report Issue
+              </Button>
+            )}
             {canExtend && (
               <Button
                 variant="secondary"
@@ -545,6 +557,22 @@ export function RentalDetailPage() {
             refetchLatestContract()
             refetchContractChain()
           }}
+        />
+      )}
+
+      {/* Support Ticket Modal (Story 5.1) */}
+      {reservation && (
+        <NewSupportModal
+          isOpen={showSupportModal}
+          onClose={() => setShowSupportModal(false)}
+          initialUnitId={reservation.unitId || 1}
+          rentals={[
+            {
+              unitId: reservation.unitId || 1,
+              unitCode: reservation.unitCode,
+              reservationCode: reservation.code,
+            },
+          ]}
         />
       )}
     </div>

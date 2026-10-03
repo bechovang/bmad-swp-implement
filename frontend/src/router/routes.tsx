@@ -9,7 +9,6 @@ import { NotificationCenterPage } from '../pages/notification/NotificationCenter
 import { ForbiddenPage } from '../pages/error/ForbiddenPage'
 import { NotFoundPage } from '../pages/error/NotFoundPage'
 import {
-  SupportPage,
   FacilityOverviewPage,
   StaffingPage,
   OperationsPage,
@@ -24,6 +23,7 @@ import {
   EscalationDetailPage,
   PolicyEditorPage,
 } from '../pages/placeholders'
+import { SupportPage } from '../pages/support/SupportPage'
 import { BrowseUnitsPage } from '../pages/unit/BrowseUnitsPage'
 import { UnitDetailPage } from '../pages/unit/UnitDetailPage'
 import { BookingSummaryPage } from '../pages/booking/BookingSummaryPage'
