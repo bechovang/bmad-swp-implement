@@ -41,6 +41,10 @@ export interface SupportTicketDto {
   assignedStaffName?: string | null
   resolutionNote?: string | null
   escalationNote?: string | null
+  managerDecision?: EscalationDecision | null
+  managerNote?: string | null
+  relocatedToUnitId?: number | null
+  relocatedToUnitCode?: string | null
   createdAt?: string | null
   updatedAt?: string | null
 }

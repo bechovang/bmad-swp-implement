@@ -3218,6 +3218,21 @@ components:
           type: string
           nullable: true
           example: 'Flooding, Unit M-2. Customer relocation needed.'
+        managerDecision:
+          $ref: '#/components/schemas/EscalationDecision'
+        managerNote:
+          type: string
+          nullable: true
+          example: 'Severe pipe rupture, customer moved to Unit M-5.'
+        relocatedToUnitId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 3
+        relocatedToUnitCode:
+          type: string
+          nullable: true
+          example: 'M-5'
         createdAt:
           type: string
           format: date-time

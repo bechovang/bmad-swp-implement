@@ -571,10 +571,22 @@ public class TicketService {
 
     public SupportTicketDto mapToDto(SupportTicket ticket) {
         String escalationNote = null;
+        EscalationDecision managerDecision = null;
+        String managerNote = null;
+        Long relocatedToUnitId = null;
+        String relocatedToUnitCode = null;
+
         if (escalationRepository != null && ticket.getId() != null) {
             Optional<Escalation> esc = escalationRepository.findByTicketId(ticket.getId());
             if (esc.isPresent()) {
-                escalationNote = esc.get().getNote();
+                Escalation e = esc.get();
+                escalationNote = e.getNote();
+                managerDecision = e.getDecision();
+                managerNote = e.getManagerNote();
+                if (e.getRelocatedToUnit() != null) {
+                    relocatedToUnitId = e.getRelocatedToUnit().getId();
+                    relocatedToUnitCode = e.getRelocatedToUnit().getCode();
+                }
             }
         }
 
@@ -594,6 +606,10 @@ public class TicketService {
                 ticket.getAssignedStaff() != null ? ticket.getAssignedStaff().getFullName() : null,
                 ticket.getResolutionNote(),
                 escalationNote,
+                managerDecision,
+                managerNote,
+                relocatedToUnitId,
+                relocatedToUnitCode,
                 ticket.getCreatedAt(),
                 ticket.getUpdatedAt()
         );

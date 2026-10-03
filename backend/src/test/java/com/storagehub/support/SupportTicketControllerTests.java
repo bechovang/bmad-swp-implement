@@ -86,6 +86,7 @@ public class SupportTicketControllerTests {
                 10L, "SR-0032", 1L, "Lan Nguyen", 1L, "S-3",
                 1L, "BK-1042", IncidentType.DEVICE_ISSUE, SupportTicketStatus.RESOLVED,
                 "Door latch issue", 2L, "Minh Tran", "Replaced hinge", null,
+                null, null, null, null,
                 LocalDateTime.now(), LocalDateTime.now()
         );
 
@@ -108,6 +109,7 @@ public class SupportTicketControllerTests {
                 10L, "SR-0032", 1L, "Lan Nguyen", 1L, "S-3",
                 1L, "BK-1042", IncidentType.DEVICE_ISSUE, SupportTicketStatus.ESCALATED,
                 "Door latch issue", 2L, "Minh Tran", null, "Flooding in corridor",
+                null, null, null, null,
                 LocalDateTime.now(), LocalDateTime.now()
         );
 

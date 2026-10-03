@@ -68,11 +68,11 @@ development_status:
   4-3-addendum-trail-7-ngày-đeo-bám-desk-ritual-chain: done
   epic-4-retrospective: optional
 
-  epic-5: in-progress
+  epic-5: done
   5-1-tạo-route-support-ticket: done
   5-2-support-ticket-xử-lý-resolve-escalate: done
   5-3-severity-decision-relocation: done
-  5-4-support-list-detail-drawer-khách: backlog
+  5-4-support-list-detail-drawer-khách: done
   epic-5-retrospective: optional
 
   epic-6: backlog

@@ -6,6 +6,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { NewSupportModal } from './NewSupportModal'
+import { SupportDetailDrawer } from '../../components/support/SupportDetailDrawer'
 import { getSupportTickets } from '../../api/support'
 import { getMyReservations } from '../../api/reservation'
 import { formatUnitCode } from '../../lib/format'
@@ -14,6 +15,8 @@ import type { SupportTicketDto, SupportTicketStatus } from '../../types/support'
 export function SupportPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicketDto | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const {
     data: tickets = [],
@@ -42,6 +45,15 @@ export function SupportPage() {
     return t.status === statusFilter
   })
 
+  const handleOpenDrawer = (ticket: SupportTicketDto) => {
+    setSelectedTicket(ticket)
+    setIsDrawerOpen(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false)
+  }
+
   const getStatusBadgeVariant = (status: SupportTicketStatus) => {
     switch (status) {
       case 'OPEN':
@@ -58,7 +70,7 @@ export function SupportPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 max-w-5xl mx-auto pb-12" data-testid="support-page">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="typography-display text-sh-ink font-bold">Support Requests</h1>
@@ -82,7 +94,7 @@ export function SupportPage() {
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-sh-sm transition-colors ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-sh-sm transition-colors cursor-pointer ${
               statusFilter === status
                 ? 'bg-sh-primary text-white'
                 : 'text-sh-muted hover:text-sh-ink hover:bg-sh-surface-subtle'
@@ -110,21 +122,36 @@ export function SupportPage() {
           }
           action={
             statusFilter === 'ALL' ? (
-              <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsModalOpen(true)}
+                data-testid="empty-new-support-btn"
+              >
                 Open First Ticket
               </Button>
             ) : undefined
           }
         />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="support-tickets-list">
           {filteredTickets.map((ticket: SupportTicketDto) => (
             <Card
               key={ticket.id}
-              className="p-5 bg-sh-surface border-sh-border hover:border-sh-border-strong transition-all rounded-sh-md shadow-sm"
+              onClick={() => handleOpenDrawer(ticket)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleOpenDrawer(ticket)
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`View support ticket ${ticket.code}`}
+              className="p-5 bg-sh-surface border-sh-border hover:border-sh-primary-border hover:shadow-xs transition-all rounded-sh-md shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-sh-primary/20"
               data-testid={`support-ticket-card-${ticket.code}`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pointer-events-none">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs font-bold text-sh-primary bg-sh-primary-tint px-2 py-0.5 rounded border border-sh-primary-border">
@@ -156,12 +183,22 @@ export function SupportPage() {
                       {new Date(ticket.createdAt).toLocaleDateString('en-GB')}
                     </div>
                   )}
+                  <span className="text-[11px] text-sh-primary font-semibold block mt-1">
+                    View full thread →
+                  </span>
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Detail Slide-over Drawer (420px) */}
+      <SupportDetailDrawer
+        ticket={selectedTicket}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+      />
 
       {/* New Support Modal */}
       <NewSupportModal
