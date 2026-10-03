@@ -916,6 +916,27 @@ export const handlers = [
       }
     }
 
+    if (body.status === 'DONE' && task.type === 'CLEANING') {
+      if (
+        task.refCode === 'BUFFER_PENDING' ||
+        task.refCode === 'S-3-PENDING' ||
+        task.title?.toLowerCase().includes('buffer pending') ||
+        task.description?.toLowerCase().includes('buffer pending')
+      ) {
+        const unitCode = task.unitCode || 'S-3'
+        const bufferClearedDate = '2026-10-05'
+        return HttpResponse.json(
+          {
+            code: 'CLOSING_STEP_MISSING',
+            message: `Unit ${unitCode} is in turnover buffer until ${bufferClearedDate}. Cleaning cannot be completed until the turnover buffer has elapsed.`,
+            missingStep: 'TURNOVER_BUFFER_PENDING',
+            stepLabel: `Unit ${unitCode} turnover buffer pending until ${bufferClearedDate}`,
+          },
+          { status: 409 }
+        )
+      }
+    }
+
     task.status = body.status
     return HttpResponse.json(task, { status: 200 })
   }),

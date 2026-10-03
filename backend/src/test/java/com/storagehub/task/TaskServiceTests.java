@@ -273,4 +273,90 @@ public class TaskServiceTests {
         verify(taskRepository).save(any(Task.class));
         verify(logService).append(eq(2L), eq(EntityType.TASK), eq(105L), eq(Action.STATUS_CHANGE), eq(null), eq("TODO"), anyString());
     }
+
+    @Test
+    @DisplayName("updateTaskStatus for CLEANING blocks with TURNOVER_BUFFER_PENDING when buffer duration has not elapsed")
+    void testCompleteCleaningTask_blocksWhenTurnoverBufferPending() {
+        // Today is 2026-10-03. Task workDate is 2026-10-03. Default buffer is 2 days -> buffer cleared date is 2026-10-05.
+        Task cleaningTask = new Task(TaskType.CLEANING, "S-3", staff, LocalDate.of(2026, 10, 3), TaskStatus.IN_PROGRESS);
+        ReflectionTestUtils.setField(cleaningTask, "id", 201L);
+
+        unit.setStatus(UnitStatus.PREPARING);
+        when(taskRepository.findByIdWithStaff(201L)).thenReturn(Optional.of(cleaningTask));
+        when(unitRepository.findByCode("S-3")).thenReturn(Optional.of(unit));
+
+        assertThatThrownBy(() -> taskService.updateTaskStatus(201L, TaskStatus.DONE, null, 2L))
+                .isInstanceOf(com.storagehub.exception.BusinessRuleException.class)
+                .hasMessageContaining("turnover buffer")
+                .matches(ex -> {
+                    com.storagehub.exception.BusinessRuleException bre = (com.storagehub.exception.BusinessRuleException) ex;
+                    return "CLOSING_STEP_MISSING".equals(bre.getCode())
+                            && "TURNOVER_BUFFER_PENDING".equals(bre.getMissingStep())
+                            && bre.getStepLabel() != null
+                            && bre.getStepLabel().contains("turnover buffer pending");
+                });
+    }
+
+    @Test
+    @DisplayName("updateTaskStatus for CLEANING transitions unit to AVAILABLE when buffer elapsed and no upcoming bookings")
+    void testCompleteCleaningTask_transitionsUnitToAvailableWhenBufferElapsedAndNoUpcomingReservation() {
+        // Task workDate was 3 days ago -> buffer is satisfied
+        LocalDate pastDate = LocalDate.now().minusDays(3);
+        Task cleaningTask = new Task(TaskType.CLEANING, "S-3", staff, pastDate, TaskStatus.IN_PROGRESS);
+        ReflectionTestUtils.setField(cleaningTask, "id", 202L);
+
+        unit.setStatus(UnitStatus.PREPARING);
+        when(taskRepository.findByIdWithStaff(202L)).thenReturn(Optional.of(cleaningTask));
+        when(unitRepository.findByCode("S-3")).thenReturn(Optional.of(unit));
+        when(reservationRepository.findByUnit_IdAndStatusIn(eq(1L), any())).thenReturn(List.of());
+        when(taskRepository.save(cleaningTask)).thenReturn(cleaningTask);
+
+        TaskDto result = taskService.updateTaskStatus(202L, TaskStatus.DONE, "Cleaning completed", 2L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.status()).isEqualTo(TaskStatus.DONE);
+        assertThat(unit.getStatus()).isEqualTo(UnitStatus.AVAILABLE);
+
+        verify(unitRepository).save(unit);
+        verify(logService).append(
+                eq(2L),
+                eq(EntityType.UNIT),
+                eq(1L),
+                eq(Action.STATUS_CHANGE),
+                eq(UnitStatus.PREPARING.name()),
+                eq(UnitStatus.AVAILABLE.name()),
+                anyString()
+        );
+    }
+
+    @Test
+    @DisplayName("updateTaskStatus for CLEANING transitions unit to RESERVED when buffer elapsed and upcoming booking exists")
+    void testCompleteCleaningTask_transitionsUnitToReservedWhenBufferElapsedAndUpcomingReservationExists() {
+        LocalDate pastDate = LocalDate.now().minusDays(3);
+        Task cleaningTask = new Task(TaskType.CLEANING, "S-3", staff, pastDate, TaskStatus.IN_PROGRESS);
+        ReflectionTestUtils.setField(cleaningTask, "id", 203L);
+
+        unit.setStatus(UnitStatus.PREPARING);
+        when(taskRepository.findByIdWithStaff(203L)).thenReturn(Optional.of(cleaningTask));
+        when(unitRepository.findByCode("S-3")).thenReturn(Optional.of(unit));
+        when(reservationRepository.findByUnit_IdAndStatusIn(eq(1L), any())).thenReturn(List.of(reservation));
+        when(taskRepository.save(cleaningTask)).thenReturn(cleaningTask);
+
+        TaskDto result = taskService.updateTaskStatus(203L, TaskStatus.DONE, "Cleaning done", 2L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.status()).isEqualTo(TaskStatus.DONE);
+        assertThat(unit.getStatus()).isEqualTo(UnitStatus.RESERVED);
+
+        verify(unitRepository).save(unit);
+        verify(logService).append(
+                eq(2L),
+                eq(EntityType.UNIT),
+                eq(1L),
+                eq(Action.STATUS_CHANGE),
+                eq(UnitStatus.PREPARING.name()),
+                eq(UnitStatus.RESERVED.name()),
+                anyString()
+        );
+    }
 }

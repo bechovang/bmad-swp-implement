@@ -14,6 +14,10 @@ import com.storagehub.entity.EntityType;
 import com.storagehub.entity.Payment;
 import com.storagehub.entity.PaymentPurpose;
 import com.storagehub.entity.PaymentStatus;
+import com.storagehub.entity.PolicyRule;
+import com.storagehub.entity.PolicyRuleType;
+import com.storagehub.entity.PolicyStatus;
+import com.storagehub.entity.RentalPolicy;
 import com.storagehub.entity.Reservation;
 import com.storagehub.entity.ReservationStatus;
 import com.storagehub.entity.Task;
@@ -26,6 +30,8 @@ import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
 import com.storagehub.repository.ContractRepository;
 import com.storagehub.repository.PaymentRepository;
+import com.storagehub.repository.PolicyRuleRepository;
+import com.storagehub.repository.RentalPolicyRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.SupportTicketRepository;
 import com.storagehub.repository.TaskRepository;
@@ -58,6 +64,8 @@ public class TaskService {
     private final LogService logService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final RentalPolicyRepository rentalPolicyRepository;
+    private final PolicyRuleRepository policyRuleRepository;
 
     public TaskService(TaskRepository taskRepository,
                        UserRepository userRepository,
@@ -70,7 +78,7 @@ public class TaskService {
                        NotificationService notificationService,
                        ObjectMapper objectMapper) {
         this(taskRepository, userRepository, reservationRepository, unitRepository, paymentRepository,
-             contractRepository, pricingEngine, null, logService, notificationService, objectMapper);
+             contractRepository, pricingEngine, null, logService, notificationService, objectMapper, null, null);
     }
 
     public TaskService(TaskRepository taskRepository,
@@ -84,6 +92,23 @@ public class TaskService {
                        LogService logService,
                        NotificationService notificationService,
                        ObjectMapper objectMapper) {
+        this(taskRepository, userRepository, reservationRepository, unitRepository, paymentRepository,
+             contractRepository, pricingEngine, supportTicketRepository, logService, notificationService, objectMapper, null, null);
+    }
+
+    public TaskService(TaskRepository taskRepository,
+                       UserRepository userRepository,
+                       ReservationRepository reservationRepository,
+                       UnitRepository unitRepository,
+                       PaymentRepository paymentRepository,
+                       ContractRepository contractRepository,
+                       PricingEngine pricingEngine,
+                       SupportTicketRepository supportTicketRepository,
+                       LogService logService,
+                       NotificationService notificationService,
+                       ObjectMapper objectMapper,
+                       RentalPolicyRepository rentalPolicyRepository,
+                       PolicyRuleRepository policyRuleRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
@@ -95,6 +120,8 @@ public class TaskService {
         this.logService = logService;
         this.notificationService = notificationService;
         this.objectMapper = objectMapper;
+        this.rentalPolicyRepository = rentalPolicyRepository;
+        this.policyRuleRepository = policyRuleRepository;
     }
 
     /**
@@ -440,6 +467,10 @@ public class TaskService {
 
         if (newStatus == TaskStatus.DONE) {
             validateClosingGuards(task);
+            if (task.getType() == TaskType.CLEANING) {
+                Long actorId = actorUserId != null ? actorUserId : task.getAssignedStaff().getId();
+                onCleaningCompleted(task, actorId);
+            }
         }
 
         task.setStatus(newStatus);
@@ -464,7 +495,7 @@ public class TaskService {
     }
 
     /**
-     * Guard registry enforcing business closing steps before moving a task to DONE (Story 3.5).
+     * Guard registry enforcing business closing steps before moving a task to DONE (Story 3.5 & 6.5).
      * Prevents "Done ảo" by throwing BusinessRuleException (409 Conflict) with structured missingStep & stepLabel.
      */
     private void validateClosingGuards(Task task) {
@@ -474,8 +505,87 @@ public class TaskService {
             validateContractClosingGuards(task);
         } else if (task.getType() == TaskType.CHECKOUT) {
             validateCheckoutClosingGuards(task);
+        } else if (task.getType() == TaskType.CLEANING) {
+            validateCleaningClosingGuards(task);
         }
-        // CLEANING and SUPPORT tasks have no closing steps and complete directly (FR-22).
+        // SUPPORT tasks complete directly (FR-22).
+    }
+
+    private void validateCleaningClosingGuards(Task task) {
+        String unitCode = task.getRefCode();
+        if (unitCode == null || unitCode.isBlank()) {
+            return;
+        }
+
+        Optional<Unit> unitOpt = unitRepository.findByCode(unitCode.trim());
+        if (unitOpt.isEmpty()) {
+            return;
+        }
+
+        Unit unit = unitOpt.get();
+        LocalDate today = LocalDate.now();
+
+        // Check turnover buffer from active policy
+        LocalDate refDate = (task.getWorkDate() != null) ? task.getWorkDate() : today;
+        RentalPolicy activePolicy = null;
+        if (rentalPolicyRepository != null) {
+            activePolicy = rentalPolicyRepository
+                    .findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(PolicyStatus.ACTIVE, refDate)
+                    .orElse(null);
+        }
+
+        int bufferDays = 2; // Default 2 days turnover buffer fallback
+        if (activePolicy != null && unit.getUnitType() != null && policyRuleRepository != null) {
+            bufferDays = policyRuleRepository.findByPolicy_IdAndUnitType_IdAndRuleType(
+                    activePolicy.getId(), unit.getUnitType().getId(), PolicyRuleType.TURNOVER_BUFFER
+            ).map(r -> r.getValue().intValue()).orElse(2);
+        }
+
+        // Buffer cleared date: workDate + bufferDays
+        LocalDate bufferClearedDate = refDate.plusDays(bufferDays);
+        if (today.isBefore(bufferClearedDate)) {
+            throw new BusinessRuleException(
+                    "CLOSING_STEP_MISSING",
+                    "Unit " + unit.getCode() + " is in turnover buffer until " + bufferClearedDate + ". Cleaning cannot be completed until the turnover buffer has elapsed.",
+                    "TURNOVER_BUFFER_PENDING",
+                    "Unit " + unit.getCode() + " turnover buffer pending until " + bufferClearedDate
+            );
+        }
+    }
+
+    private void onCleaningCompleted(Task task, Long actorId) {
+        String unitCode = task.getRefCode();
+        if (unitCode == null || unitCode.isBlank()) {
+            return;
+        }
+
+        Optional<Unit> unitOpt = unitRepository.findByCode(unitCode.trim());
+        if (unitOpt.isEmpty()) {
+            return;
+        }
+
+        Unit unit = unitOpt.get();
+        UnitStatus prevStatus = unit.getStatus();
+
+        // Check if there is an upcoming reservation for this unit (RESERVED, PENDING_PAYMENT, CHECKED_IN)
+        List<Reservation> upcoming = reservationRepository.findByUnit_IdAndStatusIn(
+                unit.getId(),
+                List.of(ReservationStatus.PENDING_PAYMENT, ReservationStatus.RESERVED, ReservationStatus.CHECKED_IN)
+        );
+
+        UnitStatus nextStatus = !upcoming.isEmpty() ? UnitStatus.RESERVED : UnitStatus.AVAILABLE;
+        unit.setStatus(nextStatus);
+        unitRepository.save(unit);
+
+        logService.append(
+                actorId,
+                EntityType.UNIT,
+                unit.getId(),
+                Action.STATUS_CHANGE,
+                prevStatus != null ? prevStatus.name() : UnitStatus.PREPARING.name(),
+                nextStatus.name(),
+                "Cleaning completed and turnover buffer satisfied. Unit transitioned to " + nextStatus.name()
+        );
     }
 
     private void validateCheckoutClosingGuards(Task task) {
