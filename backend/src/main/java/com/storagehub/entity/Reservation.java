@@ -90,6 +90,10 @@ public class Reservation {
         return unit;
     }
 
+    public void setUnit(Unit unit) {
+        this.unit = unit;
+    }
+
     public LocalDate getStartDate() {
         return startDate;
     }

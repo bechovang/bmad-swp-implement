@@ -41,6 +41,19 @@ public class Escalation {
     @Column(name = "Decision", nullable = false)
     private EscalationDecision decision = EscalationDecision.PENDING;
 
+    @Column(name = "ManagerNote", columnDefinition = "TEXT")
+    private String managerNote;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RelocatedToUnitID")
+    private Unit relocatedToUnit;
+
+    @Column(name = "CreatedAt", nullable = false)
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+
+    @Column(name = "ResolvedAt")
+    private java.time.LocalDateTime resolvedAt;
+
     public Escalation() {
     }
 
@@ -50,6 +63,7 @@ public class Escalation {
         this.manager = manager;
         this.note = note;
         this.decision = EscalationDecision.PENDING;
+        this.createdAt = java.time.LocalDateTime.now();
     }
 
     public Long getId() {
@@ -98,5 +112,37 @@ public class Escalation {
 
     public void setDecision(EscalationDecision decision) {
         this.decision = decision;
+    }
+
+    public String getManagerNote() {
+        return managerNote;
+    }
+
+    public void setManagerNote(String managerNote) {
+        this.managerNote = managerNote;
+    }
+
+    public Unit getRelocatedToUnit() {
+        return relocatedToUnit;
+    }
+
+    public void setRelocatedToUnit(Unit relocatedToUnit) {
+        this.relocatedToUnit = relocatedToUnit;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public java.time.LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(java.time.LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
     }
 }

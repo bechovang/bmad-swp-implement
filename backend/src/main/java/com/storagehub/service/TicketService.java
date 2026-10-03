@@ -7,6 +7,7 @@ import com.storagehub.dto.SupportTicketDto;
 import com.storagehub.entity.Action;
 import com.storagehub.entity.EntityType;
 import com.storagehub.entity.Escalation;
+import com.storagehub.entity.EscalationDecision;
 import com.storagehub.entity.Reservation;
 import com.storagehub.entity.ReservationStatus;
 import com.storagehub.entity.Shift;
@@ -17,6 +18,7 @@ import com.storagehub.entity.Task;
 import com.storagehub.entity.TaskStatus;
 import com.storagehub.entity.TaskType;
 import com.storagehub.entity.Unit;
+import com.storagehub.entity.UnitStatus;
 import com.storagehub.entity.User;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
@@ -373,6 +375,198 @@ public class TicketService {
     private synchronized String generateTicketCode() {
         long count = supportTicketRepository.countAllTickets() + 32; // Offset to match demo sequence SR-0032...
         return String.format("SR-%04d", count + 1);
+    }
+
+    public List<com.storagehub.dto.EscalationDto> getEscalations(Long currentUserId, String role) {
+        if (escalationRepository == null) {
+            return List.of();
+        }
+        return escalationRepository.findAll().stream()
+                .map(this::mapToEscalationDto)
+                .toList();
+    }
+
+    public com.storagehub.dto.EscalationDto getEscalationById(Long id, Long currentUserId, String role) {
+        if (escalationRepository == null) {
+            throw new ResourceNotFoundException("Escalation not found with id: " + id);
+        }
+        Escalation escalation = escalationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Escalation not found with id: " + id));
+        return mapToEscalationDto(escalation);
+    }
+
+    /**
+     * Facility Manager processes Severity Decision (Story 5.3).
+     */
+    public com.storagehub.dto.EscalationDto processSeverityDecision(Long escalationId, com.storagehub.dto.SeverityDecisionRequest request, Long managerUserId) {
+        if (request == null || request.getDecision() == null || request.getManagerNote() == null || request.getManagerNote().trim().isEmpty()) {
+            throw new BusinessRuleException("VALIDATION_FAILED", "decision and managerNote must not be blank");
+        }
+
+        Escalation escalation = escalationRepository.findById(escalationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Escalation not found with id: " + escalationId));
+
+        if (escalation.getDecision() != EscalationDecision.PENDING) {
+            throw new BusinessRuleException("DECISION_ALREADY_MADE",
+                    "Severity decision has already been recorded for escalation #" + escalationId);
+        }
+
+        User manager = userRepository.findById(managerUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manager user not found with id: " + managerUserId));
+
+        String managerNote = request.getManagerNote().trim();
+        boolean isSevere = (request.getDecision() == EscalationDecision.MAINTENANCE_RELOCATE || "SEVERE".equalsIgnoreCase(request.getDecision().name()));
+
+        if (isSevere) {
+            if (request.getTargetUnitId() == null) {
+                throw new BusinessRuleException("VALIDATION_FAILED", "targetUnitId is required for SEVERE / MAINTENANCE_RELOCATE decision");
+            }
+
+            Unit targetUnit = unitRepository.findById(request.getTargetUnitId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Target relocation unit not found with id: " + request.getTargetUnitId()));
+
+            if (targetUnit.getStatus() != UnitStatus.AVAILABLE) {
+                throw new BusinessRuleException("UNIT_UNAVAILABLE",
+                        "Target unit " + targetUnit.getCode() + " is not available for relocation (current status: " + targetUnit.getStatus() + ").");
+            }
+
+            Unit oldUnit = escalation.getTicket().getUnit();
+            if (oldUnit != null) {
+                oldUnit.setStatus(UnitStatus.MAINTENANCE);
+                unitRepository.save(oldUnit);
+            }
+
+            // Move target unit to RENTED
+            targetUnit.setStatus(UnitStatus.RENTED);
+            targetUnit = unitRepository.save(targetUnit);
+
+            // Relocate: update Reservation unit while preserving all other booking, contract, deposit details
+            Reservation reservation = escalation.getTicket().getReservation();
+            String newPin = String.format("%06d", (int) (Math.random() * 900000) + 100000);
+            if (reservation != null) {
+                reservation.setUnit(targetUnit);
+                reservation.setAccessCode(newPin);
+                reservationRepository.save(reservation);
+            }
+
+            // Create Maintenance task for damaged unit
+            if (taskRepository != null && oldUnit != null) {
+                Task maintTask = new Task(
+                        TaskType.SUPPORT,
+                        escalation.getTicket().getCode(),
+                        escalation.getEscalatedByStaff(),
+                        LocalDate.now(ICT_ZONE),
+                        TaskStatus.TODO
+                );
+                taskRepository.save(maintTask);
+            }
+
+            // Create Cleaning task for target unit turnover check
+            if (taskRepository != null) {
+                Task cleanTask = new Task(
+                        TaskType.CLEANING,
+                        targetUnit.getCode(),
+                        escalation.getEscalatedByStaff(),
+                        LocalDate.now(ICT_ZONE),
+                        TaskStatus.TODO
+                );
+                taskRepository.save(cleanTask);
+            }
+
+            escalation.setRelocatedToUnit(targetUnit);
+            escalation.setDecision(EscalationDecision.MAINTENANCE_RELOCATE);
+
+            // Audit log
+            logService.append(
+                    managerUserId,
+                    EntityType.TICKET,
+                    escalation.getTicket().getId(),
+                    Action.STATUS_CHANGE,
+                    SupportTicketStatus.ESCALATED.name(),
+                    SupportTicketStatus.IN_PROGRESS.name(),
+                    "RELOCATION: Marked SEVERE. Relocated customer from Unit " + (oldUnit != null ? oldUnit.getCode() : "N/A") + " to Unit " + targetUnit.getCode() + ". Note: " + managerNote
+            );
+
+            // Notify customer
+            notificationService.send(
+                    escalation.getTicket().getCustomer().getId(),
+                    "TICKET_RELOCATED",
+                    "Due to maintenance at Unit " + (oldUnit != null ? oldUnit.getCode() : "") + ", you have been relocated to Unit " + targetUnit.getCode() + ". Your new access code is " + newPin + ".",
+                    "/support"
+            );
+        } else {
+            escalation.setDecision(EscalationDecision.RETURN_TO_STAFF);
+
+            // Audit log
+            logService.append(
+                    managerUserId,
+                    EntityType.TICKET,
+                    escalation.getTicket().getId(),
+                    Action.STATUS_CHANGE,
+                    SupportTicketStatus.ESCALATED.name(),
+                    SupportTicketStatus.IN_PROGRESS.name(),
+                    "SEVERITY_DECISION: Marked NOT SEVERE. Returned to staff: " + managerNote
+            );
+
+            // Notify staff
+            notificationService.send(
+                    escalation.getEscalatedByStaff().getId(),
+                    "ESCALATION_RETURNED",
+                    "Ticket " + escalation.getTicket().getCode() + " returned by manager: " + managerNote,
+                    "/tasks"
+            );
+        }
+
+        escalation.setManager(manager);
+        escalation.setManagerNote(managerNote);
+        escalation.setResolvedAt(LocalDateTime.now());
+        escalation = escalationRepository.save(escalation);
+
+        // Transition ticket back to IN_PROGRESS so staff can complete remaining steps
+        SupportTicket ticket = escalation.getTicket();
+        ticket.setStatus(SupportTicketStatus.IN_PROGRESS);
+        ticket.setUpdatedAt(LocalDateTime.now());
+        supportTicketRepository.save(ticket);
+
+        log.info("Severity decision {} processed for escalation {} by manager {}",
+                escalation.getDecision(), escalationId, managerUserId);
+
+        return mapToEscalationDto(escalation);
+    }
+
+    public com.storagehub.dto.EscalationDto mapToEscalationDto(Escalation e) {
+        SupportTicket t = e.getTicket();
+        String accessCode = null;
+        if (t != null && t.getReservation() != null) {
+            accessCode = t.getReservation().getAccessCode();
+        }
+
+        return new com.storagehub.dto.EscalationDto(
+                e.getId(),
+                t != null ? t.getId() : null,
+                t != null ? t.getCode() : null,
+                t != null && t.getCustomer() != null ? t.getCustomer().getId() : null,
+                t != null && t.getCustomer() != null ? t.getCustomer().getFullName() : null,
+                t != null && t.getUnit() != null ? t.getUnit().getId() : null,
+                t != null && t.getUnit() != null ? t.getUnit().getCode() : null,
+                t != null && t.getReservation() != null ? t.getReservation().getId() : null,
+                t != null && t.getReservation() != null ? t.getReservation().getCode() : null,
+                t != null ? t.getIncidentType() : null,
+                t != null ? t.getStatus() : null,
+                t != null ? t.getDescription() : null,
+                e.getEscalatedByStaff() != null ? e.getEscalatedByStaff().getId() : null,
+                e.getEscalatedByStaff() != null ? e.getEscalatedByStaff().getFullName() : null,
+                e.getNote(),
+                e.getManager() != null ? e.getManager().getId() : null,
+                e.getManager() != null ? e.getManager().getFullName() : null,
+                e.getDecision(),
+                e.getManagerNote(),
+                e.getRelocatedToUnit() != null ? e.getRelocatedToUnit().getId() : null,
+                e.getRelocatedToUnit() != null ? e.getRelocatedToUnit().getCode() : null,
+                accessCode,
+                e.getCreatedAt(),
+                e.getResolvedAt()
+        );
     }
 
     public SupportTicketDto mapToDto(SupportTicket ticket) {

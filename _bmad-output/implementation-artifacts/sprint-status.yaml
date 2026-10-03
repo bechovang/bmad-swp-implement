@@ -71,7 +71,7 @@ development_status:
   epic-5: in-progress
   5-1-tạo-route-support-ticket: done
   5-2-support-ticket-xử-lý-resolve-escalate: done
-  5-3-severity-decision-relocation: backlog
+  5-3-severity-decision-relocation: done
   5-4-support-list-detail-drawer-khách: backlog
   epic-5-retrospective: optional
 

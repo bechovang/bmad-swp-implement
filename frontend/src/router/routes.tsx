@@ -13,7 +13,6 @@ import {
   StaffingPage,
   OperationsPage,
   ActivityLogPage,
-  EscalationsPage,
   BusinessOverviewPage,
   PolicyPage,
   ReportsPage,
@@ -23,6 +22,7 @@ import {
   EscalationDetailPage,
   PolicyEditorPage,
 } from '../pages/placeholders'
+import { EscalationsPage } from '../pages/manager/EscalationsPage'
 import { SupportPage } from '../pages/support/SupportPage'
 import { BrowseUnitsPage } from '../pages/unit/BrowseUnitsPage'
 import { UnitDetailPage } from '../pages/unit/UnitDetailPage'

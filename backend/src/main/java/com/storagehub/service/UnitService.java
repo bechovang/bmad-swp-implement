@@ -240,4 +240,20 @@ public class UnitService {
                 securityFeatures
         );
     }
+
+    @Transactional
+    public Unit markMaintenance(Long unitId, String reason) {
+        Unit unit = unitRepository.findById(unitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Unit not found: " + unitId));
+        unit.setStatus(UnitStatus.MAINTENANCE);
+        return unitRepository.save(unit);
+    }
+
+    @Transactional
+    public Unit markRented(Long unitId) {
+        Unit unit = unitRepository.findById(unitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Unit not found: " + unitId));
+        unit.setStatus(UnitStatus.RENTED);
+        return unitRepository.save(unit);
+    }
 }

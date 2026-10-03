@@ -34,6 +34,8 @@ import type {
   CreateSupportTicketRequest,
   ResolveSupportTicketRequest,
   EscalateSupportTicketRequest,
+  EscalationDto,
+  SeverityDecisionRequest,
 } from '../types/support'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
@@ -1307,6 +1309,138 @@ export const handlers = [
 
     return HttpResponse.json(ticket, { status: 200 })
   }),
+
+  // ------------------------------------------------------------ Escalations (Story 5.3)
+  http.get('/api/v1/escalations', () => {
+    return HttpResponse.json(mockEscalationsList, { status: 200 })
+  }),
+
+  http.get('/api/v1/escalations/:id', ({ params }) => {
+    const id = parseInt(params.id as string, 10)
+    const esc = mockEscalationsList.find((e) => e.id === id)
+    if (!esc) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Escalation ${id} not found` }, { status: 404 })
+    }
+    return HttpResponse.json(esc, { status: 200 })
+  }),
+
+  http.post('/api/v1/escalations/:id/decision', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const esc = mockEscalationsList.find((e) => e.id === id)
+    if (!esc) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Escalation ${id} not found` }, { status: 404 })
+    }
+
+    if (esc.decision !== 'PENDING') {
+      return HttpResponse.json(
+        {
+          code: 'DECISION_ALREADY_MADE',
+          message: `Severity decision has already been made for escalation #${id}`,
+        },
+        { status: 409 }
+      )
+    }
+
+    const body = (await request.json()) as SeverityDecisionRequest
+    if (!body || !body.decision || !body.managerNote || !body.managerNote.trim()) {
+      return HttpResponse.json(
+        {
+          code: 'VALIDATION_FAILED',
+          message: 'Decision and managerNote must not be blank',
+        },
+        { status: 400 }
+      )
+    }
+
+    const isSevere = body.decision === 'MAINTENANCE_RELOCATE' || body.decision === 'SEVERE'
+
+    if (isSevere) {
+      if (!body.targetUnitId) {
+        return HttpResponse.json(
+          {
+            code: 'VALIDATION_FAILED',
+            message: 'targetUnitId is required for severe maintenance relocation',
+          },
+          { status: 400 }
+        )
+      }
+
+      // Check target unit
+      const targetUnitKey = Object.keys(MOCK_UNITS).find((k) => MOCK_UNITS[k].id === body.targetUnitId)
+      const targetUnit = targetUnitKey ? MOCK_UNITS[targetUnitKey] : null
+      if (!targetUnit || targetUnit.status !== 'AVAILABLE') {
+        return HttpResponse.json(
+          {
+            code: 'UNIT_UNAVAILABLE',
+            message: `Target unit is not available for relocation`,
+          },
+          { status: 409 }
+        )
+      }
+
+      // Relocate
+      const oldUnitKey = Object.keys(MOCK_UNITS).find((k) => MOCK_UNITS[k].id === esc.unitId)
+      if (oldUnitKey && MOCK_UNITS[oldUnitKey]) {
+        MOCK_UNITS[oldUnitKey].status = 'MAINTENANCE'
+      }
+
+      targetUnit.status = 'RENTED'
+      const newPin = '839201'
+
+      esc.decision = 'MAINTENANCE_RELOCATE'
+      esc.relocatedToUnitId = targetUnit.id
+      esc.relocatedToUnitCode = targetUnit.code
+      esc.newAccessCode = newPin
+
+      // Also create maintenance and cleaning tasks in mockTasksList
+      mockTasksList.push({
+        id: mockTasksList.length + 1,
+        type: 'SUPPORT',
+        refCode: esc.ticketCode,
+        assignedStaffId: 2,
+        assignedStaffName: 'Minh Tran',
+        workDate: new Date().toISOString().split('T')[0],
+        status: 'TODO',
+        unitCode: esc.unitCode,
+        customerName: esc.customerName,
+        dueDate: new Date().toISOString().split('T')[0],
+        timeSlot: 'Morning',
+        title: `Maintenance: ${esc.unitCode}`,
+        description: `Severe damage maintenance: ${body.managerNote.trim()}`,
+      })
+      mockTasksList.push({
+        id: mockTasksList.length + 1,
+        type: 'CLEANING',
+        refCode: targetUnit.code,
+        assignedStaffId: 2,
+        assignedStaffName: 'Minh Tran',
+        workDate: new Date().toISOString().split('T')[0],
+        status: 'TODO',
+        unitCode: targetUnit.code,
+        customerName: esc.customerName,
+        dueDate: new Date().toISOString().split('T')[0],
+        timeSlot: 'Morning',
+        title: `Turnover Cleaning: ${targetUnit.code}`,
+        description: `Relocation turnover check for Unit ${targetUnit.code}`,
+      })
+    } else {
+      esc.decision = 'RETURN_TO_STAFF'
+    }
+
+    esc.managerId = 3
+    esc.managerName = 'Hoa Pham'
+    esc.managerNote = body.managerNote.trim()
+    esc.resolvedAt = new Date().toISOString()
+
+    // Update ticket in mockSupportTicketsList
+    const ticket = mockSupportTicketsList.find((t) => t.id === esc.ticketId)
+    if (ticket) {
+      ticket.status = 'IN_PROGRESS'
+      ticket.updatedAt = new Date().toISOString()
+    }
+
+    return HttpResponse.json(esc, { status: 200 })
+  }),
 ]
 
 export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
@@ -1369,10 +1503,71 @@ export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
   },
 ]
 
-let mockSupportTicketsList: SupportTicketDto[] = JSON.parse(JSON.stringify(INITIAL_SUPPORT_TICKETS))
+export let mockSupportTicketsList: SupportTicketDto[] = JSON.parse(JSON.stringify(INITIAL_SUPPORT_TICKETS))
 
 export function resetMockSupportTickets(custom?: SupportTicketDto[]) {
   mockSupportTicketsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_SUPPORT_TICKETS))
+}
+
+export const INITIAL_ESCALATIONS: EscalationDto[] = [
+  {
+    id: 1,
+    ticketId: 2,
+    ticketCode: 'SR-0033',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 2,
+    unitCode: 'M-2',
+    reservationId: 1,
+    reservationCode: 'BK-1042',
+    incidentType: 'OTHER',
+    ticketStatus: 'ESCALATED',
+    ticketDescription: 'Water ingress from ceiling joint in unit M-2',
+    escalatedByStaffId: 2,
+    escalatedByStaffName: 'Minh Tran',
+    escalationNote: 'Active roof leak requiring facility contractor intervention',
+    managerId: null,
+    managerName: null,
+    decision: 'PENDING',
+    managerNote: null,
+    relocatedToUnitId: null,
+    relocatedToUnitCode: null,
+    newAccessCode: null,
+    createdAt: '2026-10-18T09:30:00Z',
+    resolvedAt: null,
+  },
+  {
+    id: 2,
+    ticketId: 3,
+    ticketCode: 'SR-0034',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 3,
+    unitCode: 'M-5',
+    reservationId: null,
+    reservationCode: null,
+    incidentType: 'SECURITY',
+    ticketStatus: 'ESCALATED',
+    ticketDescription: 'Damaged external corridor lock mechanism',
+    escalatedByStaffId: 2,
+    escalatedByStaffName: 'Minh Tran',
+    escalationNote: 'Active security hardware issue requiring locksmith replacement',
+    managerId: 3,
+    managerName: 'Hoa Pham',
+    decision: 'RETURN_TO_STAFF',
+    managerNote: 'Please use backup mechanical key and monitor lock.',
+    relocatedToUnitId: null,
+    relocatedToUnitCode: null,
+    newAccessCode: null,
+    createdAt: '2026-10-19T09:30:00Z',
+    resolvedAt: '2026-10-19T10:00:00Z',
+  },
+]
+
+let mockEscalationsList: EscalationDto[] = JSON.parse(JSON.stringify(INITIAL_ESCALATIONS))
+
+export function resetMockEscalations(custom?: EscalationDto[]) {
+  mockEscalationsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_ESCALATIONS))
 }
 
 export const INITIAL_TASKS: TaskDto[] = [
@@ -1795,7 +1990,7 @@ export function resetMockReservations(custom?: ReservationDto[]) {
   mockReservationsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_RESERVATIONS))
 }
 
-export const MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {
+export const INITIAL_MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {
   'S-3': {
     id: 1,
     code: 'S-3',
@@ -1865,6 +2060,12 @@ export const MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> =
       'Fire Protection & Sprinklers',
     ],
   },
+}
+
+export let MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = JSON.parse(JSON.stringify(INITIAL_MOCK_UNITS))
+
+export function resetMockUnits(custom?: Record<string, import('../types/unit').UnitDetailDto>) {
+  MOCK_UNITS = custom ? { ...custom } : JSON.parse(JSON.stringify(INITIAL_MOCK_UNITS))
 }
 
 export const MOCK_BROWSE_UNITS: import('../types/unit').BrowseUnitDto[] = [
