@@ -40,6 +40,9 @@ import type {
 import type {
   CheckoutRequestDto,
   CreateCheckoutRequest,
+  CheckoutTaskDetailDto,
+  SubmitInspectionRequest,
+  InspectionItemDto,
 } from '../types/checkout'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
@@ -1293,6 +1296,134 @@ export const handlers = [
     return HttpResponse.json(newReq, { status: 201 })
   }),
 
+  http.get('/api/v1/checkout-tasks/:taskId', ({ params }) => {
+    const taskId = parseInt(params.taskId as string, 10)
+    const task = mockTasksList.find((t) => t.id === taskId)
+    if (!task) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Task ${taskId} not found` }, { status: 404 })
+    }
+
+    const res = mockReservationsList.find((r) => r.code === task.refCode || r.id === 2)
+    const latestCr = res
+      ? mockCheckoutRequestsList.filter((r) => r.reservationId === res.id).slice(-1)[0]
+      : null
+
+    const inspections = res
+      ? mockInspectionsList.filter((i) => (i as any).reservationId === res.id)
+      : []
+
+    const majorItems = inspections
+      .filter((i) => i.result === 'MAJOR')
+      .map((i) => i.item)
+
+    const dto: CheckoutTaskDetailDto = {
+      taskId: task.id,
+      taskStatus: task.status,
+      reservationId: res ? res.id : 2,
+      reservationCode: res ? res.code : 'BK-2026-0002',
+      customerId: res ? res.customerId : 1,
+      customerName: res ? res.customerName : 'Lan Nguyen',
+      customerPhone: '0901234567',
+      unitId: res ? res.unitId : 3,
+      unitCode: res ? res.unitCode : 'M-5',
+      requestedDate: latestCr ? latestCr.requestedDate : (res ? res.endDate : '2026-11-20'),
+      keyReturned: latestCr ? !!latestCr.keyReturned : false,
+      unitEmptied: latestCr ? !!latestCr.unitEmptied : false,
+      inspections,
+      hasMajorDamage: majorItems.length > 0,
+      majorItems,
+    }
+
+    return HttpResponse.json(dto, { status: 200 })
+  }),
+
+  http.get('/api/v1/reservations/:id/inspections', ({ params }) => {
+    const resId = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === resId)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${resId} not found` }, { status: 404 })
+    }
+
+    const latestCr = mockCheckoutRequestsList.filter((r) => r.reservationId === res.id).slice(-1)[0]
+    const inspections = mockInspectionsList.filter((i) => (i as any).reservationId === res.id)
+    const majorItems = inspections
+      .filter((i) => i.result === 'MAJOR')
+      .map((i) => i.item)
+
+    const dto: CheckoutTaskDetailDto = {
+      reservationId: res.id,
+      reservationCode: res.code,
+      customerId: res.customerId,
+      customerName: res.customerName,
+      customerPhone: '0901234567',
+      unitId: res.unitId,
+      unitCode: res.unitCode,
+      requestedDate: latestCr ? latestCr.requestedDate : res.endDate,
+      keyReturned: latestCr ? !!latestCr.keyReturned : false,
+      unitEmptied: latestCr ? !!latestCr.unitEmptied : false,
+      inspections,
+      hasMajorDamage: majorItems.length > 0,
+      majorItems,
+    }
+
+    return HttpResponse.json(dto, { status: 200 })
+  }),
+
+  http.post('/api/v1/reservations/:id/inspections', async ({ params, request }) => {
+    const resId = parseInt(params.id as string, 10)
+    const res = mockReservationsList.find((r) => r.id === resId)
+    if (!res) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Reservation ${resId} not found` }, { status: 404 })
+    }
+
+    const body = (await request.json()) as SubmitInspectionRequest
+
+    // Update checkout request checklist
+    const latestCr = mockCheckoutRequestsList.filter((r) => r.reservationId === res.id).slice(-1)[0]
+    if (latestCr) {
+      if (body.keyReturned !== undefined) latestCr.keyReturned = body.keyReturned
+      if (body.unitEmptied !== undefined) latestCr.unitEmptied = body.unitEmptied
+      if (body.generalNotes) latestCr.notes = body.generalNotes
+    }
+
+    // Save inspections
+    mockInspectionsList = mockInspectionsList.filter((i) => (i as any).reservationId !== res.id)
+    const newInspections: InspectionItemDto[] = (body.items || []).map((item, idx) => ({
+      id: mockInspectionsList.length + idx + 1,
+      reservationId: res.id,
+      item: item.item,
+      result: item.result,
+      note: item.note || null,
+      inspectorStaffId: 2,
+      inspectorStaffName: 'Minh Tran',
+      createdAt: new Date().toISOString(),
+    } as any))
+
+    mockInspectionsList.push(...newInspections)
+
+    const majorItems = newInspections
+      .filter((i) => i.result === 'MAJOR')
+      .map((i) => i.item)
+
+    const dto: CheckoutTaskDetailDto = {
+      reservationId: res.id,
+      reservationCode: res.code,
+      customerId: res.customerId,
+      customerName: res.customerName,
+      customerPhone: '0901234567',
+      unitId: res.unitId,
+      unitCode: res.unitCode,
+      requestedDate: latestCr ? latestCr.requestedDate : res.endDate,
+      keyReturned: latestCr ? !!latestCr.keyReturned : !!body.keyReturned,
+      unitEmptied: latestCr ? !!latestCr.unitEmptied : !!body.unitEmptied,
+      inspections: newInspections,
+      hasMajorDamage: majorItems.length > 0,
+      majorItems,
+    }
+
+    return HttpResponse.json(dto, { status: 200 })
+  }),
+
   // ------------------------------------------------------------ Support (Story 5.1)
   http.get('/api/v1/support-tickets', ({ request }) => {
     const url = new URL(request.url)
@@ -2145,6 +2276,14 @@ let mockCheckoutRequestsList: CheckoutRequestDto[] = JSON.parse(JSON.stringify(I
 
 export function resetMockCheckoutRequests(custom?: CheckoutRequestDto[]) {
   mockCheckoutRequestsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_CHECKOUT_REQUESTS))
+}
+
+export const INITIAL_INSPECTIONS: InspectionItemDto[] = []
+
+let mockInspectionsList: InspectionItemDto[] = JSON.parse(JSON.stringify(INITIAL_INSPECTIONS))
+
+export function resetMockInspections(custom?: InspectionItemDto[]) {
+  mockInspectionsList = custom ? [...custom] : JSON.parse(JSON.stringify(INITIAL_INSPECTIONS))
 }
 
 export const INITIAL_MOCK_UNITS: Record<string, import('../types/unit').UnitDetailDto> = {

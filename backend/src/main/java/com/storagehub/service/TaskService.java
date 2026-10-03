@@ -411,8 +411,28 @@ public class TaskService {
             validateCheckInClosingGuards(task);
         } else if (task.getType() == TaskType.CONTRACT) {
             validateContractClosingGuards(task);
+        } else if (task.getType() == TaskType.CHECKOUT) {
+            validateCheckoutClosingGuards(task);
         }
         // CLEANING and SUPPORT tasks have no closing steps and complete directly (FR-22).
+    }
+
+    private void validateCheckoutClosingGuards(Task task) {
+        String refCode = task.getRefCode();
+        if (refCode != null && !refCode.isBlank()) {
+            Optional<Reservation> resOpt = reservationRepository.findByCode(refCode.trim());
+            if (resOpt.isPresent()) {
+                Reservation res = resOpt.get();
+                if (res.getStatus() != ReservationStatus.CLOSED) {
+                    throw new BusinessRuleException(
+                            "CLOSING_STEP_MISSING",
+                            "Settlement and deposit closure are required before completing checkout task.",
+                            "SETTLEMENT_PENDING",
+                            "Settlement and deposit closure are required before completing checkout task."
+                    );
+                }
+            }
+        }
     }
 
     private void validateCheckInClosingGuards(Task task) {

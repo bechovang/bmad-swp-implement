@@ -270,4 +270,29 @@ public class TaskSnapBackTests {
         assertThat(supportResult).isNotNull();
         assertThat(supportResult.status()).isEqualTo(TaskStatus.DONE);
     }
+
+    @Test
+    @DisplayName("Story 3.5 & 6.2: CHECKOUT task done is blocked if reservation is not CLOSED")
+    void testCheckoutTask_doneBlockedUntilReservationClosed() {
+        Task checkoutTask = new Task(
+                TaskType.CHECKOUT,
+                "BK-1042",
+                staff,
+                LocalDate.of(2026, 11, 20),
+                TaskStatus.IN_PROGRESS
+        );
+        ReflectionTestUtils.setField(checkoutTask, "id", 40L);
+
+        when(taskRepository.findByIdWithStaff(40L)).thenReturn(Optional.of(checkoutTask));
+        when(reservationRepository.findByCode("BK-1042")).thenReturn(Optional.of(reservation));
+        reservation.setStatus(ReservationStatus.CHECKOUT_REQUESTED);
+
+        assertThatThrownBy(() -> taskService.updateTaskStatus(40L, TaskStatus.DONE, "Trying to close without settlement", 2L))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> {
+                    BusinessRuleException bre = (BusinessRuleException) ex;
+                    assertThat(bre.getCode()).isEqualTo("CLOSING_STEP_MISSING");
+                    assertThat(bre.getMissingStep()).isEqualTo("SETTLEMENT_PENDING");
+                });
+    }
 }

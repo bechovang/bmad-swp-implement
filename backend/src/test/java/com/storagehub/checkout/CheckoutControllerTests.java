@@ -81,6 +81,7 @@ public class CheckoutControllerTests {
         CheckoutRequestDto mockDto = new CheckoutRequestDto(
                 501L, 100L, "BK-1042", 10L, "S-3",
                 requestedDate, CheckoutRequestStatus.PENDING, "Returning keys",
+                false, false,
                 LocalDateTime.now(), LocalDateTime.now()
         );
 
@@ -104,6 +105,7 @@ public class CheckoutControllerTests {
         CheckoutRequestDto mockDto = new CheckoutRequestDto(
                 501L, 100L, "BK-1042", 10L, "S-3",
                 requestedDate, CheckoutRequestStatus.PENDING, "Returning keys",
+                false, false,
                 LocalDateTime.now(), LocalDateTime.now()
         );
 

@@ -599,6 +599,97 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /reservations/{id}/inspections:
+    get:
+      operationId: getInspectionsByReservation
+      tags: [Checkout]
+      summary: Get checkout inspection detail for reservation (Story 6.2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      responses:
+        '200':
+          description: Checkout task and inspection details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutTaskDetailDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: submitInspection
+      tags: [Checkout]
+      summary: Staff submits unit inspection & reception checklist (Story 6.2)
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_BUSINESS_OPS / ROLE_SYSTEM_ADMINISTRATOR.
+        Persists the 4 inspection items (ACCESS_CARD, PADLOCK, CLEANLINESS, STRUCTURE) with OK/MINOR/MAJOR results.
+        Flags MAJOR damage items as required basis for Settlement Charges in Story 6.3.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Reservation ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitInspectionRequest'
+      responses:
+        '200':
+          description: Inspection recorded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutTaskDetailDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /checkout-tasks/{taskId}:
+    get:
+      operationId: getCheckoutTaskDetail
+      tags: [Checkout]
+      summary: Get checkout task detail by task ID (Story 6.2)
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Checkout task detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutTaskDetailDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # -------------------------------------------------------- payments (2.4)
   /payments/create:
     post:
@@ -3535,6 +3626,134 @@ components:
           format: date-time
           nullable: true
           example: '2026-10-03T09:30:00Z'
+
+    # ----------------------------------------------------------- inspection (6.2)
+    InspectionItem:
+      type: string
+      enum: [ACCESS_CARD, PADLOCK, CLEANLINESS, STRUCTURE]
+
+    InspectionResult:
+      type: string
+      enum: [OK, MINOR, MAJOR]
+
+    InspectionItemInput:
+      type: object
+      required:
+        - item
+        - result
+      properties:
+        item:
+          $ref: '#/components/schemas/InspectionItem'
+        result:
+          $ref: '#/components/schemas/InspectionResult'
+        note:
+          type: string
+          nullable: true
+
+    SubmitInspectionRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspectionItemInput'
+        keyReturned:
+          type: boolean
+          nullable: true
+        unitEmptied:
+          type: boolean
+          nullable: true
+        generalNotes:
+          type: string
+          nullable: true
+
+    InspectionItemDto:
+      type: object
+      required:
+        - id
+        - item
+        - result
+      properties:
+        id:
+          type: integer
+          format: int64
+        item:
+          $ref: '#/components/schemas/InspectionItem'
+        result:
+          $ref: '#/components/schemas/InspectionResult'
+        note:
+          type: string
+          nullable: true
+        inspectorStaffId:
+          type: integer
+          format: int64
+          nullable: true
+        inspectorStaffName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CheckoutTaskDetailDto:
+      type: object
+      required:
+        - reservationId
+        - reservationCode
+        - unitCode
+        - inspections
+        - hasMajorDamage
+        - majorItems
+      properties:
+        taskId:
+          type: integer
+          format: int64
+          nullable: true
+        taskStatus:
+          type: string
+          nullable: true
+        reservationId:
+          type: integer
+          format: int64
+        reservationCode:
+          type: string
+        customerId:
+          type: integer
+          format: int64
+          nullable: true
+        customerName:
+          type: string
+          nullable: true
+        customerPhone:
+          type: string
+          nullable: true
+        unitId:
+          type: integer
+          format: int64
+          nullable: true
+        unitCode:
+          type: string
+        requestedDate:
+          type: string
+          format: date
+          nullable: true
+        keyReturned:
+          type: boolean
+        unitEmptied:
+          type: boolean
+        inspections:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspectionItemDto'
+        hasMajorDamage:
+          type: boolean
+        majorItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspectionItem'
+
 
 
 

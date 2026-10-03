@@ -37,7 +37,10 @@ public enum Action {
     ESCALATION(true),
 
     /** Addendum voided before signature - reason mandatory (why the draft died). */
-    ADDENDUM_VOID(true);
+    ADDENDUM_VOID(true),
+
+    /** Unit checkout inspection completed. */
+    INSPECTION_COMPLETED(false);
 
     private final boolean requiresReason;
 

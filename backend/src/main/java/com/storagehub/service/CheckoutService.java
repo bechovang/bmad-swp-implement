@@ -171,6 +171,8 @@ public class CheckoutService {
                 cr.getRequestedDate(),
                 cr.getStatus(),
                 cr.getNotes(),
+                cr.getKeyReturned() != null ? cr.getKeyReturned() : false,
+                cr.getUnitEmptied() != null ? cr.getUnitEmptied() : false,
                 cr.getCreatedAt(),
                 cr.getUpdatedAt()
         );

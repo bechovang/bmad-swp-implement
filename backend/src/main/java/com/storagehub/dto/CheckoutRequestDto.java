@@ -13,6 +13,8 @@ public record CheckoutRequestDto(
         LocalDate requestedDate,
         CheckoutRequestStatus status,
         String notes,
+        Boolean keyReturned,
+        Boolean unitEmptied,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

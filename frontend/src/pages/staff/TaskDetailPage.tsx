@@ -4,9 +4,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTaskById, updateTaskStatus, validateCheckInReservation, activateCheckIn } from '../../api/task'
 import { getContractByReservation, getContractChain, printContract, signContract, expireContract, voidContract, uploadAttachment } from '../../api/contract'
 import { getSupportTickets, getSupportTicketById, resolveSupportTicket, escalateSupportTicket } from '../../api/support'
+import { getCheckoutTaskDetail, submitInspection } from '../../api/checkout'
 import { TASK_TYPE_CONFIG, type CheckInValidationDto, type CheckInActivationDto } from '../../types/task'
 import type { ContractDto } from '../../types/contract'
 import type { SupportTicketDto } from '../../types/support'
+import type {
+  CheckoutTaskDetailDto,
+  InspectionItem,
+  InspectionResult,
+  InspectionItemInput,
+} from '../../types/checkout'
 import { Button } from '../../components/ui/Button'
 import { PaymentModal } from '../../components/payment/PaymentModal'
 import { formatMoney, formatUnitCode } from '../../lib/format'
@@ -278,6 +285,84 @@ export function TaskDetailPage() {
       setSupportSuccess(null)
       const msg = err?.response?.data?.message || err?.message || 'Failed to escalate support ticket'
       setSupportError(msg)
+    },
+  })
+
+  // Checkout reception & inspection state (Story 6.2)
+  const isCheckoutTask = task?.type === 'CHECKOUT'
+  const [keyReturned, setKeyReturned] = useState(false)
+  const [unitEmptied, setUnitEmptied] = useState(false)
+  const [checkoutNotes, setCheckoutNotes] = useState('')
+  const [inspectionItems, setInspectionItems] = useState<Record<InspectionItem, { result: InspectionResult; note: string }>>({
+    ACCESS_CARD: { result: 'OK', note: '' },
+    PADLOCK: { result: 'OK', note: '' },
+    CLEANLINESS: { result: 'OK', note: '' },
+    STRUCTURE: { result: 'OK', note: '' },
+  })
+  const [inspectionSuccess, setInspectionSuccess] = useState<string | null>(null)
+  const [inspectionError, setInspectionError] = useState<string | null>(null)
+
+  const {
+    data: checkoutDetail,
+    refetch: refetchCheckoutDetail,
+  } = useQuery<CheckoutTaskDetailDto | null>({
+    queryKey: ['checkout-task-detail', taskId],
+    queryFn: async () => {
+      if (taskId > 0) {
+        return await getCheckoutTaskDetail(taskId)
+      }
+      return null
+    },
+    enabled: isCheckoutTask && taskId > 0,
+    retry: false,
+  })
+
+  useEffect(() => {
+    if (checkoutDetail) {
+      setKeyReturned(checkoutDetail.keyReturned || false)
+      setUnitEmptied(checkoutDetail.unitEmptied || false)
+      if (checkoutDetail.inspections && checkoutDetail.inspections.length > 0) {
+        const next = { ...inspectionItems }
+        checkoutDetail.inspections.forEach((insp) => {
+          if (next[insp.item]) {
+            next[insp.item] = {
+              result: insp.result,
+              note: insp.note || '',
+            }
+          }
+        })
+        setInspectionItems(next)
+      }
+    }
+  }, [checkoutDetail])
+
+  const submitInspectionMutation = useMutation({
+    mutationFn: async () => {
+      const resId = checkoutDetail?.reservationId || 2
+      const itemsPayload: InspectionItemInput[] = (Object.keys(inspectionItems) as InspectionItem[]).map((k) => ({
+        item: k,
+        result: inspectionItems[k].result,
+        note: inspectionItems[k].note.trim() || undefined,
+      }))
+      return await submitInspection(resId, {
+        items: itemsPayload,
+        keyReturned,
+        unitEmptied,
+        generalNotes: checkoutNotes.trim() || undefined,
+      })
+    },
+    onSuccess: (data) => {
+      setInspectionError(null)
+      setInspectionSuccess(`Unit inspection findings recorded for Unit ${data.unitCode}.`)
+      refetchCheckoutDetail()
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
+    },
+    onError: (err: any) => {
+      setInspectionSuccess(null)
+      const msg = err?.response?.data?.message || err?.message || 'Failed to submit unit inspection'
+      setInspectionError(msg)
     },
   })
 
@@ -1307,6 +1392,247 @@ export function TaskDetailPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Checkout Reception & 4-Point Inspection Workflow (Story 6.2) */}
+      {isCheckoutTask && (
+        <div className="space-y-5" data-testid="checkout-task-workflow">
+          {inspectionError && (
+            <div
+              data-testid="inspection-error-banner"
+              className="p-3 bg-red-50 border border-red-200 rounded-sh-sm text-xs text-red-800 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Error:</span>
+                <span>{inspectionError}</span>
+              </div>
+            </div>
+          )}
+
+          {inspectionSuccess && (
+            <div
+              data-testid="inspection-success-banner"
+              className="p-3 bg-emerald-50 border border-emerald-200 rounded-sh-sm text-xs text-emerald-800 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold">✓ Saved:</span>
+                <span>{inspectionSuccess}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white border border-sh-border rounded-sh-md p-5 space-y-6 shadow-xs">
+            {/* Header & Unit Details */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-sh-border">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-bold text-sh-ink">
+                    Checkout Desk Reception & Inspection
+                  </span>
+                  <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded">
+                    {formatUnitCode(checkoutDetail?.unitCode || task.unitCode || 'Unit')}
+                  </span>
+                </div>
+                <p className="text-xs text-sh-muted mt-0.5">
+                  Reservation <span className="font-mono font-bold text-sh-ink">{checkoutDetail?.reservationCode || task.refCode}</span> · Customer <span className="font-semibold text-sh-ink">{checkoutDetail?.customerName || task.customerName || 'Lan Nguyen'}</span>
+                </p>
+              </div>
+
+              <div className="text-xs text-sh-muted text-right">
+                <div>Requested Date: <strong className="font-mono text-sh-ink">{checkoutDetail?.requestedDate || task.workDate}</strong></div>
+              </div>
+            </div>
+
+            {/* Step 1: Reception Checklist */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-sh-ink flex items-center gap-1.5">
+                <span>1.</span> Reception & Key Handover Checklist
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <label
+                  className={`flex items-center gap-2.5 p-3 rounded-sh-sm border transition-colors cursor-pointer select-none ${
+                    keyReturned
+                      ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold'
+                      : 'bg-sh-surface-subtle border-sh-border text-sh-ink hover:bg-sh-surface-muted'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={keyReturned}
+                    onChange={(e) => setKeyReturned(e.target.checked)}
+                    data-testid="key-returned-checkbox"
+                    className="w-4 h-4 rounded text-sh-primary border-gray-300 focus:ring-sh-primary"
+                  />
+                  <span>🔑 Padlock & Key Returned</span>
+                </label>
+
+                <label
+                  className={`flex items-center gap-2.5 p-3 rounded-sh-sm border transition-colors cursor-pointer select-none ${
+                    unitEmptied
+                      ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-semibold'
+                      : 'bg-sh-surface-subtle border-sh-border text-sh-ink hover:bg-sh-surface-muted'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={unitEmptied}
+                    onChange={(e) => setUnitEmptied(e.target.checked)}
+                    data-testid="unit-emptied-checkbox"
+                    className="w-4 h-4 rounded text-sh-primary border-gray-300 focus:ring-sh-primary"
+                  />
+                  <span>📦 Unit Vacated & Emptied</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Step 2: 4-Point Inspection Matrix */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-sh-ink flex items-center gap-1.5">
+                  <span>2.</span> 4-Point Physical Inspection Matrix
+                </h4>
+                <span className="text-[11px] text-sh-muted">Required prior to deposit settlement (Story 6.3)</span>
+              </div>
+
+              <div className="space-y-3" data-testid="inspection-matrix">
+                {(
+                  [
+                    { item: 'ACCESS_CARD', label: 'Access Card / Key Fob', desc: 'RFID badge and QR access pass returned undamaged', icon: '💳' },
+                    { item: 'PADLOCK', label: 'Depot Padlock & Keys', desc: 'Original brass padlock and all keys returned', icon: '🔒' },
+                    { item: 'CLEANLINESS', label: 'Unit Cleanliness', desc: 'Floor swept clean, no debris or trash left behind', icon: '🧹' },
+                    { item: 'STRUCTURE', label: 'Unit Structure & Door', desc: 'Roll-up door, hinges, side panels, and roof intact', icon: '🏗️' },
+                  ] as const
+                ).map(({ item, label, desc, icon }) => {
+                  const current = inspectionItems[item]
+                  return (
+                    <div
+                      key={item}
+                      data-testid={`inspection-row-${item.toLowerCase()}`}
+                      className={`p-3.5 rounded-sh-sm border space-y-2 transition-colors ${
+                        current.result === 'MAJOR'
+                          ? 'bg-rose-50/60 border-rose-300'
+                          : current.result === 'MINOR'
+                          ? 'bg-amber-50/50 border-amber-200'
+                          : 'bg-sh-surface-subtle border-sh-border'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5 font-bold text-xs text-sh-ink">
+                            <span>{icon}</span>
+                            <span>{label}</span>
+                          </div>
+                          <p className="text-[11px] text-sh-muted">{desc}</p>
+                        </div>
+
+                        {/* Result Selection Buttons */}
+                        <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                          {(['OK', 'MINOR', 'MAJOR'] as InspectionResult[]).map((res) => {
+                            const isSelected = current.result === res
+                            return (
+                              <button
+                                key={res}
+                                type="button"
+                                onClick={() =>
+                                  setInspectionItems((prev) => ({
+                                    ...prev,
+                                    [item]: { ...prev[item], result: res },
+                                  }))
+                                }
+                                data-testid={`btn-${item.toLowerCase()}-${res.toLowerCase()}`}
+                                className={`px-2.5 py-1 text-[11px] font-bold rounded transition-colors ${
+                                  isSelected
+                                    ? res === 'OK'
+                                      ? 'bg-emerald-600 text-white shadow-xs'
+                                      : res === 'MINOR'
+                                      ? 'bg-amber-500 text-white shadow-xs'
+                                      : 'bg-rose-600 text-white shadow-xs'
+                                    : 'bg-white border border-sh-border text-sh-ink hover:bg-sh-surface-muted'
+                                }`}
+                              >
+                                {res === 'OK' && '✓ OK'}
+                                {res === 'MINOR' && '⚠️ Minor'}
+                                {res === 'MAJOR' && '✕ Major'}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Line Note */}
+                      <div>
+                        <input
+                          type="text"
+                          value={current.note}
+                          onChange={(e) =>
+                            setInspectionItems((prev) => ({
+                              ...prev,
+                              [item]: { ...prev[item], note: e.target.value },
+                            }))
+                          }
+                          placeholder={`Staff notes for ${label.toLowerCase()}...`}
+                          data-testid={`input-note-${item.toLowerCase()}`}
+                          className="w-full px-2.5 py-1.5 text-xs bg-white border border-sh-border rounded-sh-sm focus:outline-none focus:ring-1 focus:ring-sh-primary"
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Major Damage Warning Banner */}
+            {(Object.keys(inspectionItems) as InspectionItem[]).some(
+              (k) => inspectionItems[k].result === 'MAJOR'
+            ) && (
+              <div
+                data-testid="major-damage-warning-banner"
+                className="p-3 bg-rose-50 border border-rose-300 rounded-sh-sm text-xs text-rose-900 space-y-1"
+              >
+                <div className="flex items-center gap-2 font-bold uppercase tracking-wider">
+                  <span>⚠️ Major Damage Finding Flagged</span>
+                </div>
+                <p className="text-[11px] text-rose-800 leading-relaxed">
+                  Major issues flagged on inspection items. These will form the required basis for itemized Settlement Charges in Step 6.3.
+                </p>
+              </div>
+            )}
+
+            {/* General Notes & Submit Action */}
+            <div className="pt-2 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-sh-ink uppercase tracking-wider mb-1">
+                  General Reception Notes (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={checkoutNotes}
+                  onChange={(e) => setCheckoutNotes(e.target.value)}
+                  placeholder="Additional notes from customer move-out / key reception..."
+                  data-testid="general-inspection-notes"
+                  className="w-full px-3 py-2 text-xs border border-sh-border rounded-sh-sm focus:outline-none focus:ring-1 focus:ring-sh-primary"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-sh-border">
+                <Link to="/tasks" className="text-xs font-semibold text-sh-muted hover:text-sh-ink">
+                  ← Back to Task Board
+                </Link>
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => submitInspectionMutation.mutate()}
+                  loading={submitInspectionMutation.isPending}
+                  data-testid="submit-inspection-btn"
+                  className="font-bold"
+                >
+                  Save Inspection & Record Findings →
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

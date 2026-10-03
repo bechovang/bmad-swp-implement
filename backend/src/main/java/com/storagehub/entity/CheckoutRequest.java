@@ -30,6 +30,12 @@ public class CheckoutRequest {
     @Column(name = "Notes", length = 500)
     private String notes;
 
+    @Column(name = "KeyReturned", nullable = false)
+    private Boolean keyReturned = false;
+
+    @Column(name = "UnitEmptied", nullable = false)
+    private Boolean unitEmptied = false;
+
     @CreationTimestamp
     @Column(name = "CreatedAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -86,6 +92,22 @@ public class CheckoutRequest {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public Boolean getKeyReturned() {
+        return keyReturned;
+    }
+
+    public void setKeyReturned(Boolean keyReturned) {
+        this.keyReturned = keyReturned;
+    }
+
+    public Boolean getUnitEmptied() {
+        return unitEmptied;
+    }
+
+    public void setUnitEmptied(Boolean unitEmptied) {
+        this.unitEmptied = unitEmptied;
     }
 
     public LocalDateTime getCreatedAt() {
