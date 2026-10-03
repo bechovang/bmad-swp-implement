@@ -1,22 +1,30 @@
 package com.storagehub.service;
 
 import com.storagehub.dto.CreateSupportTicketRequest;
+import com.storagehub.dto.EscalateSupportTicketRequest;
+import com.storagehub.dto.ResolveSupportTicketRequest;
 import com.storagehub.dto.SupportTicketDto;
 import com.storagehub.entity.Action;
 import com.storagehub.entity.EntityType;
+import com.storagehub.entity.Escalation;
 import com.storagehub.entity.Reservation;
 import com.storagehub.entity.ReservationStatus;
 import com.storagehub.entity.Shift;
 import com.storagehub.entity.StaffAssignment;
 import com.storagehub.entity.SupportTicket;
 import com.storagehub.entity.SupportTicketStatus;
+import com.storagehub.entity.Task;
+import com.storagehub.entity.TaskStatus;
+import com.storagehub.entity.TaskType;
 import com.storagehub.entity.Unit;
 import com.storagehub.entity.User;
 import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
+import com.storagehub.repository.EscalationRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.StaffAssignmentRepository;
 import com.storagehub.repository.SupportTicketRepository;
+import com.storagehub.repository.TaskRepository;
 import com.storagehub.repository.UnitRepository;
 import com.storagehub.repository.UserRepository;
 import org.slf4j.Logger;
@@ -25,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -42,6 +51,8 @@ public class TicketService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final StaffAssignmentRepository staffAssignmentRepository;
+    private final EscalationRepository escalationRepository;
+    private final TaskRepository taskRepository;
     private final TaskService taskService;
     private final NotificationService notificationService;
     private final LogService logService;
@@ -51,6 +62,8 @@ public class TicketService {
                          UserRepository userRepository,
                          ReservationRepository reservationRepository,
                          StaffAssignmentRepository staffAssignmentRepository,
+                         EscalationRepository escalationRepository,
+                         TaskRepository taskRepository,
                          TaskService taskService,
                          NotificationService notificationService,
                          LogService logService) {
@@ -59,9 +72,23 @@ public class TicketService {
         this.userRepository = userRepository;
         this.reservationRepository = reservationRepository;
         this.staffAssignmentRepository = staffAssignmentRepository;
+        this.escalationRepository = escalationRepository;
+        this.taskRepository = taskRepository;
         this.taskService = taskService;
         this.notificationService = notificationService;
         this.logService = logService;
+    }
+
+    public TicketService(SupportTicketRepository supportTicketRepository,
+                         UnitRepository unitRepository,
+                         UserRepository userRepository,
+                         ReservationRepository reservationRepository,
+                         StaffAssignmentRepository staffAssignmentRepository,
+                         TaskService taskService,
+                         NotificationService notificationService,
+                         LogService logService) {
+        this(supportTicketRepository, unitRepository, userRepository, reservationRepository,
+                staffAssignmentRepository, null, null, taskService, notificationService, logService);
     }
 
     /**
@@ -194,6 +221,115 @@ public class TicketService {
         return mapToDto(ticket);
     }
 
+    /**
+     * Staff resolves support ticket (Story 5.2).
+     */
+    public SupportTicketDto resolveTicket(Long id, ResolveSupportTicketRequest request, Long staffUserId) {
+        SupportTicket ticket = supportTicketRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Support ticket not found with id: " + id));
+
+        SupportTicketStatus oldStatus = ticket.getStatus();
+        String note = request != null && request.getNote() != null ? request.getNote().trim() : "";
+
+        ticket.setStatus(SupportTicketStatus.RESOLVED);
+        if (!note.isEmpty()) {
+            ticket.setResolutionNote(note);
+        }
+        ticket.setUpdatedAt(LocalDateTime.now());
+        final SupportTicket savedTicket = supportTicketRepository.save(ticket);
+
+        // Find and mark corresponding SUPPORT task as DONE on Kanban board
+        Optional<Task> supportTask = taskRepository.findByRefCodeAndType(savedTicket.getCode(), TaskType.SUPPORT);
+        supportTask.ifPresent(task -> {
+            task.setStatus(TaskStatus.DONE);
+            taskRepository.save(task);
+            log.info("Marked SUPPORT task {} as DONE for ticket {}", task.getId(), savedTicket.getCode());
+        });
+
+        // Audit Log
+        logService.append(
+                staffUserId,
+                EntityType.TICKET,
+                ticket.getId(),
+                Action.STATUS_CHANGE,
+                oldStatus.name(),
+                SupportTicketStatus.RESOLVED.name(),
+                note.isEmpty() ? "Support ticket marked as RESOLVED" : note
+        );
+
+        // Plain words notification to customer
+        String notifMsg = note.isEmpty()
+                ? "Resolved — support request " + ticket.getCode() + " completed. See ticket for details."
+                : "Resolved — " + note + ". See ticket for details.";
+        notificationService.send(
+                ticket.getCustomer().getId(),
+                "TICKET_RESOLVED",
+                notifMsg,
+                "/support"
+        );
+
+        log.info("Support ticket {} resolved by staff {}", ticket.getCode(), staffUserId);
+        return mapToDto(ticket);
+    }
+
+    /**
+     * Staff escalates support ticket to Facility Manager (Story 5.2).
+     */
+    public SupportTicketDto escalateTicket(Long id, EscalateSupportTicketRequest request, Long staffUserId) {
+        if (request == null || request.getNote() == null || request.getNote().trim().isEmpty()) {
+            throw new BusinessRuleException("VALIDATION_FAILED", "note must not be blank");
+        }
+
+        SupportTicket ticket = supportTicketRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Support ticket not found with id: " + id));
+
+        // Enforce 1-time escalation rule
+        Optional<Escalation> existing = escalationRepository.findByTicketId(ticket.getId());
+        if (existing.isPresent() || ticket.getStatus() == SupportTicketStatus.ESCALATED) {
+            throw new BusinessRuleException("ALREADY_ESCALATED",
+                    "Support ticket " + ticket.getCode() + " has already been escalated and cannot be escalated again.");
+        }
+
+        User staff = userRepository.findById(staffUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff user not found with id: " + staffUserId));
+
+        // Look up Facility Manager (Default ID 3 / Tuan Le)
+        User manager = userRepository.findById(3L).orElse(null);
+
+        String note = request.getNote().trim();
+        Escalation escalation = new Escalation(ticket, staff, manager, note);
+        escalationRepository.save(escalation);
+
+        SupportTicketStatus oldStatus = ticket.getStatus();
+        ticket.setStatus(SupportTicketStatus.ESCALATED);
+        ticket.setUpdatedAt(LocalDateTime.now());
+        ticket = supportTicketRepository.save(ticket);
+
+        // Audit Log
+        logService.append(
+                staffUserId,
+                EntityType.TICKET,
+                ticket.getId(),
+                Action.STATUS_CHANGE,
+                oldStatus.name(),
+                SupportTicketStatus.ESCALATED.name(),
+                "Escalated to Facility Manager: " + note
+        );
+
+        // Notification to Facility Manager
+        if (manager != null) {
+            notificationService.send(
+                    manager.getId(),
+                    "TICKET_ESCALATED",
+                    "Escalated to Facility Manager — " + note,
+                    "/tasks"
+            );
+        }
+
+        log.info("Support ticket {} escalated to manager by staff {}", ticket.getCode(), staffUserId);
+        return mapToDto(ticket);
+    }
+
     private User resolveAssignedStaff(Integer zoneId, LocalDate workDate, Shift shift) {
         if (zoneId != null) {
             Optional<StaffAssignment> assignment = staffAssignmentRepository.findByZoneAndDateAndShift(zoneId, workDate, shift);
@@ -240,6 +376,14 @@ public class TicketService {
     }
 
     public SupportTicketDto mapToDto(SupportTicket ticket) {
+        String escalationNote = null;
+        if (escalationRepository != null && ticket.getId() != null) {
+            Optional<Escalation> esc = escalationRepository.findByTicketId(ticket.getId());
+            if (esc.isPresent()) {
+                escalationNote = esc.get().getNote();
+            }
+        }
+
         return new SupportTicketDto(
                 ticket.getId(),
                 ticket.getCode(),
@@ -254,6 +398,8 @@ public class TicketService {
                 ticket.getDescription(),
                 ticket.getAssignedStaff() != null ? ticket.getAssignedStaff().getId() : null,
                 ticket.getAssignedStaff() != null ? ticket.getAssignedStaff().getFullName() : null,
+                ticket.getResolutionNote(),
+                escalationNote,
                 ticket.getCreatedAt(),
                 ticket.getUpdatedAt()
         );

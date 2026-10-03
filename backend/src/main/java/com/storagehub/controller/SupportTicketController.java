@@ -69,6 +69,32 @@ public class SupportTicketController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Staff resolves support ticket (Story 5.2).
+     */
+    @PostMapping("/{id}/resolve")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<SupportTicketDto> resolveTicket(@PathVariable("id") Long id,
+                                                          @RequestBody(required = false) com.storagehub.dto.ResolveSupportTicketRequest request,
+                                                          Authentication authentication) {
+        Long currentUserId = getCurrentUserId(authentication);
+        SupportTicketDto dto = ticketService.resolveTicket(id, request, currentUserId);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * Staff escalates support ticket to Facility Manager (Story 5.2).
+     */
+    @PostMapping("/{id}/escalate")
+    @PreAuthorize("hasAnyRole('STAFF', 'FACILITY_MANAGER', 'SYSTEM_ADMINISTRATOR', 'ADMIN')")
+    public ResponseEntity<SupportTicketDto> escalateTicket(@PathVariable("id") Long id,
+                                                           @Valid @RequestBody com.storagehub.dto.EscalateSupportTicketRequest request,
+                                                           Authentication authentication) {
+        Long currentUserId = getCurrentUserId(authentication);
+        SupportTicketDto dto = ticketService.escalateTicket(id, request, currentUserId);
+        return ResponseEntity.ok(dto);
+    }
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new org.springframework.security.authentication.InsufficientAuthenticationException("User is not authenticated");

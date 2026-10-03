@@ -17,6 +17,14 @@ export interface CreateSupportTicketRequest {
   description: string
 }
 
+export interface ResolveSupportTicketRequest {
+  note?: string
+}
+
+export interface EscalateSupportTicketRequest {
+  note: string
+}
+
 export interface SupportTicketDto {
   id: number
   code: string
@@ -31,6 +39,8 @@ export interface SupportTicketDto {
   description: string
   assignedStaffId?: number | null
   assignedStaffName?: string | null
+  resolutionNote?: string | null
+  escalationNote?: string | null
   createdAt?: string | null
   updatedAt?: string | null
 }

@@ -19,6 +19,8 @@ public record SupportTicketDto(
         String description,
         Long assignedStaffId,
         String assignedStaffName,
+        String resolutionNote,
+        String escalationNote,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

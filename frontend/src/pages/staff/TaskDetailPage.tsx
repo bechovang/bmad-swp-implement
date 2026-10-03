@@ -3,8 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTaskById, updateTaskStatus, validateCheckInReservation, activateCheckIn } from '../../api/task'
 import { getContractByReservation, getContractChain, printContract, signContract, expireContract, voidContract, uploadAttachment } from '../../api/contract'
+import { getSupportTickets, getSupportTicketById, resolveSupportTicket, escalateSupportTicket } from '../../api/support'
 import { TASK_TYPE_CONFIG, type CheckInValidationDto, type CheckInActivationDto } from '../../types/task'
 import type { ContractDto } from '../../types/contract'
+import type { SupportTicketDto } from '../../types/support'
 import { Button } from '../../components/ui/Button'
 import { PaymentModal } from '../../components/payment/PaymentModal'
 import { formatMoney, formatUnitCode } from '../../lib/format'
@@ -25,6 +27,11 @@ export function TaskDetailPage() {
   const [activationResult, setActivationResult] = useState<CheckInActivationDto | null>(null)
   const [ritualError, setRitualError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Support ticket handling state (Story 5.2)
+  const [supportNote, setSupportNote] = useState('')
+  const [supportError, setSupportError] = useState<string | null>(null)
+  const [supportSuccess, setSupportSuccess] = useState<string | null>(null)
 
   // Fetch task details
   const {
@@ -197,6 +204,80 @@ export function TaskDetailPage() {
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Failed to activate check-in'
       setRitualError(msg)
+    },
+  })
+
+  // Support ticket query for support task (Story 5.2)
+  const isSupportTask = task?.type === 'SUPPORT'
+
+  const {
+    data: supportTicket,
+    refetch: refetchSupportTicket,
+  } = useQuery<SupportTicketDto | null>({
+    queryKey: ['support-ticket-task', task?.refCode, taskId],
+    queryFn: async () => {
+      if (task?.refCode) {
+        const numericId = Number(task.refCode)
+        if (!isNaN(numericId) && numericId > 0 && !task.refCode.startsWith('SR-')) {
+          try {
+            return await getSupportTicketById(numericId)
+          } catch {
+            // fallback
+          }
+        }
+        const list = await getSupportTickets()
+        const found = list.find((t) => t.code === task.refCode || String(t.id) === task.refCode)
+        if (found) return found
+      }
+      const list = await getSupportTickets()
+      return list[0] || null
+    },
+    enabled: isSupportTask,
+    retry: false,
+  })
+
+  // Resolve support ticket mutation (Story 5.2)
+  const resolveTicketMutation = useMutation({
+    mutationFn: async ({ ticketId, note }: { ticketId: number; note: string }) => {
+      return await resolveSupportTicket(ticketId, { note })
+    },
+    onSuccess: () => {
+      setSupportError(null)
+      setSupportSuccess('Support ticket resolved successfully.')
+      setSupportNote('')
+      refetchSupportTicket()
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
+    },
+    onError: (err: any) => {
+      setSupportSuccess(null)
+      const msg = err?.response?.data?.message || err?.message || 'Failed to resolve support ticket'
+      setSupportError(msg)
+    },
+  })
+
+  // Escalate support ticket mutation (Story 5.2)
+  const escalateTicketMutation = useMutation({
+    mutationFn: async ({ ticketId, note }: { ticketId: number; note: string }) => {
+      if (!note || !note.trim()) {
+        throw new Error('Please enter an escalation note explaining the issue to the manager.')
+      }
+      return await escalateSupportTicket(ticketId, { note: note.trim() })
+    },
+    onSuccess: () => {
+      setSupportError(null)
+      setSupportSuccess('Support ticket escalated to Facility Manager.')
+      setSupportNote('')
+      refetchSupportTicket()
+      queryClient.invalidateQueries({ queryKey: ['task-detail', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      refetchTask()
+    },
+    onError: (err: any) => {
+      setSupportSuccess(null)
+      const msg = err?.response?.data?.message || err?.message || 'Failed to escalate support ticket'
+      setSupportError(msg)
     },
   })
 
@@ -986,6 +1067,246 @@ export function TaskDetailPage() {
                 </Button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Support Ticket Handling Workflow (Story 5.2) */}
+      {isSupportTask && (
+        <div className="space-y-5" data-testid="support-ticket-workflow">
+          {supportError && (
+            <div
+              data-testid="support-error-banner"
+              className="p-3 bg-red-50 border border-red-200 rounded-sh-sm text-xs text-red-800 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Error:</span>
+                <span>{supportError}</span>
+              </div>
+            </div>
+          )}
+
+          {supportSuccess && (
+            <div
+              data-testid="support-success-banner"
+              className="p-3 bg-emerald-50 border border-emerald-200 rounded-sh-sm text-xs text-emerald-800 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Success:</span>
+                <span>{supportSuccess}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Incident Details Card */}
+          <div className="bg-sh-surface border border-sh-border rounded-sh-md p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-sh-divider pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    data-testid="support-ticket-code"
+                    className="font-mono text-base font-bold text-sh-ink"
+                  >
+                    {supportTicket?.code || task.refCode || 'SR-0000'}
+                  </span>
+                  <span
+                    data-testid="incident-type-badge"
+                    className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200"
+                  >
+                    {supportTicket?.incidentType || 'INCIDENT'}
+                  </span>
+                </div>
+                <p className="text-xs text-sh-muted">
+                  Customer reported issue requiring staff triage, physical fix, or escalation to manager.
+                </p>
+              </div>
+
+              <span
+                data-testid="support-ticket-status-chip"
+                className={`text-xs font-mono font-bold px-2.5 py-1 rounded uppercase border ${
+                  supportTicket?.status === 'RESOLVED'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : supportTicket?.status === 'ESCALATED'
+                    ? 'bg-purple-100 text-purple-800 border-purple-300'
+                    : supportTicket?.status === 'IN_PROGRESS'
+                    ? 'bg-blue-100 text-blue-800 border-blue-300'
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}
+              >
+                {supportTicket?.status || 'OPEN'}
+              </span>
+            </div>
+
+            {/* Context Details Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+              <div className="p-3 bg-sh-surface-subtle border border-sh-border rounded-sh-sm space-y-0.5">
+                <span className="text-sh-muted block">Customer</span>
+                <span data-testid="customer-name-display" className="font-semibold text-sh-ink block">
+                  {supportTicket?.customerName || task.customerName || 'Lan Nguyen'}
+                </span>
+                <span className="text-[10px] text-sh-muted font-mono">
+                  ID: #{supportTicket?.customerId || 1}
+                </span>
+              </div>
+
+              <div className="p-3 bg-sh-surface-subtle border border-sh-border rounded-sh-sm space-y-0.5">
+                <span className="text-sh-muted block">Unit Code</span>
+                <span data-testid="unit-code-display" className="font-mono font-bold text-sh-ink block">
+                  {formatUnitCode(supportTicket?.unitCode || task.unitCode || 'S-3')}
+                </span>
+                <span className="text-[10px] text-sh-muted">
+                  Booking: {supportTicket?.reservationCode || 'N/A'}
+                </span>
+              </div>
+
+              <div className="p-3 bg-sh-surface-subtle border border-sh-border rounded-sh-sm space-y-0.5">
+                <span className="text-sh-muted block">Assigned Staff</span>
+                <span className="font-semibold text-sh-ink block">
+                  {supportTicket?.assignedStaffName || task.assignedStaffName || 'Minh Tran'}
+                </span>
+                <span className="text-[10px] text-sh-muted">On-duty Staff</span>
+              </div>
+
+              <div className="p-3 bg-sh-surface-subtle border border-sh-border rounded-sh-sm space-y-0.5">
+                <span className="text-sh-muted block">Reported At</span>
+                <span className="font-mono text-sh-ink block">
+                  {supportTicket?.createdAt
+                    ? new Date(supportTicket.createdAt).toLocaleDateString()
+                    : task.workDate}
+                </span>
+                <span className="text-[10px] text-sh-muted">
+                  {supportTicket?.createdAt
+                    ? new Date(supportTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : task.timeSlot || 'Morning'}
+                </span>
+              </div>
+            </div>
+
+            {/* Original Customer Verbatim Description */}
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-sh-muted">
+                Original Customer Description
+              </span>
+              <div
+                data-testid="ticket-customer-description"
+                className="p-4 bg-amber-50/40 border border-amber-200/80 rounded-sh-md text-sm text-sh-ink leading-relaxed font-sans"
+              >
+                "{supportTicket?.description || task.description || 'No description provided'}"
+              </div>
+            </div>
+
+            {/* Resolution Note if present */}
+            {supportTicket?.resolutionNote && (
+              <div
+                data-testid="resolution-note-display"
+                className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-sh-md space-y-1"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-950 uppercase tracking-wide">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>Resolution Note</span>
+                </div>
+                <p className="text-sm text-emerald-900 font-sans">
+                  {supportTicket.resolutionNote}
+                </p>
+              </div>
+            )}
+
+            {/* Escalation Note if present */}
+            {supportTicket?.escalationNote && (
+              <div
+                data-testid="escalation-note-display"
+                className="p-4 bg-purple-50/70 border border-purple-200 rounded-sh-md space-y-1"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-purple-950 uppercase tracking-wide">
+                  <span className="w-2 h-2 rounded-full bg-purple-500" />
+                  <span>Escalation Note (Forwarded to Facility Manager)</span>
+                </div>
+                <p className="text-sm text-purple-900 font-sans">
+                  {supportTicket.escalationNote}
+                </p>
+              </div>
+            )}
+
+            {/* Staff Resolution / Escalation Form */}
+            {supportTicket?.status !== 'RESOLVED' ? (
+              <div className="pt-3 border-t border-sh-border space-y-3">
+                <div className="space-y-1">
+                  <label
+                    htmlFor="staff-note"
+                    className="text-xs font-bold uppercase tracking-wide text-sh-ink block"
+                  >
+                    Staff Note / Resolution Steps
+                  </label>
+                  <textarea
+                    id="staff-note"
+                    rows={3}
+                    value={supportNote}
+                    onChange={(e) => setSupportNote(e.target.value)}
+                    placeholder="Enter actions taken to resolve the incident, or explain why escalation is required..."
+                    data-testid="staff-note-input"
+                    className="w-full px-3 py-2 text-sm border border-sh-border rounded-sh-sm focus:outline-none focus:ring-1 focus:ring-sh-primary"
+                  />
+                  <p className="text-[11px] text-sh-muted">
+                    Note is optional when resolving, but mandatory when escalating to the manager.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      if (!supportNote.trim()) {
+                        setSupportError('Please enter an escalation note explaining the issue to the manager.')
+                        return
+                      }
+                      if (supportTicket?.id) {
+                        escalateTicketMutation.mutate({
+                          ticketId: supportTicket.id,
+                          note: supportNote,
+                        })
+                      }
+                    }}
+                    loading={escalateTicketMutation.isPending}
+                    disabled={supportTicket?.status === 'ESCALATED'}
+                    data-testid="escalate-ticket-btn"
+                    className="text-xs font-semibold text-purple-900 bg-purple-50 border-purple-200 hover:bg-purple-100"
+                  >
+                    {supportTicket?.status === 'ESCALATED' ? 'Already Escalated' : '⚠️ Escalate to Manager'}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => {
+                      if (supportTicket?.id) {
+                        resolveTicketMutation.mutate({
+                          ticketId: supportTicket.id,
+                          note: supportNote,
+                        })
+                      }
+                    }}
+                    loading={resolveTicketMutation.isPending}
+                    data-testid="resolve-ticket-btn"
+                    className="font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    ✓ Resolve Ticket & Close Task
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-sh-border">
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-sh-sm text-xs text-emerald-900 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">✓ Incident Resolved:</span>
+                    <span>Support ticket has been closed and tenant notified.</span>
+                  </div>
+                  <Link to="/tasks" className="font-bold text-sh-primary hover:underline">
+                    Return to Task Board →
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

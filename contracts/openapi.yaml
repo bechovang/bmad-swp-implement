@@ -1327,6 +1327,87 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /support-tickets/{id}/resolve:
+    post:
+      operationId: resolveSupportTicket
+      tags: [Support]
+      summary: Resolve support ticket (Story 5.2)
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Transitions support ticket to RESOLVED, saves resolution note, marks corresponding SUPPORT task as DONE, and notifies customer.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveSupportTicketRequest'
+      responses:
+        '200':
+          description: Ticket successfully resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicketDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /support-tickets/{id}/escalate:
+    post:
+      operationId: escalateSupportTicket
+      tags: [Support]
+      summary: Escalate support ticket to Facility Manager (Story 5.2)
+      description: >
+        Guarded by ROLE_STAFF / ROLE_FACILITY_MANAGER / ROLE_ADMIN.
+        Transitions ticket to ESCALATED with mandatory reason note, creates Escalation record, and notifies Facility Manager.
+        Rejects subsequent escalation attempts with 409 Conflict.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscalateSupportTicketRequest'
+      responses:
+        '200':
+          description: Ticket successfully escalated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTicketDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Ticket is already escalated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -3037,6 +3118,14 @@ components:
           type: string
           nullable: true
           example: 'Minh Tran'
+        resolutionNote:
+          type: string
+          nullable: true
+          example: 'Door hinge replaced by site staff.'
+        escalationNote:
+          type: string
+          nullable: true
+          example: 'Flooding, Unit M-2. Customer relocation needed.'
         createdAt:
           type: string
           format: date-time
@@ -3047,6 +3136,24 @@ components:
           format: date-time
           nullable: true
           example: '2026-10-03T09:30:00Z'
+
+    ResolveSupportTicketRequest:
+      type: object
+      properties:
+        note:
+          type: string
+          description: Optional staff resolution note explaining what was fixed.
+          example: 'Door hinge replaced by site staff.'
+
+    EscalateSupportTicketRequest:
+      type: object
+      required:
+        - note
+      properties:
+        note:
+          type: string
+          description: Mandatory escalation explanation for Facility Manager.
+          example: 'Flooding, Unit M-2. Customer relocation needed.'
 
 
 

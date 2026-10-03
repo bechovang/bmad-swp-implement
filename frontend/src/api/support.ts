@@ -1,5 +1,11 @@
 import axios from 'axios'
-import type { CreateSupportTicketRequest, SupportTicketDto, SupportTicketStatus } from '../types/support'
+import type {
+  CreateSupportTicketRequest,
+  EscalateSupportTicketRequest,
+  ResolveSupportTicketRequest,
+  SupportTicketDto,
+  SupportTicketStatus,
+} from '../types/support'
 
 export async function createSupportTicket(data: CreateSupportTicketRequest): Promise<SupportTicketDto> {
   const token = localStorage.getItem('token')
@@ -28,3 +34,26 @@ export async function getSupportTicketById(id: number): Promise<SupportTicketDto
   })
   return res.data
 }
+
+export async function resolveSupportTicket(
+  id: number,
+  data: ResolveSupportTicketRequest,
+): Promise<SupportTicketDto> {
+  const token = localStorage.getItem('token')
+  const res = await axios.post<SupportTicketDto>(`/api/v1/support-tickets/${id}/resolve`, data, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  return res.data
+}
+
+export async function escalateSupportTicket(
+  id: number,
+  data: EscalateSupportTicketRequest,
+): Promise<SupportTicketDto> {
+  const token = localStorage.getItem('token')
+  const res = await axios.post<SupportTicketDto>(`/api/v1/support-tickets/${id}/escalate`, data, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  return res.data
+}
+

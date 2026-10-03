@@ -43,6 +43,10 @@ public class SupportTicketCreationTests {
     @Mock
     private StaffAssignmentRepository staffAssignmentRepository;
     @Mock
+    private EscalationRepository escalationRepository;
+    @Mock
+    private TaskRepository taskRepository;
+    @Mock
     private TaskService taskService;
     @Mock
     private NotificationService notificationService;
@@ -65,6 +69,8 @@ public class SupportTicketCreationTests {
                 userRepository,
                 reservationRepository,
                 staffAssignmentRepository,
+                escalationRepository,
+                taskRepository,
                 taskService,
                 notificationService,
                 logService

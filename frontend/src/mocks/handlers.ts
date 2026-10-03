@@ -32,6 +32,8 @@ import type {
 import type {
   SupportTicketDto,
   CreateSupportTicketRequest,
+  ResolveSupportTicketRequest,
+  EscalateSupportTicketRequest,
 } from '../types/support'
 
 export const DEMO_USERS: Record<string, AuthUser & { password: string }> = {
@@ -1248,6 +1250,63 @@ export const handlers = [
 
     return HttpResponse.json(newTicket, { status: 201 })
   }),
+
+  http.post('/api/v1/support-tickets/:id/resolve', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const ticket = mockSupportTicketsList.find((t) => t.id === id)
+    if (!ticket) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Support ticket ${id} not found` }, { status: 404 })
+    }
+
+    const body = (await request.json().catch(() => ({}))) as ResolveSupportTicketRequest
+    ticket.status = 'RESOLVED'
+    ticket.resolutionNote = body?.note || null
+    ticket.updatedAt = new Date().toISOString()
+
+    // Also transition any matching SUPPORT task in mockTasksList to DONE
+    const task = mockTasksList.find((t) => t.type === 'SUPPORT' && (t.refCode === ticket.code || t.refCode === String(ticket.id)))
+    if (task) {
+      task.status = 'DONE'
+    }
+
+    return HttpResponse.json(ticket, { status: 200 })
+  }),
+
+  http.post('/api/v1/support-tickets/:id/escalate', async ({ params, request }) => {
+    const id = parseInt(params.id as string, 10)
+    const ticket = mockSupportTicketsList.find((t) => t.id === id)
+    if (!ticket) {
+      return HttpResponse.json({ code: 'NOT_FOUND', message: `Support ticket ${id} not found` }, { status: 404 })
+    }
+
+    const body = (await request.json().catch(() => ({}))) as EscalateSupportTicketRequest
+    if (!body?.note || !body.note.trim()) {
+      return HttpResponse.json(
+        {
+          code: 'VALIDATION_FAILED',
+          message: 'Escalation note is required',
+          fieldErrors: [{ field: 'note', message: 'Escalation note is required' }],
+        },
+        { status: 400 }
+      )
+    }
+
+    if (ticket.status === 'ESCALATED') {
+      return HttpResponse.json(
+        {
+          code: 'ALREADY_ESCALATED',
+          message: 'Support ticket is already escalated and cannot be re-escalated.',
+        },
+        { status: 409 }
+      )
+    }
+
+    ticket.status = 'ESCALATED'
+    ticket.escalationNote = body.note.trim()
+    ticket.updatedAt = new Date().toISOString()
+
+    return HttpResponse.json(ticket, { status: 200 })
+  }),
 ]
 
 export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
@@ -1265,6 +1324,8 @@ export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
     description: 'Sticky door latch repaired during morning shift',
     assignedStaffId: 2,
     assignedStaffName: 'Minh Tran',
+    resolutionNote: 'Replaced door hinge and lubricated lock cylinder',
+    escalationNote: null,
     createdAt: '2026-10-06T08:30:00Z',
     updatedAt: '2026-10-06T10:00:00Z',
   },
@@ -1278,12 +1339,33 @@ export const INITIAL_SUPPORT_TICKETS: SupportTicketDto[] = [
     reservationId: null,
     reservationCode: null,
     incidentType: 'OTHER',
-    status: 'ESCALATED',
+    status: 'IN_PROGRESS',
     description: 'Water ingress from ceiling joint in unit M-2',
     assignedStaffId: 2,
     assignedStaffName: 'Minh Tran',
+    resolutionNote: null,
+    escalationNote: null,
     createdAt: '2026-10-18T09:00:00Z',
     updatedAt: '2026-10-18T09:30:00Z',
+  },
+  {
+    id: 3,
+    code: 'SR-0034',
+    customerId: 1,
+    customerName: 'Lan Nguyen',
+    unitId: 3,
+    unitCode: 'M-5',
+    reservationId: null,
+    reservationCode: null,
+    incidentType: 'SECURITY',
+    status: 'ESCALATED',
+    description: 'Damaged external corridor lock mechanism',
+    assignedStaffId: 2,
+    assignedStaffName: 'Minh Tran',
+    resolutionNote: null,
+    escalationNote: 'Active security hardware issue requiring locksmith replacement',
+    createdAt: '2026-10-19T09:00:00Z',
+    updatedAt: '2026-10-19T09:30:00Z',
   },
 ]
 

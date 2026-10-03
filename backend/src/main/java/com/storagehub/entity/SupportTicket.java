@@ -53,6 +53,9 @@ public class SupportTicket {
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "ResolutionNote", columnDefinition = "TEXT")
+    private String resolutionNote;
+
     @Column(name = "CreatedAt", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -146,6 +149,14 @@ public class SupportTicket {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getResolutionNote() {
+        return resolutionNote;
+    }
+
+    public void setResolutionNote(String resolutionNote) {
+        this.resolutionNote = resolutionNote;
     }
 
     public LocalDateTime getCreatedAt() {
