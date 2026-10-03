@@ -8,6 +8,12 @@ export interface SettlementPreviewDto {
   damageReason?: string | null
   lateFee: number
   daysLate: number
+  waiverAmount: number
+  waiverReason?: string | null
+  waiverCap: number
+  policyVersion?: string | null
+  waiverExceeded: boolean
+  waiverReasonRequired: boolean
   totalCharges: number
   refundAmount: number
   extraFeeAmount: number
@@ -22,6 +28,8 @@ export interface FinalizeSettlementRequest {
   damageFee?: number
   damageReason?: string | null
   lateFee?: number
+  waiverAmount?: number
+  waiverReason?: string | null
   paymentMethod?: 'CASH' | 'PAYOS' | string | null
   cashReceived?: boolean
   notes?: string | null
@@ -39,6 +47,8 @@ export interface SettlementReceiptDto {
   damageFee: number
   damageReason?: string | null
   lateFee: number
+  waiverAmount: number
+  waiverReason?: string | null
   totalCharges: number
   refundAmount: number
   extraFeeAmount: number

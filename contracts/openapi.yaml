@@ -712,6 +712,16 @@ paths:
           required: false
           schema:
             type: string
+        - name: waiverAmount
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: waiverReason
+          in: query
+          required: false
+          schema:
+            type: string
         - name: checkoutDate
           in: query
           required: false
@@ -3886,6 +3896,7 @@ components:
         - depositHeld
         - damageFee
         - lateFee
+        - waiverAmount
         - totalCharges
         - refundAmount
         - extraFeeAmount
@@ -3916,6 +3927,19 @@ components:
           type: number
         daysLate:
           type: integer
+        waiverAmount:
+          type: number
+        waiverReason:
+          type: string
+          nullable: true
+        waiverCap:
+          type: number
+        policyVersion:
+          type: string
+        waiverExceeded:
+          type: boolean
+        waiverReasonRequired:
+          type: boolean
         totalCharges:
           type: number
         refundAmount:
@@ -3945,6 +3969,12 @@ components:
         lateFee:
           type: number
           default: 0
+        waiverAmount:
+          type: number
+          default: 0
+        waiverReason:
+          type: string
+          nullable: true
         paymentMethod:
           type: string
           nullable: true
@@ -3964,6 +3994,7 @@ components:
         - depositHeld
         - damageFee
         - lateFee
+        - waiverAmount
         - totalCharges
         - refundAmount
         - extraFeeAmount
@@ -3999,6 +4030,11 @@ components:
           nullable: true
         lateFee:
           type: number
+        waiverAmount:
+          type: number
+        waiverReason:
+          type: string
+          nullable: true
         totalCharges:
           type: number
         refundAmount:
@@ -4015,6 +4051,7 @@ components:
           format: date-time
         summaryMessage:
           type: string
+
 
 
 

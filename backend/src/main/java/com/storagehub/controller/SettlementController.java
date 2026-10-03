@@ -36,9 +36,12 @@ public class SettlementController {
             @PathVariable Long reservationId,
             @RequestParam(required = false) BigDecimal damageFee,
             @RequestParam(required = false) String damageReason,
+            @RequestParam(required = false) BigDecimal waiverAmount,
+            @RequestParam(required = false) String waiverReason,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkoutDate) {
 
-        SettlementPreviewDto preview = settlementService.calculatePreview(reservationId, damageFee, damageReason, checkoutDate);
+        SettlementPreviewDto preview = settlementService.calculatePreview(
+                reservationId, damageFee, damageReason, waiverAmount, waiverReason, checkoutDate);
         return ResponseEntity.ok(preview);
     }
 
@@ -50,8 +53,11 @@ public class SettlementController {
 
         BigDecimal damageFee = (request != null) ? request.damageFee() : BigDecimal.ZERO;
         String damageReason = (request != null) ? request.damageReason() : null;
+        BigDecimal waiverAmount = (request != null) ? request.waiverAmount() : BigDecimal.ZERO;
+        String waiverReason = (request != null) ? request.waiverReason() : null;
 
-        SettlementPreviewDto preview = settlementService.calculatePreview(reservationId, damageFee, damageReason, null);
+        SettlementPreviewDto preview = settlementService.calculatePreview(
+                reservationId, damageFee, damageReason, waiverAmount, waiverReason, null);
         return ResponseEntity.ok(preview);
     }
 

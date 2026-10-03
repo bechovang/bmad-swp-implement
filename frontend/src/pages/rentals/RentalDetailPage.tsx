@@ -249,9 +249,9 @@ export function RentalDetailPage() {
         </div>
       </div>
 
-      {/* Permanent Settlement Receipt Banner (Story 6.3) */}
+      {/* Permanent Settlement Receipt Banner (Story 6.3 & 6.4) */}
       {reservation.status === 'CLOSED' && settlementReceipt && (
-        <Card className="p-5 bg-emerald-50 border-l-4 border-l-emerald-500 border-emerald-200 rounded-sh-md shadow-xs" data-testid="settlement-receipt-banner">
+        <Card className="p-5 bg-emerald-50 border-l-4 border-l-emerald-500 border-emerald-200 rounded-sh-md shadow-xs space-y-2" data-testid="settlement-receipt-banner">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -270,6 +270,12 @@ export function RentalDetailPage() {
               </span>
             </div>
           </div>
+          {settlementReceipt.waiverAmount > 0 && settlementReceipt.waiverReason && (
+            <div className="text-[11px] text-emerald-800 bg-emerald-100/60 p-2 rounded border border-emerald-200" data-testid="customer-waiver-notice">
+              <span className="font-bold">Fee Waiver Adjustment: </span>
+              <span>-{formatMoney(settlementReceipt.waiverAmount)} ({settlementReceipt.waiverReason})</span>
+            </div>
+          )}
         </Card>
       )}
 

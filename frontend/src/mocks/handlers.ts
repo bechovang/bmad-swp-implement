@@ -1429,12 +1429,14 @@ export const handlers = [
     return HttpResponse.json(dto, { status: 200 })
   }),
 
-  // ------------------------------------------------------------ Settlement (Story 6.3)
+  // ------------------------------------------------------------ Settlement (Story 6.3 & 6.4)
   http.get('/api/v1/reservations/:id/settlement-preview', ({ params, request }) => {
     const resId = parseInt(params.id as string, 10)
     const url = new URL(request.url)
     const damageFee = Math.max(0, parseFloat(url.searchParams.get('damageFee') || '0') || 0)
     const damageReason = url.searchParams.get('damageReason') || null
+    const waiverAmount = Math.max(0, parseFloat(url.searchParams.get('waiverAmount') || '0') || 0)
+    const waiverReason = url.searchParams.get('waiverReason') || null
     const checkoutDate = url.searchParams.get('checkoutDate') || null
 
     const res = mockReservationsList.find((r) => r.id === resId)
@@ -1449,20 +1451,37 @@ export const handlers = [
       lateFee = dailyRate * daysLate
     }
 
-    const totalCharges = damageFee + lateFee
+    const waiverCap = 50000
+    const policyVersion = 'Rental Policy v3'
+    const waiverExceeded = waiverAmount > waiverCap
+    const waiverReasonRequired = waiverAmount > 0
+    const hasValidWaiverReason = !waiverReasonRequired || (waiverReason !== null && waiverReason.trim() !== '')
+
+    const grossCharges = damageFee + lateFee
+    const netCharges = Math.max(0, grossCharges - waiverAmount)
     let refundAmount = 0
     let extraFeeAmount = 0
 
-    if (depositHeld >= totalCharges) {
-      refundAmount = depositHeld - totalCharges
+    if (depositHeld >= netCharges) {
+      refundAmount = depositHeld - netCharges
     } else {
-      extraFeeAmount = totalCharges - depositHeld
+      extraFeeAmount = netCharges - depositHeld
     }
 
     const extraFeeRequired = extraFeeAmount > 0
     const damageReasonRequired = damageFee > 0
     const hasValidReason = !damageReasonRequired || (damageReason !== null && damageReason.trim() !== '')
-    const canFinalize = hasValidReason && !extraFeeRequired
+    const canFinalize = hasValidReason && hasValidWaiverReason && !waiverExceeded && !extraFeeRequired
+
+    let summaryMessage = `Full refund of ${refundAmount.toLocaleString()} ₫`
+    if (extraFeeAmount > 0) {
+      summaryMessage = `Extra fee ${extraFeeAmount.toLocaleString()} ₫ (Unpaid)`
+    } else if (damageFee > 0 || lateFee > 0) {
+      summaryMessage = `Refund ${refundAmount.toLocaleString()} ₫ after deductions`
+      if (waiverAmount > 0) {
+        summaryMessage += ` (waived ${waiverAmount.toLocaleString()} ₫)`
+      }
+    }
 
     const dto: SettlementPreviewDto = {
       reservationId: res?.id || resId,
@@ -1474,16 +1493,20 @@ export const handlers = [
       damageReason,
       lateFee,
       daysLate,
-      totalCharges,
+      waiverAmount,
+      waiverReason,
+      waiverCap,
+      policyVersion,
+      waiverExceeded,
+      waiverReasonRequired,
+      totalCharges: netCharges,
       refundAmount,
       extraFeeAmount,
       extraFeeRequired,
       extraFeePaid: false,
       damageReasonRequired,
       canFinalize,
-      summaryMessage: damageFee > 0
-        ? `Refund ${refundAmount.toLocaleString()} ₫ after damage fee ${damageFee.toLocaleString()} ₫`
-        : `Full refund of ${refundAmount.toLocaleString()} ₫`,
+      summaryMessage,
     }
 
     return HttpResponse.json(dto, { status: 200 })
@@ -1493,8 +1516,23 @@ export const handlers = [
     const resId = parseInt(params.id as string, 10)
     const body = (await request.json().catch(() => ({}))) as FinalizeSettlementRequest
 
+    const res = mockReservationsList.find((r) => r.id === resId)
+
+    if (res?.status === 'EXPIRED') {
+      return HttpResponse.json(
+        {
+          code: 'WAIVER_NOT_ALLOWED_NO_SHOW',
+          message: 'Waiver cannot be applied to deposit forfeiture for no-show.',
+        },
+        { status: 400 }
+      )
+    }
+
     const damageFee = Math.max(0, body.damageFee || 0)
     const damageReason = body.damageReason || null
+    const waiverAmount = Math.max(0, body.waiverAmount || 0)
+    const waiverReason = body.waiverReason || null
+    const waiverCap = 50000
 
     if (damageFee > 0 && (!damageReason || !damageReason.trim())) {
       return HttpResponse.json(
@@ -1506,17 +1544,38 @@ export const handlers = [
       )
     }
 
-    const res = mockReservationsList.find((r) => r.id === resId)
+    if (waiverAmount > 0) {
+      if (!waiverReason || !waiverReason.trim()) {
+        return HttpResponse.json(
+          {
+            code: 'WAIVER_REASON_REQUIRED',
+            message: 'A specific waiver reason is mandatory when applying a fee waiver.',
+          },
+          { status: 400 }
+        )
+      }
+      if (waiverAmount > waiverCap) {
+        return HttpResponse.json(
+          {
+            code: 'WAIVER_EXCEEDS_CAP',
+            message: 'Waiver exceeds the 50.000 ₫ cap in Rental Policy v3',
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     const depositHeld = res ? res.depositAmount : 172500
     const lateFee = Math.max(0, body.lateFee || 0)
-    const totalCharges = damageFee + lateFee
+    const grossCharges = damageFee + lateFee
+    const netCharges = Math.max(0, grossCharges - waiverAmount)
 
     let refundAmount = 0
     let extraFeeAmount = 0
-    if (depositHeld >= totalCharges) {
-      refundAmount = depositHeld - totalCharges
+    if (depositHeld >= netCharges) {
+      refundAmount = depositHeld - netCharges
     } else {
-      extraFeeAmount = totalCharges - depositHeld
+      extraFeeAmount = netCharges - depositHeld
     }
 
     if (extraFeeAmount > 0 && !body.cashReceived) {
@@ -1562,6 +1621,16 @@ export const handlers = [
       checkoutTask.status = 'DONE'
     }
 
+    let summaryMessage = `Full refund of ${refundAmount.toLocaleString()} ₫`
+    if (extraFeeAmount > 0) {
+      summaryMessage = `Extra fee ${extraFeeAmount.toLocaleString()} ₫ (Paid)`
+    } else if (damageFee > 0 || lateFee > 0) {
+      summaryMessage = `Refund ${refundAmount.toLocaleString()} ₫ after deductions`
+      if (waiverAmount > 0) {
+        summaryMessage += ` (waived ${waiverAmount.toLocaleString()} ₫)`
+      }
+    }
+
     const receipt: SettlementReceiptDto = {
       id: mockSettlementsList.length + 1,
       receiptCode: `STL-2026-${String(Math.floor(Math.random() * 90000 + 10000))}`,
@@ -1574,15 +1643,15 @@ export const handlers = [
       damageFee,
       damageReason,
       lateFee,
-      totalCharges,
+      waiverAmount,
+      waiverReason,
+      totalCharges: netCharges,
       refundAmount,
       extraFeeAmount,
       status: 'FINALIZED',
       notes: body.notes || null,
       createdAt: new Date().toISOString(),
-      summaryMessage: damageFee > 0
-        ? `Refund ${refundAmount.toLocaleString()} ₫ after damage fee ${damageFee.toLocaleString()} ₫`
-        : `Full refund of ${refundAmount.toLocaleString()} ₫`,
+      summaryMessage,
     }
 
     mockSettlementsList.push(receipt)
@@ -1610,6 +1679,8 @@ export const handlers = [
       damageFee: 40000,
       damageReason: 'Scratched door panel and lost key badge',
       lateFee: 0,
+      waiverAmount: 0,
+      waiverReason: null,
       totalCharges: 40000,
       refundAmount: 132500,
       extraFeeAmount: 0,

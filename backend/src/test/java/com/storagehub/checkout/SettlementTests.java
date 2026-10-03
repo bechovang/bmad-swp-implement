@@ -54,6 +54,10 @@ class SettlementTests {
     private LogService logService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private RentalPolicyRepository rentalPolicyRepository;
+    @Mock
+    private PolicyRuleRepository policyRuleRepository;
 
     private SettlementService settlementService;
 
@@ -62,6 +66,8 @@ class SettlementTests {
     private Unit unit;
     private Reservation reservation;
     private Contract contract;
+    private RentalPolicy policy;
+    private PolicyRule waiverCapRule;
 
     @BeforeEach
     void setUp() {
@@ -75,7 +81,9 @@ class SettlementTests {
                 taskRepository,
                 taskService,
                 logService,
-                notificationService
+                notificationService,
+                rentalPolicyRepository,
+                policyRuleRepository
         );
 
         Role staffRole = new Role(2, "Staff", null);
@@ -107,8 +115,11 @@ class SettlementTests {
         reservation.setBaseRent(BigDecimal.valueOf(690000));
         ReflectionTestUtils.setField(reservation, "id", 871L);
 
-        RentalPolicy policy = new RentalPolicy("POL-2026-01", LocalDate.now().minusYears(1), PolicyStatus.ACTIVE);
+        policy = new RentalPolicy("v3", LocalDate.now().minusYears(1), PolicyStatus.ACTIVE);
         ReflectionTestUtils.setField(policy, "id", 1);
+
+        waiverCapRule = new PolicyRule(policy, unitType, PolicyRuleType.WAIVER_CAP, null, BigDecimal.valueOf(50000), BigDecimal.valueOf(50000));
+        ReflectionTestUtils.setField(waiverCapRule, "id", 10L);
 
         contract = new Contract(
                 "CT-2026-00871",
@@ -127,6 +138,10 @@ class SettlementTests {
     @DisplayName("Settlement preview with 172.500 deposit and 40.000 damage yields 132.500 refund")
     void testSettlementPreviewExactDemoArithmetic() {
         when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
 
         SettlementPreviewDto preview = settlementService.calculatePreview(
                 871L,
@@ -138,12 +153,86 @@ class SettlementTests {
         assertThat(preview.depositHeld()).isEqualByComparingTo(BigDecimal.valueOf(172500));
         assertThat(preview.damageFee()).isEqualByComparingTo(BigDecimal.valueOf(40000));
         assertThat(preview.lateFee()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(preview.waiverAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(preview.totalCharges()).isEqualByComparingTo(BigDecimal.valueOf(40000));
         assertThat(preview.refundAmount()).isEqualByComparingTo(BigDecimal.valueOf(132500));
         assertThat(preview.extraFeeAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(preview.extraFeeRequired()).isFalse();
         assertThat(preview.damageReasonRequired()).isTrue();
         assertThat(preview.canFinalize()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Settlement preview with valid waiver under WAIVER_CAP adjusts net charges and refund")
+    void testSettlementPreviewWithWaiverUnderCap() {
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
+
+        // Damage 40.000, Waiver 20.000 -> Net charges 20.000, Refund = 172.500 - 20.000 = 152.500
+        SettlementPreviewDto preview = settlementService.calculatePreview(
+                871L,
+                BigDecimal.valueOf(40000),
+                "Scratched door panel",
+                BigDecimal.valueOf(20000),
+                "Minor scratch forgiven for long-term customer",
+                LocalDate.now()
+        );
+
+        assertThat(preview.waiverAmount()).isEqualByComparingTo(BigDecimal.valueOf(20000));
+        assertThat(preview.waiverCap()).isEqualByComparingTo(BigDecimal.valueOf(50000));
+        assertThat(preview.waiverExceeded()).isFalse();
+        assertThat(preview.totalCharges()).isEqualByComparingTo(BigDecimal.valueOf(20000)); // Net charges
+        assertThat(preview.refundAmount()).isEqualByComparingTo(BigDecimal.valueOf(152500));
+        assertThat(preview.canFinalize()).isTrue();
+        assertThat(preview.summaryMessage()).contains("waived 20.000 ₫");
+    }
+
+    @Test
+    @DisplayName("Settlement preview requires waiverReason when waiverAmount > 0")
+    void testSettlementPreviewWaiverRequiresReason() {
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
+
+        SettlementPreviewDto preview = settlementService.calculatePreview(
+                871L,
+                BigDecimal.valueOf(40000),
+                "Damage reason present",
+                BigDecimal.valueOf(20000),
+                null, // Missing waiver reason
+                LocalDate.now()
+        );
+
+        assertThat(preview.waiverReasonRequired()).isTrue();
+        assertThat(preview.canFinalize()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Settlement preview flags waiverExceeded when waiverAmount > WAIVER_CAP")
+    void testSettlementPreviewWaiverExceedsCap() {
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
+
+        // Cap is 50.000, requesting 60.000
+        SettlementPreviewDto preview = settlementService.calculatePreview(
+                871L,
+                BigDecimal.valueOf(100000),
+                "Damage reason present",
+                BigDecimal.valueOf(60000),
+                "Trying to waive 60k",
+                LocalDate.now()
+        );
+
+        assertThat(preview.waiverExceeded()).isTrue();
+        assertThat(preview.canFinalize()).isFalse();
     }
 
     @Test
@@ -210,6 +299,8 @@ class SettlementTests {
                 BigDecimal.valueOf(40000),
                 "   ", // Blank reason
                 BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
                 null,
                 false,
                 null
@@ -218,6 +309,74 @@ class SettlementTests {
         assertThatThrownBy(() -> settlementService.finalizeSettlement(871L, request, 2L))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("damage reason is mandatory");
+    }
+
+    @Test
+    @DisplayName("Finalizing settlement blocks if waiverAmount > 0 and waiverReason is missing")
+    void testFinalizeBlocksMissingWaiverReason() {
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+
+        FinalizeSettlementRequest request = new FinalizeSettlementRequest(
+                BigDecimal.valueOf(40000),
+                "Scratched door panel",
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(20000),
+                "   ", // Blank waiver reason
+                null,
+                false,
+                null
+        );
+
+        assertThatThrownBy(() -> settlementService.finalizeSettlement(871L, request, 2L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("waiver reason is mandatory");
+    }
+
+    @Test
+    @DisplayName("Finalizing settlement blocks if waiverAmount exceeds WAIVER_CAP")
+    void testFinalizeBlocksWaiverExceedingCap() {
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
+
+        FinalizeSettlementRequest request = new FinalizeSettlementRequest(
+                BigDecimal.valueOf(100000),
+                "Scratched door panel",
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(60000), // Exceeds 50k cap
+                "Attempted override",
+                null,
+                false,
+                null
+        );
+
+        assertThatThrownBy(() -> settlementService.finalizeSettlement(871L, request, 2L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Waiver exceeds");
+    }
+
+    @Test
+    @DisplayName("Finalizing settlement blocks waiver on no-show EXPIRED reservation")
+    void testFinalizeBlocksWaiverOnNoShowExpiredReservation() {
+        reservation.setStatus(ReservationStatus.EXPIRED);
+        when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
+
+        FinalizeSettlementRequest request = new FinalizeSettlementRequest(
+                BigDecimal.ZERO,
+                null,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(20000),
+                "Waive no-show penalty",
+                null,
+                false,
+                null
+        );
+
+        assertThatThrownBy(() -> settlementService.finalizeSettlement(871L, request, 2L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("no-show");
     }
 
     @Test
@@ -231,6 +390,8 @@ class SettlementTests {
                 BigDecimal.valueOf(200000),
                 "Severe structural damage",
                 BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
                 "PAYOS",
                 false, // not paid cash
                 null
@@ -242,11 +403,16 @@ class SettlementTests {
     }
 
     @Test
-    @DisplayName("Finalizing settlement executes atomic closure: CLOSED, PREPARING, CLEANING task, Receipt")
-    void testFinalizeSettlementAtomicSuccess() {
+    @DisplayName("Finalizing settlement with waiver executes atomic closure, logs Action.WAIVER, and outputs receipt with waiver line")
+    void testFinalizeSettlementAtomicSuccessWithWaiver() {
         when(reservationRepository.findById(871L)).thenReturn(Optional.of(reservation));
         when(userRepository.findById(2L)).thenReturn(Optional.of(staffUser));
         when(contractRepository.findLatestByReservationId(871L)).thenReturn(Optional.of(contract));
+        when(rentalPolicyRepository.findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(eq(PolicyStatus.ACTIVE), any()))
+                .thenReturn(Optional.of(policy));
+        when(policyRuleRepository.findFirstByPolicy_IdAndRuleType(1, PolicyRuleType.WAIVER_CAP))
+                .thenReturn(Optional.of(waiverCapRule));
+
         when(settlementRepository.save(any(Settlement.class))).thenAnswer(i -> {
             Settlement s = i.getArgument(0);
             ReflectionTestUtils.setField(s, "id", 999L);
@@ -256,13 +422,17 @@ class SettlementTests {
         Task checkoutTask = new Task(TaskType.CHECKOUT, "BK-2026-00871", staffUser, LocalDate.now(), TaskStatus.IN_PROGRESS);
         when(taskRepository.findByRefCodeAndType("BK-2026-00871", TaskType.CHECKOUT)).thenReturn(Optional.of(checkoutTask));
 
+        // Damage 40.000, Waiver 30.000 (within 50.000 cap), deposit 172.500
+        // Net charges = 10.000, Refund = 172.500 - 10.000 = 162.500
         FinalizeSettlementRequest request = new FinalizeSettlementRequest(
                 BigDecimal.valueOf(40000),
                 "Lost access card badge and scratched door paint",
                 BigDecimal.ZERO,
+                BigDecimal.valueOf(30000),
+                "Customer loyalty discount for 6-month contract",
                 null,
                 false,
-                "Customer acknowledged damage deduction."
+                "Customer acknowledged damage and received loyalty discount."
         );
 
         SettlementReceiptDto receipt = settlementService.finalizeSettlement(871L, request, 2L);
@@ -276,14 +446,18 @@ class SettlementTests {
         // Verify TaskService called for cleaning task
         verify(taskService).createCleaningTask(unit);
 
-        // Verify audit logs & notifications
-        verify(logService).append(eq(2L), eq(EntityType.SETTLEMENT), eq(999L), eq(Action.DAMAGE_CHARGE), any(), eq("40000"), any());
+        // Verify audit logs & notifications (Damage + Waiver)
+        verify(logService).append(eq(2L), eq(EntityType.SETTLEMENT), eq(999L), eq(Action.DAMAGE_CHARGE), any(), eq("40000"), eq("Lost access card badge and scratched door paint"));
+        verify(logService).append(eq(2L), eq(EntityType.SETTLEMENT), eq(999L), eq(Action.WAIVER), any(), eq("30000"), eq("Customer loyalty discount for 6-month contract"));
         verify(notificationService).send(eq(3L), eq("SETTLEMENT_FINALIZED"), any(), any());
 
         // Verify receipt data
         assertThat(receipt.receiptCode()).startsWith("STL-");
-        assertThat(receipt.refundAmount()).isEqualByComparingTo(BigDecimal.valueOf(132500));
         assertThat(receipt.damageFee()).isEqualByComparingTo(BigDecimal.valueOf(40000));
+        assertThat(receipt.waiverAmount()).isEqualByComparingTo(BigDecimal.valueOf(30000));
+        assertThat(receipt.waiverReason()).isEqualTo("Customer loyalty discount for 6-month contract");
+        assertThat(receipt.totalCharges()).isEqualByComparingTo(BigDecimal.valueOf(10000));
+        assertThat(receipt.refundAmount()).isEqualByComparingTo(BigDecimal.valueOf(162500));
         assertThat(receipt.depositHeld()).isEqualByComparingTo(BigDecimal.valueOf(172500));
     }
 }

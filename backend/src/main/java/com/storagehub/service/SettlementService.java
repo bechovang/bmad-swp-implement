@@ -11,6 +11,10 @@ import com.storagehub.entity.Payment;
 import com.storagehub.entity.PaymentMethod;
 import com.storagehub.entity.PaymentPurpose;
 import com.storagehub.entity.PaymentStatus;
+import com.storagehub.entity.PolicyRule;
+import com.storagehub.entity.PolicyRuleType;
+import com.storagehub.entity.PolicyStatus;
+import com.storagehub.entity.RentalPolicy;
 import com.storagehub.entity.Reservation;
 import com.storagehub.entity.ReservationStatus;
 import com.storagehub.entity.Settlement;
@@ -25,6 +29,8 @@ import com.storagehub.exception.BusinessRuleException;
 import com.storagehub.exception.ResourceNotFoundException;
 import com.storagehub.repository.ContractRepository;
 import com.storagehub.repository.PaymentRepository;
+import com.storagehub.repository.PolicyRuleRepository;
+import com.storagehub.repository.RentalPolicyRepository;
 import com.storagehub.repository.ReservationRepository;
 import com.storagehub.repository.SettlementRepository;
 import com.storagehub.repository.TaskRepository;
@@ -60,6 +66,8 @@ public class SettlementService {
     private final TaskService taskService;
     private final LogService logService;
     private final NotificationService notificationService;
+    private final RentalPolicyRepository rentalPolicyRepository;
+    private final PolicyRuleRepository policyRuleRepository;
 
     public SettlementService(ReservationRepository reservationRepository,
                              SettlementRepository settlementRepository,
@@ -70,7 +78,9 @@ public class SettlementService {
                              TaskRepository taskRepository,
                              TaskService taskService,
                              LogService logService,
-                             NotificationService notificationService) {
+                             NotificationService notificationService,
+                             RentalPolicyRepository rentalPolicyRepository,
+                             PolicyRuleRepository policyRuleRepository) {
         this.reservationRepository = reservationRepository;
         this.settlementRepository = settlementRepository;
         this.paymentRepository = paymentRepository;
@@ -81,6 +91,8 @@ public class SettlementService {
         this.taskService = taskService;
         this.logService = logService;
         this.notificationService = notificationService;
+        this.rentalPolicyRepository = rentalPolicyRepository;
+        this.policyRuleRepository = policyRuleRepository;
     }
 
     /**
@@ -89,6 +101,16 @@ public class SettlementService {
     @Transactional(readOnly = true)
     public SettlementPreviewDto calculatePreview(Long reservationId, BigDecimal customDamageFee,
                                                  String customDamageReason, LocalDate checkoutDate) {
+        return calculatePreview(reservationId, customDamageFee, customDamageReason, BigDecimal.ZERO, null, checkoutDate);
+    }
+
+    /**
+     * Calculates the real-time financial settlement preview with optional fee waiver.
+     */
+    @Transactional(readOnly = true)
+    public SettlementPreviewDto calculatePreview(Long reservationId, BigDecimal customDamageFee,
+                                                 String customDamageReason, BigDecimal customWaiverAmount,
+                                                 String customWaiverReason, LocalDate checkoutDate) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found: " + reservationId));
 
@@ -116,17 +138,26 @@ public class SettlementService {
                 ? customDamageFee.max(BigDecimal.ZERO)
                 : BigDecimal.ZERO;
 
-        BigDecimal totalCharges = damageFee.add(lateFee);
+        BigDecimal waiverAmount = (customWaiverAmount != null)
+                ? customWaiverAmount.max(BigDecimal.ZERO)
+                : BigDecimal.ZERO;
+
+        WaiverCapInfo capInfo = resolveWaiverCapInfo(reservation);
+        BigDecimal waiverCap = capInfo.cap();
+        String policyVersion = capInfo.policyVersion();
+
+        BigDecimal grossCharges = damageFee.add(lateFee);
+        BigDecimal netCharges = grossCharges.subtract(waiverAmount).max(BigDecimal.ZERO);
 
         BigDecimal refundAmount;
         BigDecimal extraFeeAmount;
 
-        if (depositHeld.compareTo(totalCharges) >= 0) {
-            refundAmount = depositHeld.subtract(totalCharges);
+        if (depositHeld.compareTo(netCharges) >= 0) {
+            refundAmount = depositHeld.subtract(netCharges);
             extraFeeAmount = BigDecimal.ZERO;
         } else {
             refundAmount = BigDecimal.ZERO;
-            extraFeeAmount = totalCharges.subtract(depositHeld);
+            extraFeeAmount = netCharges.subtract(depositHeld);
         }
 
         boolean extraFeeRequired = extraFeeAmount.compareTo(BigDecimal.ZERO) > 0;
@@ -141,11 +172,15 @@ public class SettlementService {
         }
 
         boolean damageReasonRequired = damageFee.compareTo(BigDecimal.ZERO) > 0;
-        boolean hasValidReason = !damageReasonRequired || (customDamageReason != null && !customDamageReason.trim().isEmpty());
+        boolean hasValidDamageReason = !damageReasonRequired || (customDamageReason != null && !customDamageReason.trim().isEmpty());
 
-        boolean canFinalize = hasValidReason && (!extraFeeRequired || extraFeePaid);
+        boolean isWaiverExceeded = waiverAmount.compareTo(waiverCap) > 0;
+        boolean waiverReasonRequired = waiverAmount.compareTo(BigDecimal.ZERO) > 0;
+        boolean hasValidWaiverReason = !waiverReasonRequired || (customWaiverReason != null && !customWaiverReason.trim().isEmpty());
 
-        String summaryMessage = buildSummaryMessage(depositHeld, damageFee, lateFee, refundAmount, extraFeeAmount, extraFeePaid);
+        boolean canFinalize = hasValidDamageReason && hasValidWaiverReason && !isWaiverExceeded && (!extraFeeRequired || extraFeePaid);
+
+        String summaryMessage = buildSummaryMessage(depositHeld, damageFee, lateFee, waiverAmount, refundAmount, extraFeeAmount, extraFeePaid);
 
         String unitCode = reservation.getUnit() != null ? reservation.getUnit().getCode() : null;
         String customerName = reservation.getCustomer() != null ? reservation.getCustomer().getFullName() : null;
@@ -160,7 +195,13 @@ public class SettlementService {
                 customDamageReason,
                 lateFee,
                 daysLate,
-                totalCharges,
+                waiverAmount,
+                customWaiverReason,
+                waiverCap,
+                policyVersion,
+                isWaiverExceeded,
+                waiverReasonRequired,
+                netCharges,
                 refundAmount,
                 extraFeeAmount,
                 extraFeeRequired,
@@ -172,7 +213,7 @@ public class SettlementService {
     }
 
     /**
-     * Finalizes settlement and closes the rental in an atomic transaction (Story 6.3).
+     * Finalizes settlement and closes the rental in an atomic transaction (Story 6.3 & 6.4).
      */
     public SettlementReceiptDto finalizeSettlement(Long reservationId, FinalizeSettlementRequest request, Long staffUserId) {
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -183,6 +224,12 @@ public class SettlementService {
             return settlementRepository.findByReservationIdWithDetails(reservationId)
                     .map(this::mapToReceiptDto)
                     .orElseThrow(() -> new BusinessRuleException("SETTLEMENT_ALREADY_CLOSED", "Reservation is already closed"));
+        }
+
+        // Exclusion Guard: Waiver cannot be applied to deposit forfeiture for no-show (FR-36)
+        if (reservation.getStatus() == ReservationStatus.EXPIRED) {
+            throw new BusinessRuleException("WAIVER_NOT_ALLOWED_NO_SHOW",
+                    "Waiver cannot be applied to deposit forfeiture for no-show.");
         }
 
         BigDecimal damageFee = (request.damageFee() != null) ? request.damageFee().max(BigDecimal.ZERO) : BigDecimal.ZERO;
@@ -210,22 +257,39 @@ public class SettlementService {
             }
         }
 
-        BigDecimal totalCharges = damageFee.add(lateFee);
+        // 2. Waiver validation (Story 6.4)
+        BigDecimal waiverAmount = (request.waiverAmount() != null) ? request.waiverAmount().max(BigDecimal.ZERO) : BigDecimal.ZERO;
+        String waiverReason = request.waiverReason();
+
+        WaiverCapInfo capInfo = resolveWaiverCapInfo(reservation);
+        if (waiverAmount.compareTo(BigDecimal.ZERO) > 0) {
+            if (waiverReason == null || waiverReason.trim().isEmpty()) {
+                throw new BusinessRuleException("WAIVER_REASON_REQUIRED",
+                        "A specific waiver reason is mandatory when applying a fee waiver.");
+            }
+            if (waiverAmount.compareTo(capInfo.cap()) > 0) {
+                throw new BusinessRuleException("WAIVER_EXCEEDS_CAP",
+                        "Waiver exceeds the " + formatVnd(capInfo.cap()) + " cap in " + capInfo.policyVersion());
+            }
+        }
+
+        BigDecimal grossCharges = damageFee.add(lateFee);
+        BigDecimal netCharges = grossCharges.subtract(waiverAmount).max(BigDecimal.ZERO);
 
         BigDecimal refundAmount;
         BigDecimal extraFeeAmount;
 
-        if (depositHeld.compareTo(totalCharges) >= 0) {
-            refundAmount = depositHeld.subtract(totalCharges);
+        if (depositHeld.compareTo(netCharges) >= 0) {
+            refundAmount = depositHeld.subtract(netCharges);
             extraFeeAmount = BigDecimal.ZERO;
         } else {
             refundAmount = BigDecimal.ZERO;
-            extraFeeAmount = totalCharges.subtract(depositHeld);
+            extraFeeAmount = netCharges.subtract(depositHeld);
         }
 
         User staff = resolveStaffUser(staffUserId);
 
-        // 2. Extra Fee Payment Verification or Cash Collection
+        // 3. Extra Fee Payment Verification or Cash Collection
         if (extraFeeAmount.compareTo(BigDecimal.ZERO) > 0) {
             boolean isCashCollection = Boolean.TRUE.equals(request.cashReceived())
                     || "CASH".equalsIgnoreCase(request.paymentMethod());
@@ -269,7 +333,7 @@ public class SettlementService {
             }
         }
 
-        // 3. Create Settlement Record
+        // 4. Create Settlement Record
         Contract contract = contractRepository.findLatestByReservationId(reservation.getId()).orElse(null);
         String settlementReceiptCode = generateSettlementReceiptCode();
 
@@ -281,6 +345,8 @@ public class SettlementService {
                 damageFee,
                 damageReason,
                 lateFee,
+                waiverAmount,
+                waiverReason,
                 refundAmount,
                 extraFeeAmount,
                 SettlementStatus.FINALIZED,
@@ -289,18 +355,18 @@ public class SettlementService {
         );
         settlement = settlementRepository.save(settlement);
 
-        // 4. Flip Reservation -> CLOSED
+        // 5. Flip Reservation -> CLOSED
         ReservationStatus previousResStatus = reservation.getStatus();
         reservation.setStatus(ReservationStatus.CLOSED);
         reservationRepository.save(reservation);
 
-        // 5. Flip Contract -> CLOSED (if ACTIVE)
+        // 6. Flip Contract -> CLOSED (if ACTIVE)
         if (contract != null && contract.getStatus() == ContractStatus.ACTIVE) {
             contract.setStatus(ContractStatus.CLOSED);
             contractRepository.save(contract);
         }
 
-        // 6. Flip Unit -> PREPARING and spawn CLEANING task
+        // 7. Flip Unit -> PREPARING and spawn CLEANING task
         Unit unit = reservation.getUnit();
         if (unit != null) {
             unit.setStatus(UnitStatus.PREPARING);
@@ -319,7 +385,7 @@ public class SettlementService {
             );
         }
 
-        // 7. Complete CHECKOUT task on Kanban
+        // 8. Complete CHECKOUT task on Kanban
         Optional<Task> checkoutTask = taskRepository.findByRefCodeAndType(reservation.getCode(), TaskType.CHECKOUT);
         if (checkoutTask.isPresent()) {
             Task ct = checkoutTask.get();
@@ -329,7 +395,7 @@ public class SettlementService {
             }
         }
 
-        // 8. Audit Logs
+        // 9. Audit Logs (Damage Charge + Waiver)
         if (damageFee.compareTo(BigDecimal.ZERO) > 0) {
             logService.append(
                     staff.getId(),
@@ -339,6 +405,18 @@ public class SettlementService {
                     null,
                     damageFee.toString(),
                     damageReason
+            );
+        }
+
+        if (waiverAmount.compareTo(BigDecimal.ZERO) > 0) {
+            logService.append(
+                    staff.getId(),
+                    EntityType.SETTLEMENT,
+                    settlement.getId(),
+                    Action.WAIVER,
+                    null,
+                    waiverAmount.toString(),
+                    waiverReason
             );
         }
 
@@ -352,7 +430,7 @@ public class SettlementService {
                 "Rental finalized with settlement receipt " + settlementReceiptCode
         );
 
-        // 9. Customer Notification
+        // 10. Customer Notification
         if (reservation.getCustomer() != null) {
             String notifMsg = (refundAmount.compareTo(BigDecimal.ZERO) > 0)
                     ? "Settlement receipt " + settlementReceiptCode + ": Refund of " + formatVnd(refundAmount) + " processed."
@@ -401,10 +479,14 @@ public class SettlementService {
         String customerName = (res != null && res.getCustomer() != null) ? res.getCustomer().getFullName() : null;
         String staffName = (settlement.getStaff() != null) ? settlement.getStaff().getFullName() : null;
 
+        BigDecimal grossCharges = settlement.getDamageFee().add(settlement.getLateFee());
+        BigDecimal netCharges = grossCharges.subtract(settlement.getWaiverAmount()).max(BigDecimal.ZERO);
+
         String summaryMessage = buildSummaryMessage(
                 settlement.getDepositHeld(),
                 settlement.getDamageFee(),
                 settlement.getLateFee(),
+                settlement.getWaiverAmount(),
                 settlement.getRefundAmount(),
                 settlement.getExtraFee(),
                 true
@@ -422,7 +504,9 @@ public class SettlementService {
                 settlement.getDamageFee(),
                 settlement.getDamageReason(),
                 settlement.getLateFee(),
-                settlement.getDamageFee().add(settlement.getLateFee()),
+                settlement.getWaiverAmount(),
+                settlement.getWaiverReason(),
+                netCharges,
                 settlement.getRefundAmount(),
                 settlement.getExtraFee(),
                 settlement.getStatus().name(),
@@ -433,17 +517,62 @@ public class SettlementService {
     }
 
     private String buildSummaryMessage(BigDecimal depositHeld, BigDecimal damageFee, BigDecimal lateFee,
-                                       BigDecimal refundAmount, BigDecimal extraFeeAmount, boolean extraFeePaid) {
+                                       BigDecimal waiverAmount, BigDecimal refundAmount, BigDecimal extraFeeAmount,
+                                       boolean extraFeePaid) {
         if (extraFeeAmount.compareTo(BigDecimal.ZERO) > 0) {
             return "Extra fee " + formatVnd(extraFeeAmount) + (extraFeePaid ? " (Paid)" : " (Unpaid)");
         }
-        if (damageFee.compareTo(BigDecimal.ZERO) > 0) {
-            return "Refund " + formatVnd(refundAmount) + " after damage fee " + formatVnd(damageFee);
-        }
-        if (lateFee.compareTo(BigDecimal.ZERO) > 0) {
-            return "Refund " + formatVnd(refundAmount) + " after late fee " + formatVnd(lateFee);
+        if (damageFee.compareTo(BigDecimal.ZERO) > 0 || lateFee.compareTo(BigDecimal.ZERO) > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Refund ").append(formatVnd(refundAmount)).append(" after ");
+            if (damageFee.compareTo(BigDecimal.ZERO) > 0 && lateFee.compareTo(BigDecimal.ZERO) > 0) {
+                sb.append("damage fee ").append(formatVnd(damageFee)).append(" and late fee ").append(formatVnd(lateFee));
+            } else if (damageFee.compareTo(BigDecimal.ZERO) > 0) {
+                sb.append("damage fee ").append(formatVnd(damageFee));
+            } else {
+                sb.append("late fee ").append(formatVnd(lateFee));
+            }
+            if (waiverAmount != null && waiverAmount.compareTo(BigDecimal.ZERO) > 0) {
+                sb.append(" (waived ").append(formatVnd(waiverAmount)).append(")");
+            }
+            return sb.toString();
         }
         return "Full refund of " + formatVnd(refundAmount);
+    }
+
+    public record WaiverCapInfo(BigDecimal cap, String policyVersion) {}
+
+    public WaiverCapInfo resolveWaiverCapInfo(Reservation reservation) {
+        LocalDate queryDate = (reservation != null && reservation.getStartDate() != null)
+                ? reservation.getStartDate()
+                : LocalDate.now();
+
+        RentalPolicy activePolicy = null;
+        if (rentalPolicyRepository != null) {
+            activePolicy = rentalPolicyRepository
+                    .findFirstByStatusAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(PolicyStatus.ACTIVE, queryDate)
+                    .orElse(null);
+        }
+
+        String policyVersion = (activePolicy != null && activePolicy.getVersion() != null)
+                ? "Rental Policy " + activePolicy.getVersion()
+                : "Rental Policy v3";
+
+        BigDecimal waiverCap = BigDecimal.valueOf(50000); // default 50,000 VND
+        if (activePolicy != null && policyRuleRepository != null) {
+            Optional<PolicyRule> ruleOpt = policyRuleRepository
+                    .findFirstByPolicy_IdAndRuleType(activePolicy.getId(), PolicyRuleType.WAIVER_CAP);
+            if (ruleOpt.isPresent()) {
+                PolicyRule rule = ruleOpt.get();
+                if (rule.getCap() != null) {
+                    waiverCap = rule.getCap();
+                } else if (rule.getValue() != null) {
+                    waiverCap = rule.getValue();
+                }
+            }
+        }
+
+        return new WaiverCapInfo(waiverCap, policyVersion);
     }
 
     private String formatVnd(BigDecimal amount) {

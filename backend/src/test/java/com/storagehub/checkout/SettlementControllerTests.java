@@ -89,26 +89,35 @@ public class SettlementControllerTests {
                 "Scratched door panel",
                 BigDecimal.ZERO,
                 0,
-                BigDecimal.valueOf(40000),
-                BigDecimal.valueOf(132500),
+                BigDecimal.valueOf(20000),
+                "Loyalty discount",
+                BigDecimal.valueOf(50000),
+                "Rental Policy v3",
+                false,
+                true,
+                BigDecimal.valueOf(20000),
+                BigDecimal.valueOf(152500),
                 BigDecimal.ZERO,
                 false,
                 false,
                 true,
                 true,
-                "Refund 132.500 ₫ after damage fee 40.000 ₫"
+                "Refund 152.500 ₫ after damage fee 40.000 ₫ (waived 20.000 ₫)"
         );
 
-        when(settlementService.calculatePreview(eq(871L), any(), any(), any())).thenReturn(preview);
+        when(settlementService.calculatePreview(eq(871L), any(), any(), any(), any(), any())).thenReturn(preview);
 
         mockMvc.perform(get("/api/v1/reservations/871/settlement-preview")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + staffToken)
                         .param("damageFee", "40000")
-                        .param("damageReason", "Scratched door panel"))
+                        .param("damageReason", "Scratched door panel")
+                        .param("waiverAmount", "20000")
+                        .param("waiverReason", "Loyalty discount"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.depositHeld").value(172500))
                 .andExpect(jsonPath("$.damageFee").value(40000))
-                .andExpect(jsonPath("$.refundAmount").value(132500))
+                .andExpect(jsonPath("$.waiverAmount").value(20000))
+                .andExpect(jsonPath("$.refundAmount").value(152500))
                 .andExpect(jsonPath("$.canFinalize").value(true));
     }
 
@@ -119,6 +128,8 @@ public class SettlementControllerTests {
                 BigDecimal.valueOf(40000),
                 "Lost access card badge",
                 BigDecimal.ZERO,
+                BigDecimal.valueOf(20000),
+                "Loyalty discount",
                 null,
                 false,
                 "Customer acknowledged deduction"
@@ -136,13 +147,15 @@ public class SettlementControllerTests {
                 BigDecimal.valueOf(40000),
                 "Lost access card badge",
                 BigDecimal.ZERO,
-                BigDecimal.valueOf(40000),
-                BigDecimal.valueOf(132500),
+                BigDecimal.valueOf(20000),
+                "Loyalty discount",
+                BigDecimal.valueOf(20000),
+                BigDecimal.valueOf(152500),
                 BigDecimal.ZERO,
                 "FINALIZED",
                 "Customer acknowledged deduction",
                 LocalDateTime.now(),
-                "Refund 132.500 ₫ after damage fee 40.000 ₫"
+                "Refund 152.500 ₫ after damage fee 40.000 ₫ (waived 20.000 ₫)"
         );
 
         when(settlementService.finalizeSettlement(eq(871L), any(), any())).thenReturn(receipt);
@@ -153,6 +166,7 @@ public class SettlementControllerTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.receiptCode").value("STL-2026-94812"))
-                .andExpect(jsonPath("$.refundAmount").value(132500));
+                .andExpect(jsonPath("$.refundAmount").value(152500))
+                .andExpect(jsonPath("$.waiverAmount").value(20000));
     }
 }

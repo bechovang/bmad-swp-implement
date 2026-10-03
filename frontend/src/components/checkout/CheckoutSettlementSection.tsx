@@ -46,6 +46,8 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
 
   const [damageFee, setDamageFee] = useState<number>(0)
   const [damageReason, setDamageReason] = useState<string>('')
+  const [waiverAmount, setWaiverAmount] = useState<number>(0)
+  const [waiverReason, setWaiverReason] = useState<string>('')
   const [cashReceived, setCashReceived] = useState<boolean>(false)
   const [notes, setNotes] = useState<string>('')
   const [finalizedReceipt, setFinalizedReceipt] = useState<SettlementReceiptDto | null>(null)
@@ -58,13 +60,15 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
     }
   }, [hasMajorDamage, majorItems])
 
-  // Fetch real-time settlement preview
+  // Fetch real-time settlement preview with waiver
   const { data: preview } = useQuery<SettlementPreviewDto>({
-    queryKey: ['settlement-preview', reservationId, damageFee, damageReason],
+    queryKey: ['settlement-preview', reservationId, damageFee, damageReason, waiverAmount, waiverReason],
     queryFn: () =>
       getSettlementPreview(reservationId, {
         damageFee,
         damageReason: damageReason || undefined,
+        waiverAmount,
+        waiverReason: waiverReason || undefined,
       }),
     enabled: Boolean(reservationId),
   })
@@ -75,6 +79,8 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
       return await finalizeSettlement(reservationId, {
         damageFee,
         damageReason: damageReason || null,
+        waiverAmount,
+        waiverReason: waiverReason || null,
         paymentMethod: isCashAtDesk ? 'CASH' : 'PAYOS',
         cashReceived: isCashAtDesk,
         notes: notes || null,
@@ -106,12 +112,24 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
   const depositAmount = preview?.depositHeld ?? initialDeposit
   const calculatedDamage = preview?.damageFee ?? damageFee
   const calculatedLateFee = preview?.lateFee ?? 0
-  const totalCharges = preview?.totalCharges ?? calculatedDamage + calculatedLateFee
-  const refundAmount = preview?.refundAmount ?? Math.max(0, depositAmount - totalCharges)
-  const extraFeeAmount = preview?.extraFeeAmount ?? Math.max(0, totalCharges - depositAmount)
+  const waiverCap = preview?.waiverCap ?? 50000
+  const policyVersionName = preview?.policyVersion ?? 'Rental Policy v3'
+
+  const isWaiverExceeded = preview?.waiverExceeded ?? (waiverAmount > waiverCap)
+  const isWaiverReasonMissing = waiverAmount > 0 && (!waiverReason || waiverReason.trim() === '')
   const isReasonMissing = damageFee > 0 && (!damageReason || damageReason.trim() === '')
+
+  const grossCharges = calculatedDamage + calculatedLateFee
+  const netCharges = preview?.totalCharges ?? Math.max(0, grossCharges - waiverAmount)
+  const refundAmount = preview?.refundAmount ?? Math.max(0, depositAmount - netCharges)
+  const extraFeeAmount = preview?.extraFeeAmount ?? Math.max(0, netCharges - depositAmount)
   const isExtraFeeDue = extraFeeAmount > 0
-  const canConfirm = !isReasonMissing && (!isExtraFeeDue || cashReceived || preview?.extraFeePaid)
+
+  const canConfirm =
+    !isReasonMissing &&
+    !isWaiverExceeded &&
+    !isWaiverReasonMissing &&
+    (!isExtraFeeDue || cashReceived || preview?.extraFeePaid)
 
   if (finalizedReceipt) {
     return (
@@ -136,7 +154,7 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
           <div className="p-2.5 bg-white rounded border border-emerald-100">
             <span className="text-sh-muted block">Deposit Held</span>
             <span className="font-bold text-sh-ink">{formatMoney(finalizedReceipt.depositHeld)}</span>
@@ -153,11 +171,17 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
               {finalizedReceipt.lateFee > 0 ? `-${formatMoney(finalizedReceipt.lateFee)}` : '0 ₫'}
             </span>
           </div>
+          <div className="p-2.5 bg-emerald-50 rounded border border-emerald-200">
+            <span className="text-emerald-800 font-medium block">Fee Waiver / Discount</span>
+            <span className="font-bold text-emerald-700 font-mono" data-testid="receipt-waiver-amount">
+              {finalizedReceipt.waiverAmount > 0 ? `-${formatMoney(finalizedReceipt.waiverAmount)}` : '0 ₫'}
+            </span>
+          </div>
           <div className="p-2.5 bg-emerald-100/70 rounded border border-emerald-300">
             <span className="text-emerald-900 font-semibold block">
               {finalizedReceipt.refundAmount > 0 ? 'Refund Processed' : 'Extra Fee Paid'}
             </span>
-            <span className="font-bold text-emerald-900 text-sm" data-testid="receipt-final-amount">
+            <span className="font-bold text-emerald-900 text-sm font-mono" data-testid="receipt-final-amount">
               {finalizedReceipt.refundAmount > 0
                 ? formatMoney(finalizedReceipt.refundAmount)
                 : formatMoney(finalizedReceipt.extraFeeAmount)}
@@ -169,6 +193,13 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
           <div className="p-2.5 bg-white rounded border border-emerald-100 text-xs space-y-1">
             <span className="font-semibold text-sh-ink">Damage Justification:</span>
             <p className="text-sh-muted">{finalizedReceipt.damageReason}</p>
+          </div>
+        )}
+
+        {finalizedReceipt.waiverAmount > 0 && finalizedReceipt.waiverReason && (
+          <div className="p-2.5 bg-emerald-50/70 rounded border border-emerald-200 text-xs space-y-1" data-testid="receipt-waiver-reason-box">
+            <span className="font-semibold text-emerald-900">Fee Waiver Reason (Policy Cap {formatMoney(waiverCap)}):</span>
+            <p className="text-emerald-800">{finalizedReceipt.waiverReason}</p>
           </div>
         )}
 
@@ -206,12 +237,12 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
       </div>
 
       {/* Itemized Deductions Form */}
-      <div className="space-y-3 p-3.5 bg-white border border-sh-border rounded-sh-sm">
+      <div className="space-y-3.5 p-3.5 bg-white border border-sh-border rounded-sh-sm">
         <h4 className="text-xs font-bold uppercase tracking-wider text-sh-ink">
-          Itemized Settlement Charges
+          Itemized Settlement Charges & Fee Adjustments
         </h4>
 
-        {/* Damage Fee Row */}
+        {/* 1. Damage Fee Row */}
         <div className="space-y-1.5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <label className="text-xs font-semibold text-sh-ink">
@@ -254,7 +285,7 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
           </div>
         </div>
 
-        {/* Late Fee Row */}
+        {/* 2. Late Fee Row */}
         {calculatedLateFee > 0 && (
           <div className="flex items-center justify-between p-2 bg-amber-50 border border-amber-200 rounded text-xs">
             <div>
@@ -268,6 +299,63 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
             </span>
           </div>
         )}
+
+        {/* 3. Settlement Waiver Row (Story 6.4) */}
+        <div className="space-y-1.5 pt-1 border-t border-sh-divider">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <label className="text-xs font-semibold text-sh-ink block">
+                3. Staff Fee Waiver / Discount (WAIVER_CAP: {formatMoney(waiverCap)})
+              </label>
+              <span className="text-[11px] text-sh-muted">
+                Max {formatMoney(waiverCap)} waiver under {policyVersionName} (requires mandatory reason)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={waiverAmount || ''}
+                onChange={(e) => setWaiverAmount(Math.max(0, Number(e.target.value) || 0))}
+                placeholder="0"
+                data-testid="input-waiver-amount"
+                className={`w-36 px-2.5 py-1 text-xs text-right font-mono font-bold border rounded focus:outline-none focus:ring-1 ${
+                  isWaiverExceeded
+                    ? 'border-rose-400 bg-rose-50 text-rose-700 focus:ring-rose-500'
+                    : 'border-sh-border focus:ring-sh-primary'
+                }`}
+              />
+              <span className="text-xs text-sh-muted">₫</span>
+            </div>
+          </div>
+
+          {/* Waiver Reason Input */}
+          <div>
+            <input
+              type="text"
+              value={waiverReason}
+              onChange={(e) => setWaiverReason(e.target.value)}
+              placeholder="Mandatory reason for applying fee waiver (e.g. Long-term customer goodwill)..."
+              data-testid="input-waiver-reason"
+              className={`w-full px-2.5 py-1.5 text-xs rounded border transition-colors ${
+                isWaiverReasonMissing
+                  ? 'border-rose-400 bg-rose-50/50 focus:ring-rose-500'
+                  : 'border-sh-border bg-white focus:ring-sh-primary'
+              }`}
+            />
+            {isWaiverReasonMissing && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium" data-testid="error-waiver-reason-required">
+                ⚠️ A specific waiver reason is mandatory when applying a fee waiver.
+              </p>
+            )}
+            {isWaiverExceeded && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium" data-testid="error-waiver-exceeded">
+                ⚠️ Waiver exceeds the {formatMoney(waiverCap)} cap in {policyVersionName}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Live Financial Arithmetic Breakdown */}
@@ -282,11 +370,26 @@ export const CheckoutSettlementSection: React.FC<CheckoutSettlementSectionProps>
             <span className="font-mono text-sh-ink">{formatMoney(depositAmount)}</span>
           </div>
           <div className="flex justify-between py-0.5 text-sh-muted">
-            <span>Total Deductions (Damage + Late Fee):</span>
+            <span>Gross Deductions (Damage + Late Fee):</span>
             <span className="font-mono text-rose-600">
-              {totalCharges > 0 ? `-${formatMoney(totalCharges)}` : '0 ₫'}
+              {grossCharges > 0 ? `-${formatMoney(grossCharges)}` : '0 ₫'}
             </span>
           </div>
+          {waiverAmount > 0 && (
+            <div className="flex justify-between py-0.5 text-emerald-800">
+              <span>Waiver Discount (Within Cap):</span>
+              <span className="font-mono font-semibold text-emerald-700" data-testid="preview-waiver-amount">
+                +{formatMoney(waiverAmount)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between py-0.5 text-sh-muted">
+            <span>Net Settlement Charges:</span>
+            <span className="font-mono font-semibold text-sh-ink">
+              {netCharges > 0 ? `-${formatMoney(netCharges)}` : '0 ₫'}
+            </span>
+          </div>
+
           <div className="border-t border-sh-border pt-1.5 flex justify-between items-center font-bold">
             <span className="text-xs text-sh-ink">
               {isExtraFeeDue ? 'Outstanding Extra Fee Due:' : 'Net Deposit Refund to Customer:'}

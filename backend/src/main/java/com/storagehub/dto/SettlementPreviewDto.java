@@ -12,6 +12,12 @@ public record SettlementPreviewDto(
         String damageReason,
         BigDecimal lateFee,
         int daysLate,
+        BigDecimal waiverAmount,
+        String waiverReason,
+        BigDecimal waiverCap,
+        String policyVersion,
+        boolean waiverExceeded,
+        boolean waiverReasonRequired,
         BigDecimal totalCharges,
         BigDecimal refundAmount,
         BigDecimal extraFeeAmount,
@@ -21,3 +27,4 @@ public record SettlementPreviewDto(
         boolean canFinalize,
         String summaryMessage
 ) {}
+

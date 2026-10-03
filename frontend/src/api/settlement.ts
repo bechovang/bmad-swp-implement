@@ -7,7 +7,13 @@ import type {
 
 export async function getSettlementPreview(
   reservationId: number,
-  params?: { damageFee?: number; damageReason?: string; checkoutDate?: string }
+  params?: {
+    damageFee?: number
+    damageReason?: string
+    waiverAmount?: number
+    waiverReason?: string
+    checkoutDate?: string
+  }
 ): Promise<SettlementPreviewDto> {
   const res = await apiClient.get<SettlementPreviewDto>(
     `/reservations/${reservationId}/settlement-preview`,

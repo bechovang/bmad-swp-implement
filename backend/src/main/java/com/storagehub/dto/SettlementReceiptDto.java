@@ -15,6 +15,8 @@ public record SettlementReceiptDto(
         BigDecimal damageFee,
         String damageReason,
         BigDecimal lateFee,
+        BigDecimal waiverAmount,
+        String waiverReason,
         BigDecimal totalCharges,
         BigDecimal refundAmount,
         BigDecimal extraFeeAmount,

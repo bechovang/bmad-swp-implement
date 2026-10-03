@@ -16,4 +16,8 @@ public interface PolicyRuleRepository extends JpaRepository<PolicyRule, Long> {
     List<PolicyRule> findByPolicy_IdAndUnitType_Id(Integer policyId, Integer typeId);
 
     Optional<PolicyRule> findByPolicy_IdAndUnitType_IdAndRuleType(Integer policyId, Integer typeId, PolicyRuleType ruleType);
+
+    List<PolicyRule> findByPolicy_IdAndRuleType(Integer policyId, PolicyRuleType ruleType);
+
+    Optional<PolicyRule> findFirstByPolicy_IdAndRuleType(Integer policyId, PolicyRuleType ruleType);
 }

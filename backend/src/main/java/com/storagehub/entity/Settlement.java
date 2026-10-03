@@ -49,6 +49,12 @@ public class Settlement {
     @Column(name = "LateFee", nullable = false, precision = 15, scale = 0)
     private BigDecimal lateFee = BigDecimal.ZERO;
 
+    @Column(name = "WaiverAmount", nullable = false, precision = 15, scale = 0)
+    private BigDecimal waiverAmount = BigDecimal.ZERO;
+
+    @Column(name = "WaiverReason", length = 255)
+    private String waiverReason;
+
     @Column(name = "RefundAmount", nullable = false, precision = 15, scale = 0)
     private BigDecimal refundAmount = BigDecimal.ZERO;
 
@@ -73,7 +79,8 @@ public class Settlement {
 
     public Settlement(Reservation reservation, Contract contract, User staff,
                       BigDecimal depositHeld, BigDecimal damageFee, String damageReason,
-                      BigDecimal lateFee, BigDecimal refundAmount, BigDecimal extraFee,
+                      BigDecimal lateFee, BigDecimal waiverAmount, String waiverReason,
+                      BigDecimal refundAmount, BigDecimal extraFee,
                       SettlementStatus status, String receiptCode, String notes) {
         this.reservation = reservation;
         this.contract = contract;
@@ -82,12 +89,22 @@ public class Settlement {
         this.damageFee = damageFee != null ? damageFee : BigDecimal.ZERO;
         this.damageReason = damageReason;
         this.lateFee = lateFee != null ? lateFee : BigDecimal.ZERO;
+        this.waiverAmount = waiverAmount != null ? waiverAmount : BigDecimal.ZERO;
+        this.waiverReason = waiverReason;
         this.refundAmount = refundAmount != null ? refundAmount : BigDecimal.ZERO;
         this.extraFee = extraFee != null ? extraFee : BigDecimal.ZERO;
         this.status = status != null ? status : SettlementStatus.FINALIZED;
         this.receiptCode = receiptCode;
         this.notes = notes;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Settlement(Reservation reservation, Contract contract, User staff,
+                      BigDecimal depositHeld, BigDecimal damageFee, String damageReason,
+                      BigDecimal lateFee, BigDecimal refundAmount, BigDecimal extraFee,
+                      SettlementStatus status, String receiptCode, String notes) {
+        this(reservation, contract, staff, depositHeld, damageFee, damageReason,
+                lateFee, BigDecimal.ZERO, null, refundAmount, extraFee, status, receiptCode, notes);
     }
 
     public Long getId() {
@@ -148,6 +165,22 @@ public class Settlement {
 
     public void setLateFee(BigDecimal lateFee) {
         this.lateFee = lateFee;
+    }
+
+    public BigDecimal getWaiverAmount() {
+        return waiverAmount;
+    }
+
+    public void setWaiverAmount(BigDecimal waiverAmount) {
+        this.waiverAmount = waiverAmount;
+    }
+
+    public String getWaiverReason() {
+        return waiverReason;
+    }
+
+    public void setWaiverReason(String waiverReason) {
+        this.waiverReason = waiverReason;
     }
 
     public BigDecimal getRefundAmount() {

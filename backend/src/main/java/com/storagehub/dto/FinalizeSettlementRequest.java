@@ -6,6 +6,8 @@ public record FinalizeSettlementRequest(
         BigDecimal damageFee,
         String damageReason,
         BigDecimal lateFee,
+        BigDecimal waiverAmount,
+        String waiverReason,
         String paymentMethod,
         Boolean cashReceived,
         String notes
@@ -16,6 +18,9 @@ public record FinalizeSettlementRequest(
         }
         if (lateFee == null) {
             lateFee = BigDecimal.ZERO;
+        }
+        if (waiverAmount == null) {
+            waiverAmount = BigDecimal.ZERO;
         }
         if (cashReceived == null) {
             cashReceived = false;
